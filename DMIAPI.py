@@ -7,7 +7,7 @@ load_dotenv()
 DMIAPIKEY = os.getenv("DMIAPIKEY")
 
 def get_temp():
-    url = 'https://dmigw.govcloud.dk/v2/climateData/collections/municipalityValue/items?municipalityId=0851&api-key='+DMIAPIKEY+'&timeResolution=hour&parameterId=mean_temp&limit=24'
+    url = 'https://dmigw.govcloud.dk/v2/climateData/collections/municipalityValue/items?municipalityId=0851&api-key='+DMIAPIKEY+'&timeResolution=hour&parameterId=mean_temp&limit=1000'
     r = requests.get(url)
     data = json.loads(r.text)
     temp_map = {}
