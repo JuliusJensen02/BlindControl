@@ -84,22 +84,60 @@ def get_south_facade_sun(start_range="-30m"):
 #print(get_south_facade_sun())
 #print(get_room_temp("1.233"))
 
-import plotly.express as px
-import pandas as pd
-
-data = get_south_facade_sun()
-
-df = pd.DataFrame(list(data.items()), columns=["Time", "Value"])
-
-# Create an interactive plot
-fig = px.line(df, x="Time", y="Value", title="Time-Series Data (Plotly)")
+import matplotlib.pyplot as plt
+import numpy as np
+import math
 
 
-data = get_room_temp("1.233")
-df = pd.DataFrame(list(data.items()), columns=["Time", "Value"])
-fig.add_scatter(x=df['Time'], y=df['Value'], mode='lines')
 
-fig.update_xaxes(title="Time", tickformat="%m-%d %H:%M", tickangle=45, dtick="D1")
-fig.update_yaxes(title="Value")
+def normalize(list):
+    max = list[0]
+    min = list[0]
+    for item in list:
+        if item > max:
+            max = item
+        if item < min:
+            min = item
+    newlist = []
+    for item in list:
+        newlist.append((item-min)/(max-min))
+    return newlist
 
-fig.show()
+def remove_outliers(list):
+    i = 0
+    for item in list:
+        average_around = (list[i-5] + list[i-4] + list[i-3] + list[i-2] + list[i-1])/5
+        if item > 1.30 * average_around or item < 0.7 * average_around:
+            list.pop(i)
+        i = i + 1
+    return list
+
+data1 = get_south_facade_sun()
+data2 = get_room_temp("1.233")
+
+x = list(data1.keys())
+
+
+# Assign variables to the y axis part of the curve
+y = normalize(remove_outliers(list(data1.values())))
+z = normalize(remove_outliers(list(data2.values())))
+print(len(y), len(z))
+
+for i in range(1,12):
+    x.pop()
+    y.pop()
+
+# Plotting both the curves simultaneously
+plt.plot(x, y, color='r', label='Watt/m2')
+plt.plot(x, z, color='g', label='Celsius')
+
+# Naming the x-axis, y-axis and the whole graph
+plt.xlabel("Time")
+plt.ylabel("Values")
+plt.title("Sun and Temperature")
+
+# Adding legend, which helps us recognize the curve according to it's color
+plt.legend()
+
+# To load the display window
+plt.show()
