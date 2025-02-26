@@ -54,7 +54,6 @@ def query_data(input_from = "2024-11-23T00:00:00Z", days = 1):
                 time = record["_time"]
                 outside_temp_at_given_time = None
                 for dmi_time, dmi_temp in dmi_results.items():
-                    print(datetime.fromisoformat(dmi_time), hour_rounder(time))
                     if datetime.fromisoformat(dmi_time) == hour_rounder(time):
                         outside_temp_at_given_time = dmi_temp
                         break
