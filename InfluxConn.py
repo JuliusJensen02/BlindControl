@@ -89,29 +89,6 @@ import numpy as np
 import math
 
 
-
-def normalize(list):
-    max = list[0]
-    min = list[0]
-    for item in list:
-        if item > max:
-            max = item
-        if item < min:
-            min = item
-    newlist = []
-    for item in list:
-        newlist.append((item-min)/(max-min))
-    return newlist
-
-def remove_outliers(list):
-    i = 0
-    for item in list:
-        average_around = (list[i-5] + list[i-4] + list[i-3] + list[i-2] + list[i-1])/5
-        if item > 1.30 * average_around or item < 0.7 * average_around:
-            list.pop(i)
-        i = i + 1
-    return list
-
 data1 = get_south_facade_sun()
 data2 = get_room_temp("1.233")
 

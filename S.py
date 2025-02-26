@@ -3,21 +3,6 @@ import plotly.io as pio
 import pandas as pd
 import csv
 
-def remove_outliers(data_list):
-    i = 0
-    avg = 0
-    for item in data_list:
-        avg += item
-        i += 1
-    avg /= i
-    if avg > 10:
-        return list()
-    i = 0
-    for item in data_list:
-        if item > 1.3 * avg or item < 0.7 * avg:
-            del data_list[i]
-        i += 1
-    return data_list
 
 data = {}
 with open('data.csv', mode ='r') as file:
@@ -31,7 +16,7 @@ with open('data.csv', mode ='r') as file:
       if c > 21:
         if c not in data:
           data[c] = list()
-        data[c].append(watt*7)
+        data[c].append(watt)
 
 for key in list(data.keys()):
     filtered = remove_outliers(data[key])
