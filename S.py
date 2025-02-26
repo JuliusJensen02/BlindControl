@@ -14,7 +14,7 @@ def remove_outliers(data_list):
         return list()
     i = 0
     for item in data_list:
-        if item > 1.1 * avg or item < 0.9 * avg:
+        if item > 1.3 * avg or item < 0.7 * avg:
             del data_list[i]
         i += 1
     return data_list
@@ -31,7 +31,7 @@ with open('data.csv', mode ='r') as file:
       if c > 21:
         if c not in data:
           data[c] = list()
-        data[c].append(watt)
+        data[c].append(watt*7)
 
 for key in list(data.keys()):
     filtered = remove_outliers(data[key])
@@ -51,7 +51,7 @@ df = pd.DataFrame(list(sorted_data), columns=["C", "Watt"])
 
 fig = px.line(df, x=df["Watt"], y=df["C"], title="Time-Series Data (Plotly)")
 
-fig.update_xaxes(title="Watt/m2", tickangle=45)
+fig.update_xaxes(title="Watt", tickangle=45)
 fig.update_yaxes(title="C")
 pio.renderers.default = "browser"
 fig.show()
