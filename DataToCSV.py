@@ -2,6 +2,12 @@ import influxdb_client
 import os
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
+from DMIAPI import get_temp
+
+def hour_rounder(t):
+    # Rounds to nearest hour by adding a timedelta hour if minute >= 30
+    return (t.replace(second=0, microsecond=0, minute=0, hour=t.hour)
+               +timedelta(hours=t.minute//30))
 
 load_dotenv()
 client = influxdb_client.InfluxDBClient(
@@ -14,7 +20,7 @@ client = influxdb_client.InfluxDBClient(
 date_from = datetime.strptime("2024-11-23T00:00:00Z", "%Y-%m-%dT%H:%M:%SZ")
 date_to = datetime.strptime("2024-11-24T00:00:00Z", "%Y-%m-%dT%H:%M:%SZ")
 
-for i in range(90):
+for i in range(1):
     date_string_from = date_from.strftime("%Y-%m-%dT00:00:00Z")
     date_string_to = date_to.strftime("%Y-%m-%dT00:00:00Z")
     query = """
@@ -25,7 +31,7 @@ for i in range(90):
     
         data_2 = from(bucket:"db")
                  |> range(start: """+date_string_from+""", stop: """+date_string_to+""")
-                 |> filter(fn: (r) => r["room_id"] == "1.233")
+                 |> filter(fn: (r) => r.room_id == "1.213" or r.room_id == "1.215" or r.room_id == "1.217")
                  |> filter(fn: (r) => r["sensor_type"] == "temperature")
                  |> filter(fn: (r) => r["_field"] == "value")
     
@@ -37,16 +43,27 @@ for i in range(90):
 
     query_api = client.query_api()
     result = query_api.query(org=os.getenv("org"), query=query)
+    dmi_results = get_temp(date_string_from, date_string_to)
+
     data = list()
-    for record in result[0]:
-        watt = record.values.get("_value_d1")
-        c = round(record.values.get("_value_d2")*2)/2
-        data.append({"watt": watt, "temp": c})
+    for table in result:
+        for record in table:
+            time = record["_time"]
+            outside_temp_at_given_time = None
+            for dmi_time, dmi_temp in dmi_results.items():
+                #dmi_formatted_time = dmi_time[:-0]
+                print(datetime.strptime(dmi_time, "%Y-%m-%dT%H:%M:%S"), time)
+                #if datetime.strptime(dmi_formatted_time+"Z", "%Y-%m-%dT%H:%M:%SZ") == hour_rounder(time):
+                #    outside_temp_at_given_time = dmi_temp
+                #    break
+            watt = record.values.get("_value_d1")
+            c = round(record.values.get("_value_d2")*2)/2
+            data.append({"time": time, "watt": watt, "room_temp": c, "ambient_temp": outside_temp_at_given_time})
 
 
     import csv
     with open('data.csv', 'a', newline='') as csvfile:
-        fieldnames = ['watt', 'temp']
+        fieldnames = ['time', 'watt', 'room_temp', 'ambient_temp']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(data)
