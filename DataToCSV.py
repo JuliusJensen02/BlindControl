@@ -75,5 +75,5 @@ def reset_csv():
     f = open('data.csv', 'w+')
     f.close()
 
-query_data()
 reset_csv()
+query_data()
