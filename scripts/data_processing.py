@@ -1,7 +1,5 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from io import StringIO
 
 def normalize(df):
     cols_to_normalize = ['watt', 'room_temp', 'ambient_temp']
@@ -9,7 +7,6 @@ def normalize(df):
     return df
 
 def remove_outliers(df = pd.DataFrame()):
-
     temp_df = pd.DataFrame()
 
     temp_df['watt_rolling_mean'] = df['watt'].rolling(window=10, center=True, min_periods=1).mean()
@@ -28,4 +25,5 @@ def remove_outliers(df = pd.DataFrame()):
 
 
 def convert_csv_to_df(csv_data):
-    return pd.read_csv(StringIO(csv_data))
+    df = pd.read_csv(csv_data)
+    return df

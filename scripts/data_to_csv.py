@@ -2,7 +2,7 @@ import influxdb_client
 import os
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
-from DMIAPI import get_temp
+from scripts.dmi_api import get_temp
 import csv
 
 def hour_rounder(t):
@@ -74,6 +74,3 @@ def query_data(input_from = "2024-11-23T00:00:00Z", days = 1):
 def reset_csv():
     f = open('data.csv', 'w+')
     f.close()
-
-reset_csv()
-query_data()
