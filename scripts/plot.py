@@ -1,6 +1,9 @@
 import plotly.express as px
 import plotly.io as pio
 
+'''
+Plots a DataFrame with the time on x-axis, and room_temp and temp_predictions on y-axis
+'''
 def plot_df(df):
     fig = px.line(df, x="time", y=["room_temp", "temp_predictions"], title="Time-Series Data (Plotly)")
 
