@@ -27,3 +27,7 @@ def remove_outliers(df = pd.DataFrame()):
 def convert_csv_to_df(csv_data):
     df = pd.read_csv(csv_data)
     return df
+
+def smooth(df):
+    df['room_temp'] = df['room_temp'].rolling(window=15, center=True, min_periods=1).mean()
+    return df

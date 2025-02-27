@@ -18,12 +18,13 @@ client = influxdb_client.InfluxDBClient(
     timeout=1000_000
 )
 
-def query_data(input_from = "2024-11-23T00:00:00Z", days = 1):
+def query_data(input_from = "2024-11-25T00:00:00Z", days = 1):
 
     date_from = datetime.strptime(input_from, "%Y-%m-%dT%H:%M:%SZ")
     date_to = date_from + timedelta(days=1)
 
     for i in range(days):
+        # or r.room_id == "1.215" or r.room_id == "1.217"
         date_string_from = date_from.strftime("%Y-%m-%dT00:00:00Z")
         date_string_to = date_to.strftime("%Y-%m-%dT00:00:00Z")
         query = """
@@ -34,7 +35,7 @@ def query_data(input_from = "2024-11-23T00:00:00Z", days = 1):
         
             data_2 = from(bucket:"db")
                      |> range(start: """+date_string_from+""", stop: """+date_string_to+""")
-                     |> filter(fn: (r) => r.room_id == "1.213" or r.room_id == "1.215" or r.room_id == "1.217")
+                     |> filter(fn: (r) => r.room_id == "1.213")
                      |> filter(fn: (r) => r["sensor_type"] == "temperature")
                      |> filter(fn: (r) => r["_field"] == "value")
         
@@ -61,7 +62,7 @@ def query_data(input_from = "2024-11-23T00:00:00Z", days = 1):
                 c = round(record.values.get("_value_d2"), 1)
                 data.append({"time": time, "watt": watt, "room_temp": c, "ambient_temp": outside_temp_at_given_time})
 
-        with open('data.csv', 'a', newline='') as csvfile:
+        with open('data/data.csv', 'a', newline='') as csvfile:
             fieldnames = ['time', 'watt', 'room_temp', 'ambient_temp']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
@@ -72,5 +73,5 @@ def query_data(input_from = "2024-11-23T00:00:00Z", days = 1):
         date_to += timedelta(days=1)
 
 def reset_csv():
-    f = open('data.csv', 'w+')
+    f = open('data/data.csv', 'w+')
     f.close()
