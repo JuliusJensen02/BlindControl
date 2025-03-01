@@ -1,4 +1,4 @@
-from scripts.data_to_csv import reset_csv, query_data
+#from scripts.data_to_csv import reset_csv, query_data
 from scripts.data_processing import convert_csv_to_df, remove_outliers, normalize, smooth
 from scripts.greybox_fitting import fitting
 from scripts.plot import plot_df
