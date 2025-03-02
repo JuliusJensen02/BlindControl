@@ -47,7 +47,7 @@ def temp_prediction(df, alpha_a_guess, alpha_s_guess, controller, df_len, other_
     solar_watts = df['watt'].values
 
     #Preallocate space for temp-predictions for performance
-    temp_predictions = np.empty(df_len + 1)
+    temp_predictions = np.empty(df_len)
 
     #Initial room temp is added
     temp_predictions[0] = df['room_temp'].iloc[0]
