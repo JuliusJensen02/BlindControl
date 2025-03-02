@@ -16,41 +16,33 @@ df = smooth(df)
 # Ensure data is sorted by time
 df = df.sort_values(by="time")
 
-# Compute time differences in seconds
-df["delta_t"] = df["time"].diff().dt.total_seconds()
-
-# Drop the first row since diff() introduces NaN
-df = df.dropna()
-
 # Extract relevant columns
-T_r = df["room_temp"].values
-T_a = df["ambient_temp"].values
+t_r = df["room_temp"].values
+t_a = df["ambient_temp"].values
 S = df["watt"].values
-dt = df["delta_t"].values  # Time step differences
 
 def predict_temperature(params):
     alpha_a, alpha_s, beta = params
-    t_r_pred = np.empty(len(T_r))
-    t_r_pred[0] = T_r[0]  # Set initial condition
+    t_r_pred = np.empty(len(t_r))
+    t_r_pred[0] = t_r[0]  # Set initial condition
 
-    for t in range(1, len(T_r)):
+    for t in range(1, len(t_r)):
         temp_predicted = temp_change(
-            T_a[t-1], t_r_pred[t-1],
+            t_a[t-1], t_r_pred[t-1],
             alpha_a, alpha_s, solar_effect(S[t-1]),
             1, beta
         )
         t_r_pred[t] = t_r_pred[t-1] + temp_predicted
-    print(t_r_pred)
     return t_r_pred
 
 
 def mean_absolute_error(params):
-    T_r_pred = predict_temperature(params)
-    return np.mean(np.abs(T_r - T_r_pred))
+    t_r_pred = predict_temperature(params)
+    return np.mean(np.abs(t_r - t_r_pred))
 
 def mean_squared_error(params):
-    T_r_pred = predict_temperature(params)
-    return np.mean((T_r - T_r_pred)**2)
+    t_r_pred = predict_temperature(params)
+    return np.mean((t_r - t_r_pred)**2)
 
 # Initial guess for parameters
 initial_guess = np.array([0.01, 0.001, 0.1])  # alpha_a, alpha_S, beta
