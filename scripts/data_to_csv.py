@@ -85,8 +85,13 @@ def query_data(input_from = "2024-11-25T00:00:00Z", days = 1):
         # The data is written to the csv file.
         # The data is fetched from the result and the DMI API and joined based on the time before writing to the csv file.
         data = list()
+        counter = 0
         for table in result:
             for record in table:
+                counter += 1
+                if counter <= 15:
+                    continue
+                counter = 0
                 time = record["_time"]
                 outside_temp_at_given_time = None 
                 for dmi_time, dmi_temp in dmi_results.items():
@@ -101,7 +106,6 @@ def query_data(input_from = "2024-11-25T00:00:00Z", days = 1):
         with open('data/data.csv', 'a', newline='') as csvfile:
             fieldnames = ['time', 'watt', 'room_temp', 'ambient_temp'] # The fieldnames for the csv file.
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames) # The csv writer.
-            writer.writeheader() 
             writer.writerows(data)
 
         # Confirmation message
@@ -117,3 +121,7 @@ The data in the csv file is reset.
 def reset_csv():
     f = open('data/data.csv', 'w+')
     f.close()
+    with open('data/data.csv', 'a', newline='') as csvfile:
+        fieldnames = ['time', 'watt', 'room_temp', 'ambient_temp']  # The fieldnames for the csv file.
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)  # The csv writer.
+        writer.writeheader()
