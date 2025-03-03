@@ -1,6 +1,8 @@
 import plotly.express as px
 import plotly.io as pio
 
+from scripts.data_processing import normalize
+
 '''
 Plots a DataFrame with the time on x-axis, and room_temp and temp_predictions on y-axis
 '''

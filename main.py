@@ -1,5 +1,6 @@
-from scripts.greybox_fitting import get_constants, predict_for_date
+from scripts.greybox_fitting import get_constants
+from scripts.prediction import predict_for_date
 
-constants = get_constants("2024-11-25T00:00:00Z", 1)
-
+constants = get_constants("2024-11-25T00:00:00Z", 1, False)
+print(constants)
 predict_for_date("2024-11-25T00:00:00Z", constants, True)

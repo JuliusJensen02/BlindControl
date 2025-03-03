@@ -15,7 +15,7 @@ def normalize(df):
     # Define the columns to be normalized:
     cols_to_normalize = ['watt', 'room_temp', 'ambient_temp']
     # Using the formula to normalize the columns:
-    df[cols_to_normalize] = (df[cols_to_normalize] - df[cols_to_normalize].min()) / (
+    df[cols_to_normalize] = 20 + (df[cols_to_normalize] - df[cols_to_normalize].min()) / (
                 df[cols_to_normalize].max() - df[cols_to_normalize].min())
     # Return the normalized dataframe:
     return df
@@ -70,6 +70,7 @@ def convert_csv_to_df(csv_data):
     # Read the csv data into a DataFrame:
     # The csv-data is the path to the csv file containing the data.
     df = pd.read_csv(csv_data)
+    df = df.sort_values(by="time")
     return df
 
 

@@ -124,17 +124,19 @@ def query_data(input_from = "2024-11-25T00:00:00Z", days = 1):
                 watt = record.values.get("watt") # The value of the column 'value' from the table 'data_1'.
                 room_temp = round(record.values.get("room_temp"), 1) # The value of the column 'value' from the table 'data_2'.
                 heating_setpoint = record.values.get("heating_setpoint")
+                supply_temp = record.values.get("supply_temp")
+                opening_signal = record.values.get("opening_signal")
 
                 # The data is appended to the list 'data'.
                 data.append({"time": time,
                              "watt": watt,
                              "room_temp": room_temp,
                              "ambient_temp": outside_temp_at_given_time,
-                             "heating_setpoint": heating_setpoint,})
+                             "opening_signal": opening_signal})
 
         # The data is written to the csv file.
         with open('data/data.csv', 'a', newline='') as csvfile:
-            fieldnames = ['time', 'watt', 'room_temp', 'ambient_temp', 'heating_setpoint'] # The fieldnames for the csv file.
+            fieldnames = ['time', 'watt', 'room_temp', 'ambient_temp', 'opening_signal'] # The fieldnames for the csv file.
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames) # The csv writer.
             writer.writerows(data)
 
@@ -152,6 +154,6 @@ def reset_csv():
     f = open('data/data.csv', 'w+')
     f.close()
     with open('data/data.csv', 'a', newline='') as csvfile:
-        fieldnames = ['time', 'watt', 'room_temp', 'ambient_temp', 'heating_setpoint']  # The fieldnames for the csv file.
+        fieldnames = ['time', 'watt', 'room_temp', 'ambient_temp', 'opening_signal']  # The fieldnames for the csv file.
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)  # The csv writer.
         writer.writeheader()
