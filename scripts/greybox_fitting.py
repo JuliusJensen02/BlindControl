@@ -55,7 +55,7 @@ def use_best_optimization_method(initial_guess, bounds, room_temp, ambient_temp,
         'SLSQP',
         'trust-constr'
     ]
-    if best_method is not None:
+    if best_method is None:
         for method in optimization_methods:
             initial_guess_dup = initial_guess
             #Calculate the best fit for the constants based on the given method and save the best method in result
@@ -67,8 +67,9 @@ def use_best_optimization_method(initial_guess, bounds, room_temp, ambient_temp,
                 best_method = method
                 best_result = result
     else:
+        print("I knew the best method")
         best_result = minimize(mean_squared_error, initial_guess, method=best_method, bounds=bounds, args=(room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint))
-    return best_result
+    return [best_result, best_method]
 
 '''
 @params start_time: start time as a string
@@ -102,8 +103,9 @@ def train_for_time_frame(start_time = "2025-01-01T00:00:00Z", days = 1):
         cooling_setpoint = df["cooling_setpoint"].values
 
         #Calculate the best optimization
-        result = use_best_optimization_method(initial_guess, bounds, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, best_method)
-
+        result_array = use_best_optimization_method(initial_guess, bounds, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, best_method)
+        result = result_array[0]
+        best_method = result_array[1]
         #Accumulate the constants for the given timeframe
         alpha_a += result.x[0]
         alpha_s += result.x[1]
