@@ -15,7 +15,7 @@ def predict_temperature(constants, room_temp, ambient_temp, solar_watt, heating_
     alpha_a, alpha_s, alpha_r, alpha_v = constants
     t_span = (0, len(room_temp) - 1)  # Time range
     t_eval = np.arange(len(room_temp))  # Discrete evaluation points
-    heating_bool = False
+    heating_bool = [False]
 
     # Solve the ODE
     sol = solve_ivp(temp_derivative, t_span, [room_temp[0]], t_eval=t_eval,
@@ -68,15 +68,13 @@ If the current temperature is below the heating setpoint, the heater is on
 If the current temperature is above the cooling setpoint, the heater is off
 '''
 def heater_effect(heating_setpoint, cooling_setpoint, current_temperature, heating_bool):
-    if current_temperature < heating_setpoint:
-        heating_bool = True
+    if current_temperature <= heating_setpoint:
+        heating_bool[0] = True
 
-    if current_temperature > cooling_setpoint:
-        heating_bool = False
+    if current_temperature >= cooling_setpoint:
+        heating_bool[0] = False
 
-    if heating_bool:
-        return 372
-    return 0
+    return 372 if heating_bool[0] else 0
 
 
 '''

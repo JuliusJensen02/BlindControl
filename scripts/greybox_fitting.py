@@ -1,11 +1,9 @@
 import csv
 import os
 from datetime import datetime, timedelta
-
 import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
-
 from scripts.data_processing import convert_csv_to_df, remove_outliers, smooth
 from scripts.data_to_csv import reset_csv, query_data, cache_constants
 from scripts.derivative_functions import predict_temperature
@@ -17,17 +15,17 @@ from scripts.derivative_functions import predict_temperature
 @returns: dictionary of constants
 Function for getting the constants based on the given timeframe
 '''
-def get_constants(start_time = "2025-01-01T00:00:00Z", days = 1, retrain = False):
+def get_constants(start_time = "2025-01-01T00:00:00Z", days = 1, retrain = False, path = "data/constants_data.csv"):
     #Check if the cache file is empty or if retrain is true
-    if os.path.getsize("data/constants_cache.csv") == 0 or retrain: 
+    if os.path.getsize(path) == 0 or retrain: 
         train_for_time_frame(start_time, days) #Train for the given timeframe
-        df = pd.read_csv("data/constants_cache.csv") #Read the cache file
+        df = pd.read_csv(path) #Read the cache file
     else:
-        df = pd.read_csv("data/constants_cache.csv") 
+        df = pd.read_csv(path) 
         #Check if valid data is loaded from the cache file to the dataframe and if the start time and days are the same as in the csv file
         if len(df) == 0 or start_time != df['start_time'][0] or days != df['days'][0]:
             train_for_time_frame(start_time, days)
-            df = pd.read_csv("data/constants_cache.csv")
+            df = pd.read_csv(path)
     #Return the constants as a dictionary
     return {'alpha_a': df['alpha_a'][0], 'alpha_s': df['alpha_s'][0], 'alpha_r': df['alpha_r'][0], 'alpha_v': df['alpha_v'][0]}
 
@@ -55,7 +53,7 @@ def use_best_optimization_method(initial_guess, bounds, room_temp, ambient_temp,
         'SLSQP',
         'trust-constr'
     ]
-    if best_method is None:
+    if best_method[0] is None:
         for method in optimization_methods:
             initial_guess_dup = initial_guess
             #Calculate the best fit for the constants based on the given method and save the best method in result
@@ -64,12 +62,11 @@ def use_best_optimization_method(initial_guess, bounds, room_temp, ambient_temp,
             if result.fun < best_error:
                 #Set the best error and best method
                 best_error = result.fun
-                best_method = method
+                best_method[0] = method
                 best_result = result
     else:
-        print("I knew the best method")
-        best_result = minimize(mean_squared_error, initial_guess, method=best_method, bounds=bounds, args=(room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint))
-    return [best_result, best_method]
+        best_result = minimize(mean_squared_error, initial_guess, method=best_method[0], bounds=bounds, args=(room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint))
+    return best_result
 
 '''
 @params start_time: start time as a string
@@ -81,7 +78,7 @@ def train_for_time_frame(start_time = "2025-01-01T00:00:00Z", days = 1):
     alpha_a, alpha_s, alpha_v, alpha_r, error = [0, 0, 0, 0, 0] #Initial constants
     bounds = [(0, 1), (0, 1), (0, 1), (0, 1)] #Bounds for the constants
     initial_guess = np.array([0.01, 0.001, 0.01, 0.01]) #Initial guess for the constants (Not based on anything)
-    best_method = None
+    best_method = [None]
 
     #Train for the given timeframe day by day
     for i in range(days):
@@ -103,9 +100,7 @@ def train_for_time_frame(start_time = "2025-01-01T00:00:00Z", days = 1):
         cooling_setpoint = df["cooling_setpoint"].values
 
         #Calculate the best optimization
-        result_array = use_best_optimization_method(initial_guess, bounds, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, best_method)
-        result = result_array[0]
-        best_method = result_array[1]
+        result = use_best_optimization_method(initial_guess, bounds, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, best_method)
         #Accumulate the constants for the given timeframe
         alpha_a += result.x[0]
         alpha_s += result.x[1]

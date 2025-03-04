@@ -11,8 +11,7 @@ from scripts.data_processing import normalize, remove_outliers, convert_csv_to_d
 
 @pytest.fixture
 def sample_data():
-    csv_data = """
-    time,solar_watt,room_temp,ambient_temp,heating_setpoint,cooling_setpoint
+    csv_data = """time,solar_watt,room_temp,ambient_temp,heating_setpoint,cooling_setpoint
     2024-12-27 09:03:00+00:00,7.5467529297,22.2,6.6,23.0,25.0
     2024-12-27 09:18:00+00:00,7.5467529297,22.3,6.6,23.0,25.0
     2024-12-27 09:33:00+00:00,7.5467529297,22.3,6.6,23.0,25.0
