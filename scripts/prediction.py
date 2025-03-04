@@ -1,0 +1,36 @@
+import numpy as np
+
+from scripts.data_processing import convert_csv_to_df
+from scripts.data_to_csv import reset_csv, query_data
+from scripts.derivative_functions import predict_temperature
+from scripts.plot import plot_df
+
+'''
+@param start_time: a string of the date to predict
+@param constants: the constants from the training data
+@param plot: a boolean value for whether to plot the result of the prediction
+@returns: a DataFrame with the predictions
+Predicts the room temperature 
+'''
+def predict_for_date(start_time, constants, plot):
+    reset_csv()
+    query_data(start_time, 1)
+    df = convert_csv_to_df("data/data.csv")
+
+    #Get the values from the dataframe
+    room_temp = df["room_temp"].values
+    ambient_temp = df["ambient_temp"].values
+    watt = df["watt"].values
+
+    #Hardcoded opening signal for heater
+    opening_signal = np.zeros_like(df["opening_signal"].values)
+    opening_signal = np.full(len(opening_signal), 0)
+
+    #Save the predictions to the dataframe
+    df['temp_predictions'] = predict_temperature(constants.values(), room_temp, ambient_temp, watt, opening_signal)
+
+    #Plot the data if plot is true
+    if plot:
+        plot_df(df)
+        return
+    return df
