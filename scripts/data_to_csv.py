@@ -111,7 +111,7 @@ def query_data(input_from = "2024-11-25T00:00:00Z", days = 1):
         counter = 0
         for table in result:
             for record in table:
-                if counter < 15:
+                if counter < 14:
                     counter += 1
                     continue
                 counter = 0

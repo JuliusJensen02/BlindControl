@@ -9,8 +9,6 @@ The normalization is done using the formula:
 (x - min(x)) / (max(x) - min(x))
 where x is the column to be normalized.
 '''
-
-
 def normalize(df):
     # Define the columns to be normalized:
     cols_to_normalize = ['watt', 'room_temp', 'ambient_temp']
@@ -28,8 +26,6 @@ This function removes outliers from the dataframe.
 The outliers are detected using the rolling mean and the standard deviation of the columns 'watt' and 'room_temp'.
 The threshold for the outliers is set to 3 times the standard deviation.
 '''
-
-
 def remove_outliers(df=pd.DataFrame()):
     temp_df = pd.DataFrame()
 
@@ -64,8 +60,6 @@ def remove_outliers(df=pd.DataFrame()):
 @return df: DataFrame
 This function converts the csv data into a DataFrame.
 '''
-
-
 def convert_csv_to_df(csv_data):
     # Read the csv data into a DataFrame:
     # The csv-data is the path to the csv file containing the data.
@@ -80,8 +74,6 @@ def convert_csv_to_df(csv_data):
 This function smoothes the column 'room_temp' in the dataframe using the rolling mean.
 This ensures that the data is less noisy and easier to work with.
 '''
-
-
 def smooth(df):
     # Calculate the rolling mean for the column 'room_temp':
     # Rolling works by taking the average of a window of values around the current value.
