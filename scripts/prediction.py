@@ -21,9 +21,11 @@ def predict_for_date(start_time, constants, plot):
     room_temp = df["room_temp"].values
     ambient_temp = df["ambient_temp"].values
     solar_watt = df["solar_watt"].values
+    heating_setpoint = df["heating_setpoint"].values
+    cooling_setpoint = df["cooling_setpoint"].values
 
     #Save the predictions to the dataframe
-    df['temp_predictions'] = predict_temperature(constants.values(), room_temp, ambient_temp, solar_watt)
+    df['temp_predictions'] = predict_temperature(constants.values(), room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint)
 
     #Plot the data if plot is true
     if plot:

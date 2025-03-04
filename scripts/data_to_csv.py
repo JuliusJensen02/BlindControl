@@ -161,13 +161,13 @@ def reset_csv():
 @params days: number of days to train for
 Writes the constants from the training to the cache csv file
 '''
-def cache_constants(alpha_a, alpha_s, alpha_r, alpha_v, start_time, days):
+def cache_constants(alpha_a, alpha_s, alpha_r, alpha_v, start_time, days, error):
     #Open the csv file in write mode
     with open('data/constants_cache.csv', 'w+', newline='') as csvfile:
-        fieldnames = ['alpha_a', 'alpha_s', 'alpha_r', 'alpha_v', 'start_time', 'days'] # The fieldnames for the csv file.
+        fieldnames = ['alpha_a', 'alpha_s', 'alpha_r', 'alpha_v', 'start_time', 'days', 'error'] # The fieldnames for the csv file.
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)  # The csv writer.
         writer.writeheader()
         #Write the constants to the csv file
         writer.writerow({'alpha_a': alpha_a, 'alpha_s': alpha_s, 'alpha_r': alpha_r,
-                          'alpha_v': alpha_v, 'start_time': start_time, 'days': days})
+                          'alpha_v': alpha_v, 'start_time': start_time, 'days': days, 'error': error})
 

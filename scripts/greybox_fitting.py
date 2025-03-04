@@ -42,13 +42,13 @@ def get_constants(start_time = "2025-01-01T00:00:00Z", days = 1, retrain = False
 @returns: the best optimization method
 Determines the best minimize method for the minimize function based on the first date
 '''
-def determine_optimization_method(optimization_methods, initial_guess, bounds, room_temp, ambient_temp, solar_watt):
+def determine_optimization_method(optimization_methods, initial_guess, bounds, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint):
     best_error = float("inf")
     best_method = ""
     for method in optimization_methods:
         initial_guess_dup = initial_guess
         #Calculate the best fit for the constants based on the given method and save the best method in result
-        result = minimize(mean_squared_error, initial_guess_dup, method=method, bounds=bounds, args=(room_temp, ambient_temp, solar_watt))
+        result = minimize(mean_squared_error, initial_guess_dup, method=method, bounds=bounds, args=(room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint))
         #Check if the error is less than the best error
         if result.fun < best_error:
             #Set the best error and best method
@@ -63,7 +63,7 @@ Trains the constants for the given timeframe
 '''
 def train_for_time_frame(start_time = "2025-01-01T00:00:00Z", days = 1):
     time = datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%SZ") #Convert the start time to a datetime object
-    alpha_a, alpha_s, alpha_v, alpha_r = [0, 0, 0, 0] #Initial constants
+    alpha_a, alpha_s, alpha_v, alpha_r, error = [0, 0, 0, 0, 0] #Initial constants
     optimization_methods = [
         'Powell',
         'L-BFGS-B',
@@ -92,26 +92,28 @@ def train_for_time_frame(start_time = "2025-01-01T00:00:00Z", days = 1):
         room_temp = df["room_temp"].values
         ambient_temp = df["ambient_temp"].values
         solar_watt = df["solar_watt"].values
+        heating_setpoint = df["heating_setpoint"].values
+        cooling_setpoint = df["cooling_setpoint"].values
 
         #Determine the best method using the determine_optimization_method function
         #TODO: Make determine_optimization_method return result instead of best_method, to avoid a run of the minimize function
         if best_method is None:
-            best_method = determine_optimization_method(optimization_methods, initial_guess, bounds, room_temp, ambient_temp, solar_watt)
+            best_method = determine_optimization_method(optimization_methods, initial_guess, bounds, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint)
 
         #Calculate the best fit for the constants based on the best method (Again??!?)
-        result = minimize(mean_squared_error, initial_guess, method=best_method, bounds=bounds, args=(room_temp, ambient_temp, solar_watt))
+        result = minimize(mean_squared_error, initial_guess, method=best_method, bounds=bounds, args=(room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint))
 
         #Accumulate the constants for the given timeframe
         alpha_a += result.x[0]
         alpha_s += result.x[1]
         alpha_r += result.x[2]
         alpha_v += result.x[3]
-
+        error += result.fun
         #Increment the time by one day
         time = time + timedelta(days=1)
 
     #Calculate the average of the constants and cache them
-    cache_constants(alpha_a/days, alpha_s/days, alpha_r/days, alpha_v/days, start_time, days)
+    cache_constants(alpha_a/days, alpha_s/days, alpha_r/days, alpha_v/days, start_time, days, error/days)
 
 
 '''
@@ -122,6 +124,6 @@ def train_for_time_frame(start_time = "2025-01-01T00:00:00Z", days = 1):
 @returns: mean squared error
 Function for calculating the mean squared error
 '''
-def mean_squared_error(constants, room_temp, ambient_temp, solar_watt):
-    t_r_pred = predict_temperature(constants, room_temp, ambient_temp, solar_watt)
+def mean_squared_error(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint):
+    t_r_pred = predict_temperature(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint)
     return np.mean((room_temp - t_r_pred) ** 2)

@@ -9,13 +9,15 @@ from scipy.integrate import solve_ivp
 @returns sol.y[0]: list of temperature predictions
 Function for predicting the temperature for the training functions
 '''
-def predict_temperature(constants, room_temp, ambient_temp, solar_watt):
+def predict_temperature(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint):
     alpha_a, alpha_s, alpha_r, alpha_v = constants
     t_span = (0, len(room_temp) - 1)  # Time range
     t_eval = np.arange(len(room_temp))  # Discrete evaluation points
+    heating_bool = False
 
     # Solve the ODE
-    sol = solve_ivp(temp_derivative, t_span, [room_temp[0]], t_eval=t_eval, args=(alpha_a, alpha_s, alpha_r, alpha_v, ambient_temp, solar_watt))
+    sol = solve_ivp(temp_derivative, t_span, [room_temp[0]], t_eval=t_eval,
+                    args=(alpha_a, alpha_s, alpha_r, alpha_v, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, heating_bool))
     return sol.y[0]  # Return the temperature predictions
 
 
@@ -31,12 +33,12 @@ def predict_temperature(constants, room_temp, ambient_temp, solar_watt):
 @returns: temperature derivative
 Function that the solve_ivp uses to calculate the derivative temperature function for the room
 '''
-#TODO: Add heating effect function based on set points and current temp
-def temp_derivative(t, T, alpha_a, alpha_s, alpha_r, alpha_v, ambient_temp, solar_watt):
+def temp_derivative(t, T, alpha_a, alpha_s, alpha_r, alpha_v, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, heating_bool):
     t = int(t)
     if t >= len(ambient_temp):
         t = len(ambient_temp) - 1
-    return (ambient_temp[t] - T) * alpha_a + solar_effect(solar_watt[t]) * alpha_s + alpha_r + alpha_v
+    return ((ambient_temp[t] - T) * alpha_a + solar_effect(solar_watt[t]) * alpha_s +
+            heater_effect(heating_setpoint[t], cooling_setpoint[t], T, heating_bool) * alpha_r + alpha_v)
 
 
 '''
@@ -55,9 +57,16 @@ def solar_effect(df_watt):
 @returns: heater effect
 Calculates the heater's effect on the room
 '''
-#TODO: Create heater effect function
-def heater_effect():
-    return 372
+def heater_effect(heating_setpoint, cooling_setpoint, current_temperature, heating_bool):
+    if current_temperature < heating_setpoint:
+        heating_bool = True
+
+    if current_temperature > cooling_setpoint:
+        heating_bool = False
+
+    if heating_bool:
+        return 372
+    return 0
 
 
 '''
