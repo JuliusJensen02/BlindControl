@@ -6,6 +6,8 @@ from scipy.integrate import solve_ivp
 @params room_temp: list of room temperatures
 @params ambient_temp: list of ambient temperatures
 @params solar_watt: list of solar_watt
+@params heating_setpoint: list of heating setpoints
+@params cooling_setpoint: list of cooling setpoints
 @returns sol.y[0]: list of temperature predictions
 Function for predicting the temperature for the training functions
 '''
@@ -30,6 +32,9 @@ def predict_temperature(constants, room_temp, ambient_temp, solar_watt, heating_
 @params alpha_v: alpha_v constant for ventilation effect
 @params ambient_temp: list of ambient temperatures
 @params solar_watt: list of solar_watt
+@params heating_setpoint: list of heating setpoints
+@params cooling_setpoint: list of cooling setpoints
+@params heating_bool: boolean for heating
 @returns: temperature derivative
 Function that the solve_ivp uses to calculate the derivative temperature function for the room
 '''
@@ -53,9 +58,14 @@ def solar_effect(df_watt):
 
 
 '''
-
+@params heating_setpoint: list of heating setpoints
+@params cooling_setpoint: list of cooling setpoints
+@params current_temperature: current temperature in the room
+@params heating_bool: boolean for heating
 @returns: heater effect
-Calculates the heater's effect on the room
+Function for calculating the heater's effect on the room
+If the current temperature is below the heating setpoint, the heater is on
+If the current temperature is above the cooling setpoint, the heater is off
 '''
 def heater_effect(heating_setpoint, cooling_setpoint, current_temperature, heating_bool):
     if current_temperature < heating_setpoint:
