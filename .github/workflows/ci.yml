@@ -1,4 +1,4 @@
-name: Run Python Tests
+name: Run Python Tests on Windows
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest  # Runs on an Ubuntu machine
+    runs-on: windows-latest  # Runs on a Windows machine
 
     steps:
       - name: Checkout code
@@ -19,12 +19,14 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'  # Specify your Python version
+          python-version: '3.10'  # Change this to your required Python version
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt || echo "No requirements.txt found"
+        shell: pwsh  # Use PowerShell (needed for Windows compatibility)
 
       - name: Run tests
-        run: pytest  # Runs pytest (ensure you have test files)
+        run: pytest
+        shell: pwsh  # Ensure PowerShell is used to execute the command
