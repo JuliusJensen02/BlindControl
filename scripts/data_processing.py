@@ -4,14 +4,14 @@ import pandas as pd
 '''
 @param df: DataFrame
 @return df: DataFrame
-This function normalizes the columns 'watt', 'room_temp', and 'ambient_temp' in the dataframe.
+This function normalizes the columns 'solar_watt', 'room_temp', and 'ambient_temp' in the dataframe.
 The normalization is done using the formula:
 (x - min(x)) / (max(x) - min(x))
 where x is the column to be normalized.
 '''
 def normalize(df):
     # Define the columns to be normalized:
-    cols_to_normalize = ['watt', 'room_temp', 'ambient_temp']
+    cols_to_normalize = ['solar_watt', 'room_temp', 'ambient_temp']
     # Using the formula to normalize the columns:
     df[cols_to_normalize] = 20 + (df[cols_to_normalize] - df[cols_to_normalize].min()) / (
                 df[cols_to_normalize].max() - df[cols_to_normalize].min())
@@ -23,17 +23,17 @@ def normalize(df):
 @param df: DataFrame
 @return df_cleaned: DataFrame
 This function removes outliers from the dataframe.
-The outliers are detected using the rolling mean and the standard deviation of the columns 'watt' and 'room_temp'.
+The outliers are detected using the rolling mean and the standard deviation of the columns 'solar_watt' and 'room_temp'.
 The threshold for the outliers is set to 3 times the standard deviation.
 '''
 def remove_outliers(df=pd.DataFrame()):
     temp_df = pd.DataFrame()
 
-    # Calculate the rolling mean for the column 'watt':
-    temp_df['watt_rolling_mean'] = df['watt'].rolling(window=10, center=True, min_periods=1).mean()
+    # Calculate the rolling mean for the column 'solar_watt':
+    temp_df['watt_rolling_mean'] = df['solar_watt'].rolling(window=10, center=True, min_periods=1).mean()
 
-    # Calculate the absolute difference between the actual value and the rolling mean for the column 'watt':
-    temp_df['watt_diff'] = np.abs(df['watt'] - temp_df['watt_rolling_mean'])
+    # Calculate the absolute difference between the actual value and the rolling mean for the column 'solar_watt':
+    temp_df['watt_diff'] = np.abs(df['solar_watt'] - temp_df['watt_rolling_mean'])
 
     # Calculate the rolling mean for the column 'room_temp':
     temp_df['room_temp_rolling_mean'] = df['room_temp'].rolling(window=10, center=True, min_periods=1).mean()

@@ -55,46 +55,40 @@ def query_data(input_from = "2024-11-25T00:00:00Z", days = 1):
         # The query to fetch the data from the InfluxDB written in the InfluxDB Flux language.
         # The data is filtered based on the source and the room_id. Add 'or r.room_id == "1.215" or r.room_id == "1.217"' to filter for other rooms.
         query = """
-            data_1 = from(bucket:"db")
+            data_solar_watt = from(bucket:"db")
                      |> range(start: """+date_string_from+""", stop: """+date_string_to+""")
                      |> filter(fn: (r) => r["source"] == "/TM023_1_20_1103/SG01/Solar_panel_south")
                      |> filter(fn: (r) => r["_field"] == "value")
-                     |> rename(columns: {_value: "watt"})
+                     |> rename(columns: {_value: "solar_watt"})
         
-            data_2 = from(bucket:"db")
+            data_room_temp = from(bucket:"db")
                      |> range(start: """+date_string_from+""", stop: """+date_string_to+""")
                      |> filter(fn: (r) => r.room_id == "1.213") 
                      |> filter(fn: (r) => r["sensor_type"] == "temperature")
                      |> filter(fn: (r) => r["_field"] == "value")
                      |> rename(columns: {_value: "room_temp"})
                      
-            data_3 = from(bucket:"db")
-                     |> range(start: """+date_string_from+""", stop: """+date_string_to+""")
-                     |> filter(fn: (r) => r.room_id == "1.213") 
-                     |> filter(fn: (r) => r["sensor_type"] == "opening_signal")
-                     |> filter(fn: (r) => r["_field"] == "value")
-                     |> rename(columns: {_value: "opening_signal"})
-            
-            data_4 = from(bucket:"db")
-                     |> range(start: """+date_string_from+""", stop: """+date_string_to+""")
-                     |> filter(fn: (r) => r["source"] == "/TM023_0_21_1101/Lon/Net/VA01-QMV01/Kamstrup_HEAT_KMP_TAC/Node_Object_[0]/Supply_temperature_north_east_VA01")
-                     |> filter(fn: (r) => r["_field"] == "value") 
-                     |> rename(columns: {_value: "supply_temp"})
-             
-            data_5 = from(bucket:"db")
+            data_heating_setpoint = from(bucket:"db")
                      |> range(start: """+date_string_from+""", stop: """+date_string_to+""")
                      |> filter(fn: (r) => r.room_id == "1.213") 
                      |> filter(fn: (r) => r["sensor_type"] == "setpoint")
                      |> filter(fn: (r) => r["source"] == "/TM023_3_20_1.204/Lon/Net/Rum_1.213/Temperature_heating_setpoint_1.213")
                      |> filter(fn: (r) => r["_field"] == "value") 
-                     |> rename(columns: {_value: "heating_setpoint"})        
+                     |> rename(columns: {_value: "heating_setpoint"})  
+            
+            data_cooling_setpoint = from(bucket:"db")
+                     |> range(start: """+date_string_from+""", stop: """+date_string_to+""")
+                     |> filter(fn: (r) => r.room_id == "1.213") 
+                     |> filter(fn: (r) => r["sensor_type"] == "setpoint")
+                     |> filter(fn: (r) => r["source"] == "/TM023_3_20_1.204/Lon/Net/Rum_1.213/Temperature_cooling_setpoint_1.213")
+                     |> filter(fn: (r) => r["_field"] == "value") 
+                     |> rename(columns: {_value: "cooling_setpoint"})        
                      
-            watt_temp = join(tables: {d1: data_1, d2: data_2}, on: ["_time"])
-            watt_temp_rad = join(tables: {dwt: watt_temp, d3: data_3}, on: ["_time"])
-            watt_temp_rad_supply = join(tables: {dwts: watt_temp_rad, d4: data_4}, on: ["_time"])
-            watt_temp_rad_supply_setpoint = join(tables: {dwts: watt_temp_rad_supply, d5: data_5}, on: ["_time"])
-            watt_temp_rad_supply_setpoint
-            |> keep (columns: ["_time", "watt", "room_temp", "opening_signal", "supply_temp", "heating_setpoint"])
+            solar_room = join(tables: {d1: data_solar_watt, d2: data_room_temp}, on: ["_time"])
+            solar_room_heater = join(tables: {dsr: solar_room, d3: data_heating_setpoint}, on: ["_time"])
+            solar_room_heater_cooler = join(tables: {dsrh: solar_room_heater, d4: data_cooling_setpoint}, on: ["_time"])
+            solar_room_heater_cooler
+            |> keep (columns: ["_time", "solar_watt", "room_temp", "heating_setpoint", "cooling_setpoint"])
             """ 
 
         # The query_api is used to query the data from the InfluxDB.
@@ -121,22 +115,22 @@ def query_data(input_from = "2024-11-25T00:00:00Z", days = 1):
                     if datetime.fromisoformat(dmi_time) == hour_rounder(time):  # The time from the DMI API is rounded to the nearest hour.
                         outside_temp_at_given_time = dmi_temp
                         break
-                watt = record.values.get("watt") # The value of the column 'value' from the table 'data_1'.
-                room_temp = round(record.values.get("room_temp"), 1) # The value of the column 'value' from the table 'data_2'.
+                solar_watt = record.values.get("solar_watt") # The value of the column 'value' from the table 'data_solar_watt'.
+                room_temp = round(record.values.get("room_temp"), 1) # The value of the column 'value' from the table 'data_room_temp'.
                 heating_setpoint = record.values.get("heating_setpoint")
-                supply_temp = record.values.get("supply_temp")
-                opening_signal = record.values.get("opening_signal")
+                cooling_setpoint = record.values.get("cooling_setpoint")
 
                 # The data is appended to the list 'data'.
                 data.append({"time": time,
-                             "watt": watt,
+                             "solar_watt": solar_watt,
                              "room_temp": room_temp,
                              "ambient_temp": outside_temp_at_given_time,
-                             "opening_signal": opening_signal})
+                             "heating_setpoint": heating_setpoint,
+                             "cooling_setpoint": cooling_setpoint})
 
         # The data is written to the csv file.
         with open('data/data.csv', 'a', newline='') as csvfile:
-            fieldnames = ['time', 'watt', 'room_temp', 'ambient_temp', 'opening_signal'] # The fieldnames for the csv file.
+            fieldnames = ['time', 'solar_watt', 'room_temp', 'ambient_temp', 'heating_setpoint', 'cooling_setpoint'] # The fieldnames for the csv file.
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames) # The csv writer.
             writer.writerows(data)
 
@@ -154,6 +148,26 @@ def reset_csv():
     f = open('data/data.csv', 'w+')
     f.close()
     with open('data/data.csv', 'a', newline='') as csvfile:
-        fieldnames = ['time', 'watt', 'room_temp', 'ambient_temp', 'opening_signal']  # The fieldnames for the csv file.
+        fieldnames = ['time', 'solar_watt', 'room_temp', 'ambient_temp', 'heating_setpoint', 'cooling_setpoint']  # The fieldnames for the csv file.
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)  # The csv writer.
         writer.writeheader()
+
+'''
+@params alpha_a: alpha_a constant for ambient temperature
+@params alpha_s: alpha_s constant for solar effect
+@params alpha_r: alpha_r constant for heater effect
+@params alpha_v: alpha_v constant for ventilation effect
+@params start_time: start time as a string
+@params days: number of days to train for
+Writes the constants from the training to the cache csv file
+'''
+def cache_constants(alpha_a, alpha_s, alpha_r, alpha_v, start_time, days):
+    #Open the csv file in write mode
+    with open('data/constants_cache.csv', 'w+', newline='') as csvfile:
+        fieldnames = ['alpha_a', 'alpha_s', 'alpha_r', 'alpha_v', 'start_time', 'days'] # The fieldnames for the csv file.
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)  # The csv writer.
+        writer.writeheader()
+        #Write the constants to the csv file
+        writer.writerow({'alpha_a': alpha_a, 'alpha_s': alpha_s, 'alpha_r': alpha_r,
+                          'alpha_v': alpha_v, 'start_time': start_time, 'days': days})
+

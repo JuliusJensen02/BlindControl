@@ -20,14 +20,10 @@ def predict_for_date(start_time, constants, plot):
     #Get the values from the dataframe
     room_temp = df["room_temp"].values
     ambient_temp = df["ambient_temp"].values
-    watt = df["watt"].values
-
-    #Hardcoded opening signal for heater
-    opening_signal = np.zeros_like(df["opening_signal"].values)
-    opening_signal = np.full(len(opening_signal), 0)
+    solar_watt = df["solar_watt"].values
 
     #Save the predictions to the dataframe
-    df['temp_predictions'] = predict_temperature(constants.values(), room_temp, ambient_temp, watt, opening_signal)
+    df['temp_predictions'] = predict_temperature(constants.values(), room_temp, ambient_temp, solar_watt)
 
     #Plot the data if plot is true
     if plot:
