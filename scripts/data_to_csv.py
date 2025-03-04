@@ -115,12 +115,12 @@ def query_data(input_from = "2024-11-25T00:00:00Z", days = 1):
                     if datetime.fromisoformat(dmi_time) == hour_rounder(time):  # The time from the DMI API is rounded to the nearest hour.
                         outside_temp_at_given_time = dmi_temp
                         break
-                solar_watt = record.values.get("solar_watt") # The value of the column 'value' from the table 'data_solar_watt'.
-                room_temp = round(record.values.get("room_temp"), 1) # The value of the column 'value' from the table 'data_room_temp'.
+                solar_watt = record.values.get("solar_watt") 
+                room_temp = round(record.values.get("room_temp"), 1) 
                 heating_setpoint = record.values.get("heating_setpoint")
                 cooling_setpoint = record.values.get("cooling_setpoint")
 
-                # The data is appended to the list 'data'.
+                # The data is appended to the list 'data' which is used to write to the csv file.
                 data.append({"time": time,
                              "solar_watt": solar_watt,
                              "room_temp": room_temp,
