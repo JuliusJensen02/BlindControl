@@ -10,7 +10,9 @@ from scripts.data_processing import convert_csv_to_df, remove_outliers, smooth
 from scripts.data_to_csv import reset_csv, query_data
 from scripts.derivative_functions import predict_temperature
 
-
+'''
+Cache function for the constants of the training
+'''
 def get_constants(start_time = "2025-01-01T00:00:00Z", days = 1, retrain = False):
     if os.path.getsize("data/constants_cache.csv") == 0 or retrain:
         train_for_time_frame(start_time, days)
@@ -23,6 +25,9 @@ def get_constants(start_time = "2025-01-01T00:00:00Z", days = 1, retrain = False
     return {'alpha_a': df['alpha_a'][0], 'alpha_s': df['alpha_s'][0], 'alpha_r': df['alpha_r'][0], 'alpha_v': df['alpha_v'][0]}
 
 
+'''
+Determines the best method for the minimize function based on the first date
+'''
 def determine_optimization_method(optimization_methods, initial_guess, bounds, room_temp, ambient_temp, watt, opening_signal):
     best_error = float("inf")
     best_method = ""
@@ -34,6 +39,9 @@ def determine_optimization_method(optimization_methods, initial_guess, bounds, r
             best_method = method
     return best_method
 
+'''
+Writes the constants from the training to the cache file
+'''
 def cache_constants(alpha_a, alpha_s, alpha_r, alpha_v, start_time, days):
     with open('data/constants_cache.csv', 'w+', newline='') as csvfile:
         fieldnames = ['alpha_a', 'alpha_s', 'alpha_r', 'alpha_v', 'start_time', 'days']
@@ -42,6 +50,10 @@ def cache_constants(alpha_a, alpha_s, alpha_r, alpha_v, start_time, days):
         writer.writerow({'alpha_a': alpha_a / days, 'alpha_s': alpha_s/days, 'alpha_r': alpha_r/days,
                           'alpha_v': alpha_v/days, 'start_time': start_time, 'days': days})
 
+
+'''
+Function for determining the constants based on the given timeframe
+'''
 def train_for_time_frame(start_time = "2025-01-01T00:00:00Z", days = 1):
     time = datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%SZ")
     alpha_a, alpha_s, alpha_v, alpha_r = [0, 0, 0, 0]
@@ -68,6 +80,7 @@ def train_for_time_frame(start_time = "2025-01-01T00:00:00Z", days = 1):
         watt = df["watt"].values
         opening_signal = df["opening_signal"].values
 
+        #Best method determination
         if best_method is None:
             best_method = determine_optimization_method(optimization_methods, initial_guess, bounds, room_temp, ambient_temp, watt, opening_signal)
 
@@ -82,6 +95,8 @@ def train_for_time_frame(start_time = "2025-01-01T00:00:00Z", days = 1):
 
     cache_constants(alpha_a, alpha_s, alpha_r, alpha_v, start_time, days)
 
+
+#Error function for the minimization
 def mean_squared_error(constants, room_temp, ambient_temp, watt, opening_signal):
     t_r_pred = predict_temperature(constants, room_temp, ambient_temp, watt, opening_signal)
     return np.mean((room_temp - t_r_pred) ** 2)
