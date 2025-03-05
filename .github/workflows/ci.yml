@@ -23,6 +23,14 @@ jobs:
 
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
+
+      - name: Set environment variables from GitHub secrets
+        run: |
+          echo "INFLUXDB_URL=${{ secrets.INFLUXDB_URL }}" >> $GITHUB_ENV
+          echo "INFLUXDB_TOKEN=${{ secrets.INFLUXDB_TOKEN }}" >> $GITHUB_ENV
+          echo "INFLUXDB_ORG=${{ secrets.INFLUXDB_ORG }}" >> $GITHUB_ENV
+          echo "INFLUXDB_BUCKET =${{ secrets.INFLUXDB_BUCKET }}" >> $GITHUB_ENV
+          echo "DMI_API_KEY =${{ secrets.DMI_API_KEY }}" >> $GITHUB_ENV
         
       - name: Set up Python
         uses: actions/setup-python@v4
