@@ -24,7 +24,7 @@ def test_exact_half():
     assert rounded == datetime(2024, 3, 4, 16, 0)
 
 @patch('influxdb_client.InfluxDBClient.query_api')
-@patch('scripts.dmi_api.get_temp')
+@patch('scripts.data_to_csv.get_temp')
 def test_query_data(mock_get_temp, mock_query_api):
     # Mock the InfluxDB query_api correctly
     mock_query_api = MagicMock(spec=QueryApi)

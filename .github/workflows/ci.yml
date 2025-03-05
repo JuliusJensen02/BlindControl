@@ -11,11 +11,11 @@ on:
 jobs:
   test:
     runs-on: windows-latest
-    
+
     defaults:
       run:
-        shell: bash
-        working-directory: ./
+        shell: pwsh
+        working-directory: ./ 
         
     steps:
       - name: Checkout code
@@ -23,27 +23,52 @@ jobs:
 
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
+        shell: bash  # This works in Bash
 
+      # Fix: Set environment variables properly in PowerShell
       - name: Set environment variables from GitHub secrets
+        shell: pwsh
         run: |
-          echo "INFLUXDB_URL=${{ secrets.INFLUXDB_URL }}" >> $GITHUB_ENV
-          echo "INFLUXDB_TOKEN=${{ secrets.INFLUXDB_TOKEN }}" >> $GITHUB_ENV
-          echo "INFLUXDB_ORG=${{ secrets.INFLUXDB_ORG }}" >> $GITHUB_ENV
-          echo "INFLUXDB_BUCKET=${{ secrets.INFLUXDB_BUCKET }}" >> $GITHUB_ENV
-          echo "DMI_API_KEY=${{ secrets.DMI_API_KEY }}" >> $GITHUB_ENV
+          Add-Content -Path $env:GITHUB_ENV -Value 'INFLUXDB_URL=${{ secrets.INFLUXDB_URL }}'
+          Add-Content -Path $env:GITHUB_ENV -Value 'INFLUXDB_TOKEN=${{ secrets.INFLUXDB_TOKEN }}'
+          Add-Content -Path $env:GITHUB_ENV -Value 'INFLUXDB_ORG=${{ secrets.INFLUXDB_ORG }}'
+          Add-Content -Path $env:GITHUB_ENV -Value 'INFLUXDB_BUCKET=${{ secrets.INFLUXDB_BUCKET }}'
+          Add-Content -Path $env:GITHUB_ENV -Value 'DMI_API_KEY=${{ secrets.DMI_API_KEY }}'
+
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-          cache: 'pip' 
 
-      - name: Install dependencies
+      # Cache virtual environment
+      - name: Cache virtual environment
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            venv-${{ runner.os }}-
+
+      # Set up virtual environment if not cached
+      - name: Set up virtual environment
+        shell: pwsh
         run: |
+          if (!(Test-Path ".venv")) {
+            python -m venv .venv
+          }
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          INFLUXDB_URL: ${{ secrets.INFLUXDB_URL }}
+          INFLUXDB_TOKEN: ${{ secrets.INFLUXDB_TOKEN }}
+          INFLUXDB_ORG: ${{ secrets.INFLUXDB_ORG }}
+          INFLUXDB_BUCKET: ${{ secrets.INFLUXDB_BUCKET }}
+          DMI_API_KEY: ${{ secrets.DMI_API_KEY }}
+
+      - name: Install dependencies and run tests
+        shell: pwsh
+        run: |
+          .\.venv\Scripts\Activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt || echo "No requirements.txt found"
-        shell: pwsh
-
-      - name: Run tests
-        run: python -m pytest ./tests -p no:warnings
-        shell: pwsh
+          python -m pytest ./tests -p no:warnings
