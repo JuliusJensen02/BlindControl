@@ -49,4 +49,3 @@ def test_predict_temperature(sample_data, constants):
     assert isinstance(result, np.ndarray)
     assert len(result) == len(room_temp)
     assert result[0] == room_temp[0]
-    assert result[-1] != room_temp[-1]

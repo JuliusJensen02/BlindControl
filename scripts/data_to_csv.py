@@ -145,9 +145,7 @@ def query_data(input_from = "2024-11-25T00:00:00Z", days = 1):
 The data in the csv file is reset.
 '''
 def reset_csv(path='data/data.csv'):
-    f = open(path, 'w+')
-    f.close()
-    with open(path, 'a', newline='') as csvfile:
+    with open(path, 'w', newline='') as csvfile:
         fieldnames = ['time', 'solar_watt', 'room_temp', 'ambient_temp', 'heating_setpoint', 'cooling_setpoint']  # The fieldnames for the csv file.
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)  # The csv writer.
         writer.writeheader()
