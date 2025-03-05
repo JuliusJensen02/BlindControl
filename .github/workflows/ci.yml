@@ -28,5 +28,5 @@ jobs:
         shell: pwsh  # Use PowerShell (needed for Windows compatibility)
 
       - name: Run tests
-        run: pytest tests/
+        run: pytest tests/ -p no:warnings
         shell: pwsh  # Ensure PowerShell is used to execute the command
