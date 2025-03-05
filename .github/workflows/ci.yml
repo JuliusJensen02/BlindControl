@@ -31,7 +31,7 @@ jobs:
           echo "INFLUXDB_ORG=${{ secrets.INFLUXDB_ORG }}" >> $GITHUB_ENV
           echo "INFLUXDB_BUCKET=${{ secrets.INFLUXDB_BUCKET }}" >> $GITHUB_ENV
           echo "DMI_API_KEY=${{ secrets.DMI_API_KEY }}" >> $GITHUB_ENV
-        
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -40,10 +40,10 @@ jobs:
       - name: Cache Python dependencies
         uses: actions/cache@v3
         with:
-          path: ~/.cache/pip  # Cache the pip cache directory
-          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          path: C:\Users\Bruger\AppData\Local\pip\cache  # Correct path for Windows pip cache
+          key: Windows-python-${{ hashFiles('requirements.txt') }}
           restore-keys: |
-            ${{ runner.os }}-python-
+            Windows-python-
 
       - name: Install dependencies
         run: |
@@ -54,4 +54,3 @@ jobs:
       - name: Run tests
         run: python -m pytest ./tests -p no:warnings
         shell: pwsh
-
