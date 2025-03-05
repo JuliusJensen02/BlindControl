@@ -15,7 +15,7 @@ from scripts.derivative_functions import predict_temperature
 @returns: dictionary of constants
 Function for getting the constants based on the given timeframe
 '''
-def get_constants(start_time = "2025-01-01T00:00:00Z", days = 1, retrain = False, path = "data/constants_data.csv"):
+def get_constants(start_time = "2025-01-01T00:00:00Z", days = 1, retrain = False, path = "data/constants_cache.csv"):
     #Check if the cache file is empty or if retrain is true
     if os.path.getsize(path) == 0 or retrain: 
         train_for_time_frame(start_time, days) #Train for the given timeframe
