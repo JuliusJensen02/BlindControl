@@ -23,7 +23,7 @@ jobs:
 
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
-
+        
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -44,6 +44,6 @@ jobs:
         shell: pwsh
 
       - name: Run tests
-        run: pytest ./tests -p no:warnings
+        run: python -m pytest ./tests -p no:warnings
         shell: pwsh
 
