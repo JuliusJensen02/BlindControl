@@ -144,10 +144,8 @@ def query_data(input_from = "2024-11-25T00:00:00Z", days = 1):
 '''
 The data in the csv file is reset.
 '''
-def reset_csv():
-    f = open('data/data.csv', 'w+')
-    f.close()
-    with open('data/data.csv', 'a', newline='') as csvfile:
+def reset_csv(path='data/data.csv'):
+    with open(path, 'w', newline='') as csvfile:
         fieldnames = ['time', 'solar_watt', 'room_temp', 'ambient_temp', 'heating_setpoint', 'cooling_setpoint']  # The fieldnames for the csv file.
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)  # The csv writer.
         writer.writeheader()
@@ -161,9 +159,9 @@ def reset_csv():
 @params days: number of days to train for
 Writes the constants from the training to the cache csv file
 '''
-def cache_constants(alpha_a, alpha_s, alpha_r, alpha_v, start_time, days, error):
+def cache_constants(alpha_a, alpha_s, alpha_r, alpha_v, start_time, days, error, path = 'data/constants_cache.csv'):
     #Open the csv file in write mode
-    with open('data/constants_cache.csv', 'w+', newline='') as csvfile:
+    with open(path, 'w+', newline='') as csvfile:
         fieldnames = ['alpha_a', 'alpha_s', 'alpha_r', 'alpha_v', 'start_time', 'days', 'error'] # The fieldnames for the csv file.
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)  # The csv writer.
         writer.writeheader()
