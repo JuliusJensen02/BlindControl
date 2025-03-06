@@ -26,9 +26,9 @@ And used to access the InfluxDB.
 '''
 load_dotenv()
 client = influxdb_client.InfluxDBClient(
-    url=os.getenv("url"),
-    token=os.getenv("token"),
-    org=os.getenv("org"),
+    url=os.getenv("INFLUXDB_URL"),
+    token=os.getenv("INFLUXDB_TOKEN"),
+    org=os.getenv("INFLUXDB_ORG"),
     timeout=1000_000
 )
 

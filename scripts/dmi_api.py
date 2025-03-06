@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-DMIAPIKEY = os.getenv("DMIAPIKEY")
+DMIAPIKEY = os.getenv("DMI_API_KEY")
 
 '''
 @params start: start time as a string
