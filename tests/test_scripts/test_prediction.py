@@ -22,8 +22,7 @@ def sample_df():
     }
     return pd.DataFrame(data)
 
-@patch('scripts.prediction.reset_csv')  # Mocking reset_csv function
-@patch('scripts.prediction.query_data')  # Mocking query_data function
+
 @patch('scripts.prediction.convert_csv_to_df')  # Mocking convert_csv_to_df function
 @patch('scripts.prediction.predict_temperature')  # Mocking predict_temperature function
 @patch('scripts.prediction.plot_df')  # Mocking plot_df function

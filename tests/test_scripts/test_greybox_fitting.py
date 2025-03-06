@@ -4,7 +4,7 @@ import pandas as pd
 import os
 import numpy as np
 from io import StringIO
-from datetime import timedelta
+from datetime import datetime, timedelta
 from scripts.greybox_fitting import get_constants, train_for_time_frame, use_best_optimization_method, mean_squared_error
 from scripts.data_processing import convert_csv_to_df, remove_outliers, smooth
 from scripts.data_to_csv import reset_csv, query_data, cache_constants
@@ -40,61 +40,40 @@ def test_get_constants(mock_train, mock_read_csv, mock_getsize):
     mock_getsize.assert_called_once_with("tests/test_data/test_data.csv")
 
 
+@pytest.fixture
+def mock_data():
+    # Example data to return from train_for_day
+    return [1, 1, 1, 1, 1]  # alpha_a, alpha_s, alpha_r, alpha_v, error
 
 
-@patch('scripts.greybox_fitting.reset_csv')
-@patch('scripts.greybox_fitting.query_data')
-@patch('scripts.greybox_fitting.convert_csv_to_df')
-@patch('scripts.greybox_fitting.remove_outliers')
-@patch('scripts.greybox_fitting.smooth')
-@patch('scripts.greybox_fitting.use_best_optimization_method')
-@patch('scripts.greybox_fitting.cache_constants')
-def test_train_for_time_frame(
-    mock_cache_constants, mock_use_best_optimization_method, mock_smooth,
-    mock_remove_outliers, mock_convert_csv_to_df, mock_query_data, mock_reset_csv, sample_data
-):
-    # Mock helper functions
-    mock_reset_csv.return_value = None
-    mock_query_data.return_value = None
-    mock_convert_csv_to_df.return_value = sample_data
-    mock_remove_outliers.return_value = sample_data
-    mock_smooth.return_value = sample_data
-    mock_use_best_optimization_method.return_value = MagicMock(x=np.array([0.1, 0.2, 0.3, 0.4]), fun=0.05)
-    mock_cache_constants.return_value = None
+@patch('scripts.greybox_fitting.cache_constants')  # Mock cache_constants function
+@patch('scripts.greybox_fitting.train_for_day')  # Mock train_for_day function
+@patch('multiprocessing.Pool')  # Mock multiprocessing.Pool
+def test_train_for_time_frame(mock_pool, mock_train_for_day, mock_cache_constants, mock_data):
+    # Mock the behavior of train_for_day
+    mock_train_for_day.return_value = mock_data  # Mock return values of train_for_day
 
-    start_time = "2024-12-27T00:00:00Z"
-    days = 1
+    # Mock the multiprocessing Pool
+    mock_pool.return_value.__enter__.return_value.starmap.return_value = [mock_data] * 5  # Simulating 5 days of data
+
 
     # Call the function
+    start_time = "2025-01-01T00:00:00Z"
+    days = 5
     train_for_time_frame(start_time, days)
 
-    # Verify calls
-    mock_reset_csv.assert_called_once()
-    mock_query_data.assert_called_once_with(start_time, days)
-    mock_convert_csv_to_df.assert_called_once_with("data/data.csv")
-    mock_remove_outliers.assert_called_once()
-    mock_smooth.assert_called_once()
+    # Assert that train_for_day was called the correct number of times
+    assert mock_train_for_day.call_count == days
 
-    # Validate optimization call with correct arguments
-    actual_args, _ = mock_use_best_optimization_method.call_args
-    expected_args = (
-        np.array([0.01, 0.001, 0.01, 0.01]),
-        [(0, 1), (0, 1), (0, 1), (0, 1)],
-        sample_data["room_temp"].values,
-        sample_data["ambient_temp"].values,
-        sample_data["solar_watt"].values,
-        sample_data["heating_setpoint"].values,
-        sample_data["cooling_setpoint"].values,
-        [None]
-    )
+    # Assert that cache_constants is called with the correct parameters
+    expected_alpha_a = sum([d[0] for d in [mock_data] * days]) / days
+    expected_alpha_s = sum([d[1] for d in [mock_data] * days]) / days
+    expected_alpha_r = sum([d[2] for d in [mock_data] * days]) / days
+    expected_alpha_v = sum([d[3] for d in [mock_data] * days]) / days
+    expected_error = sum([d[4] for d in [mock_data] * days]) / days
 
-    for actual, expected in zip(actual_args[:7], expected_args[:7]):
-        assert np.array_equal(actual, expected), f"Mismatch in optimization argument: {actual} != {expected}"
-    assert actual_args[7] == expected_args[7], "Mismatch in best method argument"
-
-    # Validate caching call
-    mock_cache_constants.assert_called_once_with(0.1, 0.2, 0.3, 0.4, start_time, days, 0.05)
-
+    mock_cache_constants.assert_called_once_with(expected_alpha_a, expected_alpha_s, expected_alpha_r,
+                                                 expected_alpha_v, start_time, days, expected_error)
 
 @patch('scripts.greybox_fitting.minimize')
 def test_use_best_optimization_method(mock_minimize):
@@ -115,7 +94,7 @@ def test_use_best_optimization_method(mock_minimize):
     best_method = [None]
 
     # Call the function
-    result = use_best_optimization_method(initial_guess, bounds, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, best_method)
+    result = use_best_optimization_method(room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, best_method)
 
     # Assertions
     assert result.fun == pytest.approx(0.1)

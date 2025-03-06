@@ -2,15 +2,12 @@ import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
 from plotly.subplots import make_subplots
-
 from scripts.data_processing import normalize
 
 '''
 @params df: DataFrame
 Plots a DataFrame with the time on x-axis and two different sets of y-axis variables in subplots
 '''
-
-
 def plot_df(df):
     # Create a subplot figure with two rows
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, subplot_titles=(

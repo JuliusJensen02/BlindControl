@@ -14,8 +14,6 @@ from scripts.plot import plot_df
 Predicts the room temperature 
 '''
 def predict_for_date(start_time, constants, plot):
-    #reset_csv()
-    #query_data(start_time, 1)
     df = convert_csv_to_df(datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%SZ"))
 
     #Get the values from the dataframe
