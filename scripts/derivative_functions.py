@@ -1,3 +1,4 @@
+import time
 import numpy as np
 from scipy.integrate import solve_ivp
 
@@ -11,15 +12,12 @@ from scipy.integrate import solve_ivp
 @returns sol.y[0]: list of temperature predictions
 Function for predicting the temperature for the training functions
 '''
-def predict_temperature(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint):
+def predict_temperature(constants, t_span, t_eval, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint):
     alpha_a, alpha_s, alpha_r, alpha_v = constants
-    t_span = (0, len(room_temp) - 1)  # Time range
-    t_eval = np.arange(len(room_temp))  # Discrete evaluation points
-    heating_bool = [False]
 
     # Solve the ODE
     sol = solve_ivp(temp_derivative, t_span, [room_temp[0]], t_eval=t_eval,
-                    args=(alpha_a, alpha_s, alpha_r, alpha_v, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, heating_bool))
+                    args=(alpha_a, alpha_s, alpha_r, alpha_v, ambient_temp, solar_watt, heating_setpoint))
     return sol.y[0]  # Return the temperature predictions
 
 
@@ -38,12 +36,14 @@ def predict_temperature(constants, room_temp, ambient_temp, solar_watt, heating_
 @returns: temperature derivative
 Function that the solve_ivp uses to calculate the derivative temperature function for the room
 '''
-def temp_derivative(t, T, alpha_a, alpha_s, alpha_r, alpha_v, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, heating_bool):
+def temp_derivative(t, T, alpha_a, alpha_s, alpha_r, alpha_v, ambient_temp, solar_watt, heating_setpoint):
     t = int(t)
     if t >= len(ambient_temp):
         t = len(ambient_temp) - 1
-    return ((ambient_temp[t] - T) * alpha_a + solar_effect(solar_watt[t]) * alpha_s +
-            heater_effect(heating_setpoint[t], cooling_setpoint[t], T, heating_bool) * alpha_r + alpha_v)
+    return ((ambient_temp[t] - T) * alpha_a +
+            solar_effect(solar_watt[t]) * alpha_s +
+            (372 if T[0] <= heating_setpoint[t] else 0) * alpha_r +
+            alpha_v)
 
 
 '''
@@ -67,14 +67,8 @@ Function for calculating the heater's effect on the room
 If the current temperature is below the heating setpoint, the heater is on
 If the current temperature is above the cooling setpoint, the heater is off
 '''
-def heater_effect(heating_setpoint, cooling_setpoint, current_temperature, heating_bool):
-    if current_temperature <= heating_setpoint:
-        heating_bool[0] = True
-
-    if current_temperature >= cooling_setpoint:
-        heating_bool[0] = False
-
-    return 372 if heating_bool[0] else 0
+def heater_effect(heating_setpoint, current_temperature):
+    return 372 if current_temperature <= heating_setpoint else 0
 
 
 '''
