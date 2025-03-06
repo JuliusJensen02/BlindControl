@@ -1,13 +1,12 @@
-import csv
 import os
 from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
-from scripts.data_processing import convert_csv_to_df, remove_outliers, smooth
-from scripts.data_to_csv import reset_csv, query_data, cache_constants
+from scripts.data_processing import convert_csv_to_df
+from scripts.data_to_csv import cache_constants
 from scripts.derivative_functions import predict_temperature
-
+import multiprocessing
 '''
 @params start_time: start time as a string
 @params days: number of days to train for
@@ -42,31 +41,50 @@ def get_constants(start_time = "2025-01-01T00:00:00Z", days = 1, retrain = False
 @returns: the best optimization fit
 Determines and uses the best minimize method for the minimize function based on the first date
 '''
-def use_best_optimization_method(initial_guess, bounds, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, best_method):
+def use_best_optimization_method(room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, best_method):
     best_error = float("inf")
     best_result = None
     optimization_methods = [
-        'Powell',
-        'L-BFGS-B',
+        #'L-BFGS-B',
         'TNC',
-        'COBYLA',
-        'SLSQP',
-        'trust-constr'
+        #'COBYLA',
+        #'SLSQP'
     ]
+    best_method[0] = 'TNC'
+    bounds = [(0, 1), (0, 1), (0, 1), (0, 1)]  # Bounds for the constants
     if best_method[0] is None:
+        print("Choosing best optimization algorithm...")
         for method in optimization_methods:
-            initial_guess_dup = initial_guess
             #Calculate the best fit for the constants based on the given method and save the best method in result
-            result = minimize(mean_squared_error, initial_guess_dup, method=method, bounds=bounds, args=(room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint))
+            result = minimize(sum_squared_error, np.array([0.0001, 0.0001, 0.001, 0.01]), method=method, bounds=bounds, args=(room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint))
             #Check if the error is less than the best error
             if result.fun < best_error:
                 #Set the best error and best method
                 best_error = result.fun
                 best_method[0] = method
                 best_result = result
+        print("Best method: ", best_method)
     else:
-        best_result = minimize(mean_squared_error, initial_guess, method=best_method[0], bounds=bounds, args=(room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint))
+        best_result = minimize(sum_squared_error, np.array([0.0001, 0.0001, 0.001, 0.01]), method=best_method[0], bounds=bounds, args=(room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint))
     return best_result
+
+def train_for_day(i, time, best_method, days):
+    print("Minimizing for day "+str(i+1)+" / "+str(days))
+    """
+        Train the model for a specific day (used for multiprocessing).
+        """
+    df = convert_csv_to_df(time)
+    room_temp = df["room_temp"].to_numpy()
+    ambient_temp = df["ambient_temp"].to_numpy()
+    solar_watt = df["solar_watt"].to_numpy()
+    heating_setpoint = df["heating_setpoint"].to_numpy()
+    cooling_setpoint = df["cooling_setpoint"].to_numpy()
+
+    result = use_best_optimization_method(room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint,
+                                          best_method)
+
+    # Return results to accumulate constants
+    return result.x[0], result.x[1], result.x[2], result.x[3], result.fun
 
 '''
 @params start_time: start time as a string
@@ -76,40 +94,19 @@ Trains the constants for the given timeframe
 def train_for_time_frame(start_time = "2025-01-01T00:00:00Z", days = 1):
     time = datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%SZ") #Convert the start time to a datetime object
     alpha_a, alpha_s, alpha_v, alpha_r, error = [0, 0, 0, 0, 0] #Initial constants
-    bounds = [(0, 1), (0, 1), (0, 1), (0, 1)] #Bounds for the constants
-    initial_guess = np.array([0.01, 0.001, 0.01, 0.01]) #Initial guess for the constants (Not based on anything)
     best_method = [None]
 
-    #Train for the given timeframe day by day
-    for i in range(days):
-        #Reset the csv file
-        reset_csv()
+    # Create a pool of workers for parallelization
+    with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
+        # Map the days to the pool workers
+        results = pool.starmap(train_for_day, [(i, time + timedelta(days=i), best_method, days) for i in range(days)])
 
-        #Query the data for the given date
-        query_data(datetime.strftime(time, "%Y-%m-%dT%H:%M:%SZ"), 1)
-
-        df = convert_csv_to_df("data/data.csv")         #Convert the csv file data to a dataframe
-        df = remove_outliers(df)                        #Remove outliers from the dataframe
-        df = smooth(df)                                 #Smooth the dataframe
-
-        #Save the values of the columns in the dataframe to variables
-        room_temp = df["room_temp"].values
-        ambient_temp = df["ambient_temp"].values
-        solar_watt = df["solar_watt"].values
-        heating_setpoint = df["heating_setpoint"].values
-        cooling_setpoint = df["cooling_setpoint"].values
-
-        #Calculate the best optimization
-        result = use_best_optimization_method(initial_guess, bounds, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, best_method)
-        #Accumulate the constants for the given timeframe
-        alpha_a += result.x[0]
-        alpha_s += result.x[1]
-        alpha_r += result.x[2]
-        alpha_v += result.x[3]
-        error += result.fun
-
-        #Increment the time by one day
-        time = time + timedelta(days=1)
+    for res in results:
+        alpha_a += res[0]
+        alpha_s += res[1]
+        alpha_r += res[2]
+        alpha_v += res[3]
+        error += res[4]
 
     #Calculate the average of the constants and cache them
     cache_constants(alpha_a/days, alpha_s/days, alpha_r/days, alpha_v/days, start_time, days, error/days)
@@ -128,3 +125,18 @@ Function for calculating the mean squared error
 def mean_squared_error(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint):
     t_r_pred = predict_temperature(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint)
     return np.mean((room_temp - t_r_pred) ** 2)
+
+
+def mean_absolute_error(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint):
+    t_r_pred = predict_temperature(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint)
+    return np.mean(np.abs((room_temp - t_r_pred)))
+
+
+def sum_squared_error(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint):
+    t_r_pred = predict_temperature(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint)
+    return np.sum((room_temp - t_r_pred) ** 2)
+
+
+def sum_absolute_error(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint):
+    t_r_pred = predict_temperature(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint)
+    return np.sum(np.abs((room_temp - t_r_pred)))
