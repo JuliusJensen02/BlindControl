@@ -132,7 +132,7 @@ def query_data(input_from):
                          "cooling_setpoint": cooling_setpoint})
 
     df = pd.DataFrame(data)
-    df = remove_outliers(df)  # Remove outliers from the dataframe
+    #df = remove_outliers(df)  # Remove outliers from the dataframe
     df = smooth(df)  # Smooth the dataframe
     df.to_csv('data/data_'+date_from.strftime("%Y-%m-%d")+'.csv', mode='w')
     # Confirmation message

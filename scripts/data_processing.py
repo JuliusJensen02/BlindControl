@@ -11,7 +11,7 @@ where x is the column to be normalized.
 '''
 def normalize(df):
     # Define the columns to be normalized:
-    cols_to_normalize = ['solar_watt', 'room_temp', 'ambient_temp']
+    cols_to_normalize = ['solar_watt']
     # Using the formula to normalize the columns:
     df[cols_to_normalize] = 20 + (df[cols_to_normalize] - df[cols_to_normalize].min()) / (
                 df[cols_to_normalize].max() - df[cols_to_normalize].min())

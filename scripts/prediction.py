@@ -24,11 +24,13 @@ def predict_for_date(start_time, constants, plot):
     solar_watt = df["solar_watt"].to_numpy()
     heating_setpoint = df["heating_setpoint"].to_numpy()
     cooling_setpoint = df["cooling_setpoint"].to_numpy()
-
-    t_span = (0, len(room_temp) - 1)  # Time range
-    t_eval = np.arange(len(room_temp))  # Discrete evaluation points
+    heating_effects = np.zeros_like(solar_watt)
+    solar_effects = np.zeros_like(solar_watt)
     #Save the predictions to the dataframe
-    df['temp_predictions'] = predict_temperature(constants.values(), t_span, t_eval, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint)
+    df['temp_predictions'] = predict_temperature(constants.values(), room_temp, ambient_temp, solar_watt,
+                                heating_setpoint, cooling_setpoint, heating_effects, solar_effects)
+    df['heating_effects'] = heating_effects
+    df['solar_effects'] = solar_effects
     #Plot the data if plot is true
     if plot:
         plot_df(df)

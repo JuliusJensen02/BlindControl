@@ -1,7 +1,6 @@
-import time
 import numpy as np
-from scipy.integrate import solve_ivp
 
+heater_turned_on_percentage = 0
 '''
 @params constants: list of constants
 @params room_temp: list of room temperatures
@@ -12,13 +11,27 @@ from scipy.integrate import solve_ivp
 @returns sol.y[0]: list of temperature predictions
 Function for predicting the temperature for the training functions
 '''
-def predict_temperature(constants, t_span, t_eval, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint):
+def predict_temperature(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, heating_effects = None, solar_effects = None):
     alpha_a, alpha_s, alpha_r, alpha_v = constants
 
+    T = np.zeros_like(room_temp)
+    T[0] = room_temp[0]
+    dt = 0.25
+    for i in range(1, len(room_temp)):
+        S_t = solar_effect(solar_watt[i])
+        H_t = heater_effect(heating_setpoint[i], T[i-1])
+        if heating_effects is not None:
+            solar_effects[i-1] = S_t
+            heating_effects[i-1] = H_t
+        dT = ((ambient_temp[i] - T[i - 1]) * alpha_a + S_t * alpha_s + H_t * alpha_r + alpha_v)
+        T[i] = T[i - 1] + dT
+    return T
     # Solve the ODE
-    sol = solve_ivp(temp_derivative, t_span, [room_temp[0]], t_eval=t_eval,
-                    args=(alpha_a, alpha_s, alpha_r, alpha_v, ambient_temp, solar_watt, heating_setpoint))
-    return sol.y[0]  # Return the temperature predictions
+    #sol = solve_ivp(temp_derivative, t_span, [room_temp[0]], t_eval=t_eval, method='LSODA',
+    #                args=(alpha_a, alpha_s, alpha_r, alpha_v, ambient_temp, solar_watt, heating_setpoint))
+    #return sol.y[0]  # Return the temperature predictions
+
+
 
 
 '''
@@ -37,13 +50,13 @@ def predict_temperature(constants, t_span, t_eval, room_temp, ambient_temp, sola
 Function that the solve_ivp uses to calculate the derivative temperature function for the room
 '''
 def temp_derivative(t, T, alpha_a, alpha_s, alpha_r, alpha_v, ambient_temp, solar_watt, heating_setpoint):
-    t = int(t)
-    if t >= len(ambient_temp):
-        t = len(ambient_temp) - 1
-    return ((ambient_temp[t] - T) * alpha_a +
-            solar_effect(solar_watt[t]) * alpha_s +
-            (372 if T[0] <= heating_setpoint[t] else 0) * alpha_r +
-            alpha_v)
+    t = min(int(t), len(ambient_temp) - 1)
+    ambient_temp_effect = (ambient_temp[t] - T) * alpha_a
+    solar_watt_effect = solar_effect(solar_watt[t]) * alpha_s
+    heating_effect = (372 if T[0] <= heating_setpoint[t] else 0) * alpha_r
+    ventilating_effect = alpha_v
+
+    return ambient_temp_effect + solar_watt_effect + heating_effect + ventilating_effect
 
 
 '''
@@ -68,7 +81,18 @@ If the current temperature is below the heating setpoint, the heater is on
 If the current temperature is above the cooling setpoint, the heater is off
 '''
 def heater_effect(heating_setpoint, current_temperature):
-    return 372 if current_temperature <= heating_setpoint else 0
+    global heater_turned_on_percentage
+    if current_temperature <= heating_setpoint:
+        heater_turned_on_percentage += 0.25
+        if heater_turned_on_percentage > 1:
+            heater_turned_on_percentage = 1
+
+    elif current_temperature > heating_setpoint:
+        heater_turned_on_percentage -= 0.25
+        if heater_turned_on_percentage < 0:
+            heater_turned_on_percentage = 0
+
+    return 372 * heater_turned_on_percentage
 
 
 '''

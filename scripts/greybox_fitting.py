@@ -51,14 +51,12 @@ def use_best_optimization_method(room_temp, ambient_temp, solar_watt, heating_se
         #'SLSQP'
     ]
     best_method[0] = 'TNC'
-    t_span = (0, len(room_temp) - 1)  # Time range
-    t_eval = np.arange(len(room_temp))  # Discrete evaluation points
     bounds = [(0, 1), (0, 1), (0, 1), (0, 1)]  # Bounds for the constants
     if best_method[0] is None:
         print("Choosing best optimization algorithm...")
         for method in optimization_methods:
             #Calculate the best fit for the constants based on the given method and save the best method in result
-            result = minimize(mean_squared_error, np.array([0.01, 0.001, 0.01, 0.01]), method=method, bounds=bounds, args=(t_span, t_eval, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint))
+            result = minimize(sum_squared_error, np.array([0.0001, 0.0001, 0.001, 0.01]), method=method, bounds=bounds, args=(room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint))
             #Check if the error is less than the best error
             if result.fun < best_error:
                 #Set the best error and best method
@@ -67,7 +65,7 @@ def use_best_optimization_method(room_temp, ambient_temp, solar_watt, heating_se
                 best_result = result
         print("Best method: ", best_method)
     else:
-        best_result = minimize(mean_squared_error, np.array([0.01, 0.001, 0.01, 0.01]), method=best_method[0], bounds=bounds, args=(t_span, t_eval, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint))
+        best_result = minimize(sum_squared_error, np.array([0.0001, 0.0001, 0.001, 0.01]), method=best_method[0], bounds=bounds, args=(room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint))
     return best_result
 
 def train_for_day(i, time, best_method, days):
@@ -124,6 +122,21 @@ def train_for_time_frame(start_time = "2025-01-01T00:00:00Z", days = 1):
 @returns: mean squared error
 Function for calculating the mean squared error
 '''
-def mean_squared_error(constants, t_span, t_eval, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint):
-    t_r_pred = predict_temperature(constants, t_span, t_eval, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint)
+def mean_squared_error(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint):
+    t_r_pred = predict_temperature(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint)
     return np.mean((room_temp - t_r_pred) ** 2)
+
+
+def mean_absolute_error(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint):
+    t_r_pred = predict_temperature(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint)
+    return np.mean(np.abs((room_temp - t_r_pred)))
+
+
+def sum_squared_error(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint):
+    t_r_pred = predict_temperature(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint)
+    return np.sum((room_temp - t_r_pred) ** 2)
+
+
+def sum_absolute_error(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint):
+    t_r_pred = predict_temperature(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint)
+    return np.sum(np.abs((room_temp - t_r_pred)))
