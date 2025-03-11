@@ -26,7 +26,7 @@ def predict_for_date(start_time, constants, plot):
     solar_effects = np.zeros_like(solar_watt)
     #Save the predictions to the dataframe
     df['temp_predictions'] = predict_temperature(constants.values(), room_temp, ambient_temp, solar_watt,
-                                heating_setpoint, cooling_setpoint, heating_effects, solar_effects)
+                                heating_setpoint, heating_effects, solar_effects)
     df['heating_effects'] = heating_effects
     df['solar_effects'] = solar_effects
     #Plot the data if plot is true
