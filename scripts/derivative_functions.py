@@ -80,4 +80,4 @@ def heater_effect(room, heating_setpoint, current_temperature):
 
 
 def occupancy_effect(lux):
-    return lux / 300 * 100 #300 is lux per person, 100 is wattage per person
+    return lux / 300 * 100 #300 is lux per person, 100 is wattage per person TODO: make constants
