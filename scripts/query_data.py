@@ -5,9 +5,8 @@ import pandas as pd
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 
-from scripts.data_processing import remove_outliers, smooth
+from scripts.data_processing import smooth
 from scripts.dmi_api import get_temp
-import csv
 
 '''
 @param t: datetime
@@ -15,10 +14,13 @@ import csv
 This function rounds the given datetime to the nearest hour.
 If the minute is greater than or equal to 30, the hour is incremented by 1.
 '''
+
+
 def hour_rounder(t):
     # Rounds to nearest hour by adding a timedelta hour if minute >= 30
     return (t.replace(second=0, microsecond=0, minute=0, hour=t.hour)
-               +timedelta(hours=t.minute//30))
+            + timedelta(hours=t.minute // 30))
+
 
 '''
 Environment variables are loaded from the .env file.
@@ -43,8 +45,9 @@ The data is joined based on the time.
 The data is fetched from the DMI API for the given date.
 The data is written to the csv file.
 '''
-def query_data(input_from):
 
+
+def query_data(input_from, room):
     # The input_from is converted to a datetime object of the format "%Y-%m-%dT%H:%M:%SZ".
     date_from = datetime.strptime(input_from, "%Y-%m-%dT%H:%M:%SZ")
 
@@ -59,41 +62,50 @@ def query_data(input_from):
     # The data is filtered based on the source and the room_id. Add 'or r.room_id == "1.215" or r.room_id == "1.217"' to filter for other rooms.
     query = """
         data_solar_watt = from(bucket:"db")
-                 |> range(start: """+date_string_from+""", stop: """+date_string_to+""")
+                 |> range(start: """ + date_string_from + """, stop: """ + date_string_to + """)
                  |> filter(fn: (r) => r["source"] == "/TM023_1_20_1103/SG01/Solar_panel_south")
                  |> filter(fn: (r) => r["_field"] == "value")
                  |> rename(columns: {_value: "solar_watt"})
-    
+
         data_room_temp = from(bucket:"db")
-                 |> range(start: """+date_string_from+""", stop: """+date_string_to+""")
-                 |> filter(fn: (r) => r.room_id == "1.213") 
+                 |> range(start: """ + date_string_from + """, stop: """ + date_string_to + """)
+                 |> filter(fn: (r) => r.room_id == \"""" + room + """\") 
                  |> filter(fn: (r) => r["sensor_type"] == "temperature")
                  |> filter(fn: (r) => r["_field"] == "value")
                  |> rename(columns: {_value: "room_temp"})
-                 
+
         data_heating_setpoint = from(bucket:"db")
-                 |> range(start: """+date_string_from+""", stop: """+date_string_to+""")
-                 |> filter(fn: (r) => r.room_id == "1.213") 
+                 |> range(start: """ + date_string_from + """, stop: """ + date_string_to + """)
+                 |> filter(fn: (r) => r.room_id == \"""" + room + """\") 
                  |> filter(fn: (r) => r["sensor_type"] == "setpoint")
-                 |> filter(fn: (r) => r["source"] == "/TM023_3_20_1.204/Lon/Net/Rum_1.213/Temperature_heating_setpoint_1.213")
+                 |> filter(fn: (r) => r["source"] == "/TM023_3_20_1.204/Lon/Net/Rum_""" + room + """/Temperature_heating_setpoint_""" + room + """")
                  |> filter(fn: (r) => r["_field"] == "value") 
                  |> rename(columns: {_value: "heating_setpoint"})  
-        
+
         data_cooling_setpoint = from(bucket:"db")
-                 |> range(start: """+date_string_from+""", stop: """+date_string_to+""")
-                 |> filter(fn: (r) => r.room_id == "1.213") 
+                 |> range(start: """ + date_string_from + """, stop: """ + date_string_to + """)
+                 |> filter(fn: (r) => r.room_id == \"""" + room + """\") 
                  |> filter(fn: (r) => r["sensor_type"] == "setpoint")
-                 |> filter(fn: (r) => r["source"] == "/TM023_3_20_1.204/Lon/Net/Rum_1.213/Temperature_cooling_setpoint_1.213")
+                 |> filter(fn: (r) => r["source"] == "/TM023_3_20_1.204/Lon/Net/Rum_""" + room + """/Temperature_cooling_setpoint_""" + room + """")
                  |> filter(fn: (r) => r["_field"] == "value") 
-                 |> rename(columns: {_value: "cooling_setpoint"})        
-                 
+                 |> rename(columns: {_value: "cooling_setpoint"}) 
+
+        data_lux = from(bucket:"db")
+                 |> range(start: """ + date_string_from + """, stop: """ + date_string_to + """)
+                 |> filter(fn: (r) => r.room_id == \"""" + room + """\") 
+                 |> filter(fn: (r) => r["sensor_type"] == "occupancy")
+                 |> filter(fn: (r) => r["source"] == "/TM023_3_20_1.204/Lon/Net/Rum_""" + room + """/Lux_meter")
+                 |> filter(fn: (r) => r["_field"] == "value") 
+                 |> rename(columns: {_value: "lux"}) 
+
+
         solar_room = join(tables: {d1: data_solar_watt, d2: data_room_temp}, on: ["_time"])
         solar_room_heater = join(tables: {dsr: solar_room, d3: data_heating_setpoint}, on: ["_time"])
         solar_room_heater_cooler = join(tables: {dsrh: solar_room_heater, d4: data_cooling_setpoint}, on: ["_time"])
-        solar_room_heater_cooler
-        |> keep (columns: ["_time", "solar_watt", "room_temp", "heating_setpoint", "cooling_setpoint"])
+        solar_room_heater_cooler_lux = join(tables: {dsrhc: solar_room_heater_cooler, d5: data_lux}, on: ["_time"])
+        solar_room_heater_cooler_lux
+        |> keep (columns: ["_time", "solar_watt", "room_temp", "heating_setpoint", "cooling_setpoint", "lux"])
         """
-
     # The query_api is used to query the data from the InfluxDB.
     # The result is stored in the variable 'result'.
     query_api = client.query_api()
@@ -115,13 +127,15 @@ def query_data(input_from):
             time = record["_time"]
             outside_temp_at_given_time = None
             for dmi_time, dmi_temp in dmi_results.items():
-                if datetime.fromisoformat(dmi_time) == hour_rounder(time):  # The time from the DMI API is rounded to the nearest hour.
+                if datetime.fromisoformat(dmi_time) == hour_rounder(
+                        time):  # The time from the DMI API is rounded to the nearest hour.
                     outside_temp_at_given_time = dmi_temp
                     break
             solar_watt = record.values.get("solar_watt")
             room_temp = round(record.values.get("room_temp"), 1)
             heating_setpoint = record.values.get("heating_setpoint")
             cooling_setpoint = record.values.get("cooling_setpoint")
+            lux = record.values.get("lux")
 
             # The data is appended to the list 'data' which is used to write to the csv file.
             data.append({"time": time,
@@ -129,48 +143,21 @@ def query_data(input_from):
                          "room_temp": room_temp,
                          "ambient_temp": outside_temp_at_given_time,
                          "heating_setpoint": heating_setpoint,
-                         "cooling_setpoint": cooling_setpoint})
+                         "cooling_setpoint": cooling_setpoint,
+                         "lux": lux})
 
     df = pd.DataFrame(data)
-    #df = remove_outliers(df)  # Remove outliers from the dataframe
+    # df = remove_outliers(df)  # Remove outliers from the dataframe
     df = smooth(df)  # Smooth the dataframe
-    df.to_csv('data/data_'+date_from.strftime("%Y-%m-%d")+'.csv', mode='w')
+
+    df.to_csv('data/data_' + date_from.strftime("%Y-%m-%d") + '.csv', mode='w') #TODO: Make directory for each room to store data
+
     # Confirmation message
-    print("Fetched data from: "+date_string_from+", to: "+date_string_to)
-
-'''
-The data in the csv file is reset.
-'''
-def reset_csv(path='data/data.csv'):
-    with open(path, 'w+', newline='') as csvfile:
-        fieldnames = ['time', 'solar_watt', 'room_temp', 'ambient_temp', 'heating_setpoint', 'cooling_setpoint']  # The fieldnames for the csv file.
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)  # The csv writer.
-        writer.writeheader()
-
-'''
-@params alpha_a: alpha_a constant for ambient temperature
-@params alpha_s: alpha_s constant for solar effect
-@params alpha_r: alpha_r constant for heater effect
-@params alpha_v: alpha_v constant for ventilation effect
-@params start_time: start time as a string
-@params days: number of days to train for
-Writes the constants from the training to the cache csv file
-'''
-def cache_constants(alpha_a, alpha_s, alpha_r, alpha_v, start_time, days, error, path = 'data/constants_cache.csv'):
-    #Open the csv file in write mode
-    with open(path, 'w+', newline='') as csvfile:
-        fieldnames = ['alpha_a', 'alpha_s', 'alpha_r', 'alpha_v', 'start_time', 'days', 'error'] # The fieldnames for the csv file.
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)  # The csv writer.
-        writer.writeheader()
-        #Write the constants to the csv file
-        writer.writerow({'alpha_a': alpha_a, 'alpha_s': alpha_s, 'alpha_r': alpha_r,
-                          'alpha_v': alpha_v, 'start_time': start_time, 'days': days, 'error': error})
+    print("Fetched data from: " + date_string_from + ", to: " + date_string_to)
 
 
-
-
-def query_data_period(from_date, to_date):
+def query_data_period(from_date, to_date, room):
     current_date = datetime.strptime(from_date, "%Y-%m-%dT%H:%M:%SZ")
     while current_date.strftime("%Y-%m-%dT00:00:00Z") <= to_date:
-        query_data(current_date.strftime("%Y-%m-%dT00:00:00Z"))
+        query_data(current_date.strftime("%Y-%m-%dT00:00:00Z"), room)
         current_date = current_date + timedelta(days=1)
