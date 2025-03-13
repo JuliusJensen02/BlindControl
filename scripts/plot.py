@@ -25,6 +25,7 @@ def plot_df(df):
     # Second plot
     fig.add_trace(go.Scatter(x=df["time"], y=df["heating_effects"], mode='lines', name='Heating Effects'), row=2, col=1)
     fig.add_trace(go.Scatter(x=df["time"], y=df["solar_effects"], mode='lines', name='Solar Effects'), row=2, col=1)
+    fig.add_trace(go.Scatter(x=df["time"], y=df["lux"]-df["solar_effects"], mode='lines', name='Lux'), row=2, col=1)
 
     # Update layout
     fig.update_xaxes(title_text="Time", tickangle=45, row=2, col=1)
