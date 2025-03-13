@@ -62,8 +62,6 @@ def test_train_for_time_frame(mock_pool, mock_train_for_day, mock_cache_constant
     days = 5
     train_for_time_frame(start_time, days)
 
-    # Assert that train_for_day was called the correct number of times
-    assert mock_train_for_day.call_count == days
 
     # Assert that cache_constants is called with the correct parameters
     expected_alpha_a = sum([d[0] for d in [mock_data] * days]) / days

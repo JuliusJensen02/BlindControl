@@ -2,6 +2,9 @@ import pytest
 from unittest.mock import patch, MagicMock
 import pandas as pd
 from scripts.prediction import predict_for_date # Import the function to test
+from scripts.data_processing import convert_csv_to_df
+from scripts.derivative_functions import predict_temperature
+from scripts.plot import plot_df
 
 # Mock constants for the prediction
 constants_mock = {
@@ -23,9 +26,9 @@ def sample_df():
     return pd.DataFrame(data)
 
 
-@patch('scripts.prediction.convert_csv_to_df')  # Mocking convert_csv_to_df function
-@patch('scripts.prediction.predict_temperature')  # Mocking predict_temperature function
-@patch('scripts.prediction.plot_df')  # Mocking plot_df function
+@patch('scripts.data_processing.convert_csv_to_df')  # Mocking convert_csv_to_df function
+@patch('scripts.derivative_functions.predict_temperature')  # Mocking predict_temperature function
+@patch('scripts.plot.plot_df')  # Mocking plot_df function
 def test_predict_for_date(mock_plot, mock_predict_temp, mock_convert_csv, mock_query_data, mock_reset_csv, sample_df):
     # Mock reset_csv and query_data to avoid actually manipulating files or querying data
     mock_reset_csv.return_value = None
