@@ -60,10 +60,10 @@ def remove_outliers(df=pd.DataFrame()):
 @return df: DataFrame
 This function converts the csv data into a DataFrame.
 '''
-def convert_csv_to_df(from_date):
+def convert_csv_to_df(from_date, room):
     # Read the csv data into a DataFrame:
     # The csv-data is the path to the csv file containing the data.
-    df = pd.read_csv('data/data_' + from_date.strftime("%Y-%m-%d") + '.csv')
+    df = pd.read_csv('data/'"" + room["name"] + ""'/data_' + from_date.strftime("%Y-%m-%d") + '.csv')
     df = df.sort_values(by="time")
     return df
 

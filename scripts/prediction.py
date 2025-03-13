@@ -2,7 +2,7 @@ from datetime import datetime
 
 import numpy as np
 
-from data_processing import smooth
+from scripts.data_processing import smooth
 from scripts.data_processing import convert_csv_to_df
 from scripts.derivative_functions import predict_temperature
 from scripts.plot import plot_df
@@ -15,7 +15,7 @@ from scripts.plot import plot_df
 Predicts the room temperature 
 '''
 def predict_for_date(room, start_time, constants, plot):
-    df = convert_csv_to_df(datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%SZ"))
+    df = convert_csv_to_df(datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%SZ"),room)
 
     #Get the values from the dataframe
     room_temp = df["room_temp"].to_numpy()
