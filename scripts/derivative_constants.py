@@ -12,8 +12,6 @@ import os
 
 import pandas as pd
 
-from greybox_fitting import train_for_time_frame
-
 
 def cache_constants(alpha_a, alpha_s, alpha_r, alpha_v, alpha_o, start_time, days, error, path = 'data/constants_cache.csv'):
     #Open the csv file in write mode
@@ -36,6 +34,7 @@ def cache_constants(alpha_a, alpha_s, alpha_r, alpha_v, alpha_o, start_time, day
 Function for getting the constants based on the given timeframe
 """
 def get_constants(room, start_time = "2025-01-01T00:00:00Z", days = 1, retrain = False, path = "data/constants_cache.csv"):
+    from greybox_fitting import train_for_time_frame
     #Check if the cache file is empty or if retrain is true
     if os.path.getsize(path) == 0 or retrain:
         train_for_time_frame(room, start_time, days) #Train for the given timeframe
