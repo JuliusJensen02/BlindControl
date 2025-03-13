@@ -11,7 +11,7 @@ heater_turned_on_percentage = 0
 @returns sol.y[0]: list of temperature predictions
 Function for predicting the temperature for the training functions
 '''
-def predict_temperature(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, heating_effects = None, solar_effects = None):
+def predict_temperature(constants, room_temp, ambient_temp, solar_watt, heating_setpoint, heating_effects = None, solar_effects = None):
     alpha_a, alpha_s, alpha_r, alpha_v = constants
 
     T = np.zeros_like(room_temp)
@@ -26,37 +26,6 @@ def predict_temperature(constants, room_temp, ambient_temp, solar_watt, heating_
         dT = ((ambient_temp[i] - T[i - 1]) * alpha_a + S_t * alpha_s + H_t * alpha_r + alpha_v)
         T[i] = T[i - 1] + dT
     return T
-    # Solve the ODE
-    #sol = solve_ivp(temp_derivative, t_span, [room_temp[0]], t_eval=t_eval, method='LSODA',
-    #                args=(alpha_a, alpha_s, alpha_r, alpha_v, ambient_temp, solar_watt, heating_setpoint))
-    #return sol.y[0]  # Return the temperature predictions
-
-
-
-
-'''
-@params t: time 
-@params T: temperature in the room
-@params alpha_a: alpha_a constant for ambient temperature
-@params alpha_s: alpha_s constant for solar effect
-@params alpha_r: alpha_r constant for heater effect
-@params alpha_v: alpha_v constant for ventilation effect
-@params ambient_temp: list of ambient temperatures
-@params solar_watt: list of solar_watt
-@params heating_setpoint: list of heating setpoints
-@params cooling_setpoint: list of cooling setpoints
-@params heating_bool: boolean for heating
-@returns: temperature derivative
-Function that the solve_ivp uses to calculate the derivative temperature function for the room
-'''
-def temp_derivative(t, T, alpha_a, alpha_s, alpha_r, alpha_v, ambient_temp, solar_watt, heating_setpoint):
-    t = min(int(t), len(ambient_temp) - 1)
-    ambient_temp_effect = (ambient_temp[t] - T) * alpha_a
-    solar_watt_effect = solar_effect(solar_watt[t]) * alpha_s
-    heating_effect = (372 if T[0] <= heating_setpoint[t] else 0) * alpha_r
-    ventilating_effect = alpha_v
-
-    return ambient_temp_effect + solar_watt_effect + heating_effect + ventilating_effect
 
 
 '''
