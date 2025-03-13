@@ -2,28 +2,35 @@
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
 <nta>
 	<declaration>import "./libraries/store_data"
-
-double T_setpoint = store_data.setpoint;
-double T_current;
-double T_ambient;
-double heating_setpoint;
-double cooling_setpoint;
-bool blinds;
-bool heater;
-double blind_eff = 0.5; //assumed value (change if we find real data)
-double solar_effect; //Data from CSV file (Collected from BMS)
-double heater_effect = 372;
-const double g_value = 0.7; //assumed value (Change if Olena ever responds)
-const double mean_window_area_group = 4.25; //mean value of window area for group rooms
-const int P = 15; //Swicthing period, 15 min
-double heater_turned_on_percentage = 0.0; 
-
-
+import "_/UPPAALLibraries/DataRetrieval"
 
 const double hour = 60.0;
+const int P = 15; //Swicthing period, 15 min
+const double g_value = 0.45; //Value gotten from Rasmus
+const double blind_eff = 0.5; //assumed value (change if we find real data)
 
 
-import "_/UPPAALLibraries/DataRetrieval"
+Room r213 = create_room("1.213", 3.64, 372);
+Room r215 = create_room("1.215", 5.46, 422);
+Room r217 = create_room("1.217", 3.64, 379);
+Room r229 = create_room("1.229", 5.18, 758);
+Room r231 = create_room("1.231", 6.86, 758);
+Room r233 = create_room("1.233", 7, 758);
+
+
+bool blinds;
+bool heater;
+
+
+double valve = 0.0; 
+double S; //Data from CSV file (Collected from BMS)
+double T_r;
+double T_a;
+double heating_setpoint;
+double cooling_setpoint;
+double T_setpoint = store_data.setpoint;
+
+
 
 int time_index = 0;  // Tracks which time step we are at within a day
 int day_index = 0;   // Tracks which day we are in
@@ -61,6 +68,20 @@ double H_t(double heating_setpoint, double T_current) {
     return heater_effect * heater_turned_on_percentage;
 }
 
+
+struct Room {
+    string name;
+    double window_size;
+    int heater;
+}
+
+void create_room(string name, double window_size, int heater) {
+    struct Room r1;
+    r1.name = name;
+    r1.window_size = window_size;
+    r1.heater = heater;
+    return r1;
+}
 
 
 
