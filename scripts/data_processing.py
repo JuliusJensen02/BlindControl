@@ -74,8 +74,8 @@ def convert_csv_to_df(from_date):
 This function smoothes the column 'room_temp' in the dataframe using the rolling mean.
 This ensures that the data is less noisy and easier to work with.
 '''
-def smooth(df):
+def smooth(df, col):
     # Calculate the rolling mean for the column 'room_temp':
     # Rolling works by taking the average of a window of values around the current value.
-    df['room_temp'] = df['room_temp'].rolling(window=15, center=True, min_periods=1).mean()
+    df[col] = df[col].rolling(window=15, center=True, min_periods=1).mean()
     return df

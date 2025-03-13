@@ -19,7 +19,7 @@ def predict_temperature(room, constants, T_r, T_a, solar_watt, heating_setpoint,
     for i in range(1, len(T_r)):
         S_t = solar_effect(room, solar_watt[i])
         E_h = heater_effect(room, heating_setpoint[i], T[i-1])
-        O = abs(occupancy_effect(lux[i]) - S_t)
+        O = max(occupancy_effect(lux[i]) - S_t, 0)
         if heating_effects is not None:
             heating_effects[i-1] = E_h
             solar_effects[i-1] = S_t

@@ -146,7 +146,7 @@ def query_data(input_from, room):
 
     df = pd.DataFrame(data)
     # df = remove_outliers(df)  # Remove outliers from the dataframe
-    df = smooth(df)  # Smooth the dataframe
+    df = smooth(df, 'room_temp')  # Smooth the dataframe
 
     df.to_csv('data/data_' + date_from.strftime("%Y-%m-%d") + '.csv', mode='w') #TODO: Make directory for each room to store data
 

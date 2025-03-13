@@ -42,7 +42,7 @@ def main():
     #query_data_period("2024-11-20T00:00:00Z", "2025-03-05T00:00:00Z", chosen_room["name"])
     constants = get_constants(chosen_room, "2024-11-20T00:00:00Z", 50, True)
     print(constants)
-    predict_for_date(chosen_room, "2025-03-04T00:00:00Z", constants, True)
+    predict_for_date(chosen_room, "2025-03-02T00:00:00Z", constants, True)
 
 if __name__ == '__main__':
     # This is required to ensure proper initialization of multiprocessing
