@@ -34,7 +34,7 @@ client = influxdb_client.InfluxDBClient(
     timeout=1000_000
 )
 
-'''
+"""
 @param input_from: str
 @param days: int
 @return None
@@ -44,9 +44,7 @@ The data is filtered based on the source and the room_id.
 The data is joined based on the time.
 The data is fetched from the DMI API for the given date.
 The data is written to the csv file.
-'''
-
-
+"""
 def query_data(input_from, room):
     # The input_from is converted to a datetime object of the format "%Y-%m-%dT%H:%M:%SZ".
     date_from = datetime.strptime(input_from, "%Y-%m-%dT%H:%M:%SZ")

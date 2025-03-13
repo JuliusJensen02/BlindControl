@@ -3,7 +3,7 @@ import multiprocessing
 from scripts.query_data import query_data_period
 from scripts.derivative_constants import get_constants
 from scripts.prediction import predict_for_date
-
+#TODO: Add relevant info to rooms for easy query
 rooms = {
     "1.213": {
         "name": "1.213",
