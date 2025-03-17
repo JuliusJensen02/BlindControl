@@ -1,55 +1,152 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
 <nta>
-	<declaration>import "./libraries/store_data"
-#include "data_arrays.h"
+	<declaration>double data_1_213_2025_03_05[94][8] = {
+    {0, 1741133640, 2.9389648438, 21.225, 6.1, 21.0, 25.0, 4.0313987732},
+    {1, 1741134600, 2.9389648438, 21.22222222222222, 6.1, 21.0, 25.0, 4.0999097824},
+    {2, 1741135500, 2.9389648438, 21.21, 6.1, 21.0, 25.0, 4.0872440338},
+    {3, 1741136400, 2.9389648438, 21.20909090909091, 6.1, 21.0, 25.0, 4.0900402069},
+    {4, 1741137360, 2.9389648438, 21.2, 6.1, 21.0, 25.0, 4.0311636925},
+    {5, 1741138260, 2.9389648438, 21.184615384615384, 5.9, 21.0, 25.0, 4.0394406319},
+    {6, 1741139220, 2.9389648438, 21.185714285714287, 5.9, 21.0, 25.0, 4.0818338394},
+    {7, 1741140120, 2.9389648438, 21.18, 5.9, 21.0, 25.0, 4.1012530327},
+    {8, 1741141020, 2.9389648438, 21.166666666666668, 5.9, 21.0, 25.0, 4.1260066032000005},
+    {9, 1741141920, 2.9389648438, 21.153333333333332, 6.1, 21.0, 25.0, 4.0788097382},
+    {10, 1741142820, 2.9389648438, 21.146666666666665, 6.1, 21.0, 25.0, 4.0154738426},
+    {11, 1741143720, 2.9389648438, 21.133333333333333, 6.1, 21.0, 25.0, 4.0236153603},
+    {12, 1741144620, 2.9389648438, 21.126666666666665, 6.1, 21.0, 25.0, 4.0848827362},
+    {13, 1741145640, 2.9389648438, 21.113333333333337, 6.2, 21.0, 25.0, 4.0448346138},
+    {14, 1741146540, 2.9389648438, 21.10666666666667, 6.2, 21.0, 25.0, 4.0426969528},
+    {15, 1741147440, 2.9389648438, 21.113333333333333, 6.2, 21.0, 25.0, 4.0190501213},
+    {16, 1741148340, 2.9389648438, 21.153333333333332, 6.2, 21.0, 25.0, 4.0568599701},
+    {17, 1741149240, 2.9389648438, 21.2, 6.4, 21.0, 25.0, 4.0708785057},
+    {18, 1741150200, 2.9389648438, 21.226666666666667, 6.4, 21.0, 25.0, 4.0495710373},
+    {19, 1741151100, 2.9389648438, 21.22666666666667, 6.4, 22.0, 24.0, 4.1602993011},
+    {20, 1741152000, 2.9389648438, 21.233333333333338, 6.4, 22.0, 24.0, 3.9584052563},
+    {21, 1741152900, 2.9389648438, 21.246666666666666, 6.6, 22.0, 24.0, 3.9853394032},
+    {22, 1741153800, 2.9389648438, 21.28666666666667, 6.6, 22.0, 24.0, 4.0953917503},
+    {23, 1741154700, 2.9389648438, 21.32, 6.6, 22.5, 23.5, 26.37134552},
+    {24, 1741155600, 2.9389648438, 21.353333333333335, 6.6, 22.0, 24.0, 8.551322937},
+    {25, 1741156500, 4.9652099609, 21.39333333333333, 6.7, 22.0, 24.0, 12.1704473495},
+    {26, 1741157400, 4.9652099609, 21.426666666666666, 6.7, 22.0, 24.0, 14.9815855026},
+    {27, 1741158420, 6.9665527344, 21.45333333333333, 6.7, 22.0, 24.0, 18.1432476044},
+    {28, 1741159320, 8.972167968800001, 21.493333333333332, 6.7, 22.0, 24.0, 25.490694046},
+    {29, 1741160220, 12.9974365234, 21.52, 7.0, 22.0, 24.0, 31.1746730804},
+    {30, 1741161120, 17.0841064453, 21.526666666666667, 7.0, 22.0, 24.0, 38.8436470032},
+    {31, 1741162080, 21.1489257812, 21.513333333333332, 7.0, 22.0, 24.0, 46.8536949158},
+    {32, 1741162980, 21.1489257812, 21.506666666666664, 7.0, 22.0, 24.0, 45.0587615967},
+    {33, 1741163880, 23.166015625, 21.506666666666668, 7.1, 22.0, 24.0, 48.3290786743},
+    {34, 1741164900, 27.2580566406, 21.553333333333335, 7.1, 22.0, 24.0, 62.8129310608},
+    {35, 1741165800, 31.4060058594, 21.606666666666666, 7.1, 22.0, 24.0, 66.3488388062},
+    {36, 1741166700, 31.4060058594, 21.64, 7.1, 22.0, 24.0, 58.0039138794},
+    {37, 1741167600, 31.4060058594, 21.646666666666665, 7.6, 22.0, 24.0, 64.963218689},
+    {38, 1741168560, 33.4943847656, 21.673333333333336, 7.6, 22.0, 24.0, 69.5914306641},
+    {39, 1741169460, 33.4943847656, 21.686666666666667, 7.6, 22.0, 24.0, 75.4275436401},
+    {40, 1741170420, 48.371887207, 21.7, 7.6, 22.0, 24.0, 103.1487503052},
+    {41, 1741171440, 58.7892456055, 21.72666666666667, 8.1, 22.0, 24.0, 119.8880996704},
+    {42, 1741172340, 75.2106323242, 21.753333333333334, 8.1, 22.0, 24.0, 208.4184265137},
+    {43, 1741173240, 86.8725585938, 21.773333333333333, 8.1, 22.0, 24.0, 170.517578125},
+    {44, 1741174140, 93.508972168, 21.8, 8.1, 22.0, 24.0, 143.8319244385},
+    {45, 1741175100, 55.245300293, 21.833333333333332, 8.1, 22.0, 24.0, 103.0232086182},
+    {46, 1741176000, 72.4837646484, 21.866666666666667, 8.1, 22.0, 24.0, 165.0586853027},
+    {47, 1741176900, 112.2512207031, 21.880000000000003, 8.1, 22.0, 24.0, 224.7758636475},
+    {48, 1741177860, 98.23046875, 21.913333333333334, 8.2, 22.0, 24.0, 203.9638671875},
+    {49, 1741178760, 84.74609375, 21.933333333333334, 8.2, 22.0, 24.0, 155.9120178223},
+    {50, 1741179660, 108.3099365234, 21.953333333333333, 8.2, 22.0, 24.0, 262.3715209961},
+    {51, 1741180560, 86.2965698242, 21.959999999999997, 8.2, 22.0, 24.0, 151.1879730225},
+    {52, 1741181460, 81.4652099609, 21.973333333333336, 8.0, 22.0, 24.0, 178.725982666},
+    {53, 1741182360, 68.3806152344, 21.98, 8.0, 22.0, 24.0, 130.7931060791},
+    {54, 1741183260, 94.3208618164, 21.986666666666665, 8.0, 22.0, 24.0, 241.7996520996},
+    {55, 1741184160, 106.9561767578, 22.006666666666668, 8.0, 22.0, 24.0, 231.1338043213},
+    {56, 1741185120, 76.9981079102, 22.02, 7.9, 22.0, 24.0, 162.5495605469},
+    {57, 1741186020, 53.1636962891, 22.033333333333335, 7.9, 22.0, 24.0, 81.6969909668},
+    {58, 1741186920, 29.1286621094, 22.033333333333335, 7.9, 22.0, 24.0, 46.8949279785},
+    {59, 1741187820, 24.9031982422, 22.026666666666664, 7.9, 22.0, 24.0, 44.393409729},
+    {60, 1741188720, 20.8823242188, 22.019999999999996, 7.7, 22.0, 24.0, 40.6101760864},
+    {61, 1741189620, 18.8454589844, 21.993333333333336, 7.7, 22.0, 24.0, 31.5064964294},
+    {62, 1741190520, 18.9458007812, 21.98, 7.7, 21.0, 25.0, 44.1864700317},
+    {63, 1741191420, 16.8978271484, 21.953333333333333, 7.7, 21.0, 25.0, 27.8506603241},
+    {64, 1741192320, 12.8674316406, 21.926666666666666, 7.5, 21.0, 25.0, 21.1609783173},
+    {65, 1741193220, 8.8123779297, 21.88, 7.5, 21.0, 25.0, 13.11439991},
+    {66, 1741194120, 4.7203369141, 21.86, 7.5, 21.0, 25.0, 6.52617836},
+    {67, 1741195020, 4.7203369141, 21.833333333333332, 7.5, 21.0, 25.0, 4.6038265228},
+    {68, 1741195920, 4.7203369141, 21.793333333333333, 7.3, 21.0, 25.0, 4.0490403175},
+    {69, 1741196820, 4.7203369141, 21.766666666666666, 7.3, 21.0, 25.0, 4.0517430305},
+    {70, 1741197720, 4.7203369141, 21.740000000000002, 7.3, 21.0, 25.0, 4.0383996964},
+    {71, 1741198680, 2.7121582031, 21.706666666666663, 7.3, 21.0, 25.0, 4.0614647865},
+    {72, 1741199640, 2.7121582031, 21.673333333333336, 7.0, 21.0, 25.0, 4.0417962074},
+    {73, 1741200540, 2.7121582031, 21.66, 7.0, 21.0, 25.0, 4.055724144},
+    {74, 1741201440, 2.7121582031, 21.633333333333333, 7.0, 21.0, 25.0, 4.0547180176},
+    {75, 1741202400, 2.7121582031, 21.60666666666667, 7.0, 21.0, 25.0, 4.0451116562},
+    {76, 1741203360, 2.7121582031, 21.6, 6.6, 21.0, 25.0, 4.0570921898},
+    {77, 1741204260, 2.7121582031, 21.58, 6.6, 21.0, 25.0, 4.0701799393},
+    {78, 1741205160, 2.7121582031, 21.566666666666666, 6.6, 21.0, 25.0, 4.0536222458},
+    {79, 1741206060, 2.7121582031, 21.546666666666667, 6.6, 21.0, 25.0, 4.0296449661},
+    {80, 1741206960, 2.7121582031, 21.546666666666667, 6.5, 21.0, 25.0, 4.0302529335},
+    {81, 1741207980, 2.7121582031, 21.533333333333335, 6.5, 21.0, 25.0, 4.0660648346},
+    {82, 1741208880, 2.7121582031, 21.52, 6.5, 21.0, 25.0, 4.0360751152},
+    {83, 1741209780, 2.7121582031, 21.52, 6.5, 21.0, 25.0, 4.057806015},
+    {84, 1741210680, 2.7121582031, 21.513333333333332, 6.4, 21.0, 25.0, 4.0969805717},
+    {85, 1741211640, 2.7121582031, 21.493333333333336, 6.4, 21.0, 25.0, 4.0687155724},
+    {86, 1741212540, 2.7121582031, 21.466666666666665, 6.4, 21.0, 25.0, 4.0608820915},
+    {87, 1741213500, 2.7121582031, 21.457142857142856, 6.4, 21.0, 25.0, 4.1055607796},
+    {88, 1741214460, 2.7121582031, 21.43846153846154, 6.4, 21.0, 25.0, 4.0886974335},
+    {89, 1741215360, 2.7121582031, 21.433333333333334, 6.4, 21.0, 25.0, 4.0576334},
+    {90, 1741216260, 2.7121582031, 21.427272727272726, 6.4, 21.0, 25.0, 4.0321083069},
+    {91, 1741217220, 2.7121582031, 21.41, 6.4, 21.0, 25.0, 4.041642189},
+    {92, 1741218180, 2.7121582031, 21.41111111111111, 6.6, 21.0, 25.0, 4.1086544991},
+    {93, 1741219080, 2.7121582031, 21.4, 6.6, 21.0, 25.0, 4.017343998}
+};
 
-double S(double t);
-double H(double heating_setpoint, double T_current);
-double O (double lux);
-double derivative_function(double T_a, double T_r, double S, double H, double O, double a_a, double a_s, double a_h, double a_v, double a_o);
+int counter = 0;
 
 const int hour = 60;
 const double g_value = 0.45; //Value gotten from Rasmus
 const double blind_eff = 0.5; //assumed value (change if we find real data)
-const double watt_person = 100; //Assumed watt coming from 1 person
-const double lux_person = 300; //Lux per person
+const double watt_per_person = 100; //Assumed watt coming from 1 person
+const double lux_per_person = 300; //Lux per person
 clock x;
+int period = 15;
 broadcast chan fetch;
-broadcast chan new_data;
+broadcast chan new_period;
 
-
-typedef struct Room {
-    string name;
-    double window_size;
+struct {
+    int name;
+    int window_size;
     int heater;
-    double constants[5];
+    int constants[5];
 } Room;
 
-Room r213 = {"1.213", 3.64, 372, {0.0,0.0,0.0,0.0,0.0}};
-Room r215 = {"1.215", 5.46, 422, {0.0,0.0,0.0,0.0,0.0}};
-Room r217 = {"1.217", 3.64, 379, {0.0,0.0,0.0,0.0,0.0}};
-Room r229 = {"1.229", 5.18, 758, {0.0,0.0,0.0,0.0,0.0}};
-Room r231 = {"1.231", 6.86, 758, {0.0,0.0,0.0,0.0,0.0}};
-Room r233 = {"1.233", 7, 758, {0.0,0.0,0.0,0.0,0.0}};
+void init_room(Room &amp;r, int name, int window_size, int heater, int c0, int c1, int c2, int c3, int c4) {
+    r.name = name;
+    r.window_size = window_size;  // Example: 3.64 → 364
+    r.heater = heater;
+    r.constants[0] = c0;
+    r.constants[1] = c1;
+    r.constants[2] = c2;
+    r.constants[3] = c3;
+    r.constants[4] = c4;
+}
 
-bool blinds;
-bool heater;
 
+
+Room r213;
+init_room(r213, 1213, 364, 372, 0, 0, 0, 0, 0);
+Room r215;
+ = Room(1215, 546, 422, {0,0,0,0,0});
+Room r217;
+ = Room(1217, 364, 379, {0,0,0,0,0});
+Room r229;
+ = Room(1229, 518, 758, {0,0,0,0,0});
+Room r231;
+ = Room(1231, 686, 758, {0,0,0,0,0});
+Room r233;
+ = Room(1233, 700, 758, {0,0,0,0,0});
 
 double valve = 0.0; 
-double S; //Data from CSV file (Collected from BMS)
-double T_r;
-double T_a;
-double heating_setpoint;
-double cooling_setpoint;
-double lux;
-double T_setpoint = store_data.setpoint;
 
-
-
-double S (double t, Room room) {
-    return solar_effect[t] * g_value * room.window_size;
+double S (double solar_effect, Room room) {
+    return solar_effect * g_value * room.window_size;
 }
 
 
@@ -69,130 +166,171 @@ double H (double heating_setpoint, double T_current, Room room) {
     return room.heater * valve;
 }
 
-double O (double lux) {
-    return lux/lux_person * watt_person
+double O(double lux){
+    return lux / lux_per_person * watt_per_person;
 }
 
-double derivative_function(double T_a, double T_r, double S, double H, double O, double a_a, double a_s, double a_h, double a_v, double a_o) {
-    return (T_a - T_r) * a_s + S * a_s + H * a_h + (T_a - T_r) * a_v + O * a_o
+double derivative_function(double T_a, double T_r, double S, double H, double O, Room room) {
+    return (T_a - T_r) * room.constants[0]/10000 + S * room.constants[1]/10000 + H * room.constants[2]/10000 + (T_a - T_r) * room.constants[3]/10000 + O * room.constants[4]/10000;
 }
+
+double room_temp        = data_1_213_2025_03_05[0][3];
+double ambient_temp     = data_1_213_2025_03_05[0][4];
+double occupancy        = O(data_1_213_2025_03_05[0][7]);
+double heater           = H(data_1_213_2025_03_05[0][5], data_1_213_2025_03_05[0][3], r213);
+double solar            = S(data_1_213_2025_03_05[0][2], r213); 
+double heating_setpoint = data_1_213_2025_03_05[0][5];
+double cost             = 0;
+
+
+
+
 
 
 
 
 </declaration>
 	<template>
-		<name x="5" y="5">Optimization</name>
-		<declaration>// Place local declarations here.
-</declaration>
-		<location id="id0" x="0" y="0">
-			<label kind="invariant" x="-212" y="25">D'== (T_setpoint - T_room) * (T_setpoint - T_room)</label>
+		<name>room</name>
+		<location id="id0" x="-102" y="0">
+			<label kind="invariant" x="-467" y="17">T' = derivative_function(ambient_temp, room_temp, solar, heater, occupancy, current_room)</label>
 		</location>
 		<init ref="id0"/>
 	</template>
 	<template>
-		<name>DataCollection</name>
-		<declaration>const int P = 15; //Swicthing period, 15 min</declaration>
+		<name x="5" y="5">optimization</name>
+		<declaration>// Place local declarations here.
+</declaration>
 		<location id="id1" x="0" y="0">
-			<label kind="invariant" x="-25" y="17">x &lt;= P</label>
+			<label kind="invariant" x="-272" y="17">cost' == (heating_setpoint - room_temp) * (heating_setpoint - room_temp)</label>
 		</location>
 		<init ref="id1"/>
-		<transition id="id2" controllable="false">
-			<source ref="id1"/>
-			<target ref="id1"/>
-			<label kind="guard" x="-85" y="-161">x &gt;= P</label>
-			<label kind="synchronisation" x="-85" y="-178">fetch!</label>
-			<nail x="-85" y="-136"/>
-			<nail x="76" y="-136"/>
+	</template>
+	<template>
+		<name>data_collection</name>
+		<declaration>void fetch_data(){
+    occupancy = O(data_1_213_2025_03_05[counter][7]);
+    solar = S(data_1_213_2025_03_05[counter][2], r213);
+    heater = H(data_1_213_2025_03_05[counter][5], room_temp, r213);
+    ambient_temp = data_1_213_2025_03_05[counter][4];
+}</declaration>
+		<location id="id2" x="0" y="0">
+		</location>
+		<init ref="id2"/>
+		<transition id="id3" controllable="false">
+			<source ref="id2"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="-51" y="-110">new_period?</label>
+			<label kind="assignment" x="-51" y="-93">fetch_data()</label>
+			<nail x="-68" y="-68"/>
+			<nail x="68" y="-68"/>
+			<nail x="68" y="-68"/>
 		</transition>
 	</template>
 	<template>
 		<name>ModBlinds</name>
-		<location id="id3" x="238" y="0">
+		<location id="id4" x="238" y="0">
 			<name x="221" y="-34">Down</name>
 		</location>
-		<location id="id4" x="-204" y="0">
+		<location id="id5" x="-204" y="0">
 			<name x="-214" y="-34">Up</name>
 		</location>
-		<init ref="id4"/>
-		<transition id="id5">
-			<source ref="id3"/>
-			<target ref="id3"/>
+		<init ref="id5"/>
+		<transition id="id6">
+			<source ref="id4"/>
+			<target ref="id4"/>
 			<label kind="guard" x="263" y="-110">x == P,
 blinds == 0 &amp;&amp; T_room &gt;= T_setpoint</label>
 			<label kind="assignment" x="297" y="0">x = 0</label>
 			<nail x="340" y="-68"/>
 			<nail x="340" y="0"/>
 		</transition>
-		<transition id="id6">
-			<source ref="id4"/>
-			<target ref="id4"/>
+		<transition id="id7">
+			<source ref="id5"/>
+			<target ref="id5"/>
 			<label kind="guard" x="-501" y="-110">x == P,
 blinds == 1 &amp;&amp; T_room &lt;= T_setpoint</label>
 			<label kind="assignment" x="-297" y="0">x = 0</label>
 			<nail x="-306" y="-68"/>
 			<nail x="-306" y="0"/>
 		</transition>
-		<transition id="id7">
-			<source ref="id3"/>
-			<target ref="id4"/>
+		<transition id="id8">
+			<source ref="id4"/>
+			<target ref="id5"/>
 			<label kind="guard" x="-127" y="-153">x == P,
 blinds == 0 &amp;&amp; T_room &lt; T_setpoint</label>
 			<label kind="assignment" x="-59" y="-110">x = 0, blinds = 1</label>
 			<nail x="8" y="-85"/>
 		</transition>
-		<transition id="id8">
-			<source ref="id4"/>
-			<target ref="id3"/>
+		<transition id="id9">
+			<source ref="id5"/>
+			<target ref="id4"/>
 			<label kind="guard" x="-127" y="8">x == P,
 blinds == 1 &amp;&amp; T_room &gt; T_setpoint</label>
 			<label kind="assignment" x="-59" y="51">x = 0, blinds = 0</label>
 		</transition>
 	</template>
 	<template>
+		<name>Clock</name>
+		<location id="id10" x="-170" y="0">
+			<name x="-187" y="17">Tick</name>
+			<label kind="invariant" x="-221" y="42">x &lt;= period</label>
+		</location>
+		<init ref="id10"/>
+		<transition id="id11" controllable="false">
+			<source ref="id10"/>
+			<target ref="id10"/>
+			<label kind="guard" x="-221" y="-68">x &gt;= period</label>
+			<label kind="synchronisation" x="-212" y="-110">new_period!</label>
+			<label kind="assignment" x="-212" y="-93">counter++</label>
+			<nail x="-239" y="-68"/>
+			<nail x="-103" y="-68"/>
+		</transition>
+	</template>
+	<template>
 		<name>ModHeater</name>
-		<location id="id9" x="751" y="141">
+		<location id="id12" x="751" y="141">
 			<name x="734" y="107">Off</name>
 		</location>
-		<location id="id10" x="309" y="141">
+		<location id="id13" x="309" y="141">
 			<name x="299" y="107">On</name>
 		</location>
-		<transition id="id11">
-			<source ref="id9"/>
-			<target ref="id9"/>
+		<transition id="id14">
+			<source ref="id12"/>
+			<target ref="id12"/>
 			<label kind="guard" x="776" y="31">x == P,
 heater == 0 &amp;&amp; T_room &gt; T_setpoint</label>
 			<label kind="assignment" x="810" y="141">x = 0</label>
 			<nail x="853" y="73"/>
 			<nail x="853" y="141"/>
 		</transition>
-		<transition id="id12">
-			<source ref="id10"/>
-			<target ref="id10"/>
+		<transition id="id15">
+			<source ref="id13"/>
+			<target ref="id13"/>
 			<label kind="guard" x="12" y="31">x == P,
 heater == 1 &amp;&amp; T_room &lt; T_setpoint</label>
 			<label kind="assignment" x="216" y="141">x = 0</label>
 			<nail x="207" y="73"/>
 			<nail x="207" y="141"/>
 		</transition>
-		<transition id="id13">
-			<source ref="id9"/>
-			<target ref="id10"/>
+		<transition id="id16">
+			<source ref="id12"/>
+			<target ref="id13"/>
 			<label kind="guard" x="386" y="-12">x == P,
 heater == 0 &amp;&amp; T_room &lt; T_setpoint</label>
 			<label kind="assignment" x="454" y="31">x = 0, heater = 1</label>
 			<nail x="521" y="56"/>
 		</transition>
-		<transition id="id14">
-			<source ref="id10"/>
-			<target ref="id9"/>
+		<transition id="id17">
+			<source ref="id13"/>
+			<target ref="id12"/>
 			<label kind="guard" x="386" y="149">x == P,
 heater == 1 &amp;&amp; T_room &gt; T_setpoint</label>
 			<label kind="assignment" x="454" y="192">x = 0, heater = 0</label>
 		</transition>
 	</template>
 	<system>// Place template instantiations here.
-Process = Template();
+Process = Clock, data_collection;
 // List one or more processes to be composed into a system.
 system Process;
 </system>
