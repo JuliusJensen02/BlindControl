@@ -45,7 +45,7 @@ The data is joined based on the time.
 The data is fetched from the DMI API for the given date.
 The data is written to the csv file.
 """
-def query_data(input_from, room):
+def query_data(input_from, room, source_lux):
     # The input_from is converted to a datetime object of the format "%Y-%m-%dT%H:%M:%SZ".
     date_from = datetime.strptime(input_from, "%Y-%m-%dT%H:%M:%SZ")
 
@@ -67,35 +67,35 @@ def query_data(input_from, room):
 
         data_room_temp = from(bucket:"db")
                  |> range(start: """ + date_string_from + """, stop: """ + date_string_to + """)
-                 |> filter(fn: (r) => r.room_id == \"""" + room + """\") 
+                 |> filter(fn: (r) => r.room_id == \"""" + room["name"] + """\") 
                  |> filter(fn: (r) => r["sensor_type"] == "temperature")
                  |> filter(fn: (r) => r["_field"] == "value")
                  |> rename(columns: {_value: "room_temp"})
 
         data_heating_setpoint = from(bucket:"db")
                  |> range(start: """ + date_string_from + """, stop: """ + date_string_to + """)
-                 |> filter(fn: (r) => r.room_id == \"""" + room + """\") 
+                 |> filter(fn: (r) => r.room_id == \"""" + room["name"] + """\") 
                  |> filter(fn: (r) => r["sensor_type"] == "setpoint")
-                 |> filter(fn: (r) => r["source"] == "/TM023_3_20_1.204/Lon/Net/Rum_""" + room + """/Temperature_heating_setpoint_""" + room + """")
+                 |> filter(fn: (r) => r["source"] == "/TM023_3_20_1.204/Lon/Net/Rum_""" + room["name"] + """/Temperature_heating_setpoint_""" + room["name"] + """")
                  |> filter(fn: (r) => r["_field"] == "value") 
                  |> rename(columns: {_value: "heating_setpoint"})  
 
         data_cooling_setpoint = from(bucket:"db")
                  |> range(start: """ + date_string_from + """, stop: """ + date_string_to + """)
-                 |> filter(fn: (r) => r.room_id == \"""" + room + """\") 
+                 |> filter(fn: (r) => r.room_id == \"""" + room["name"] + """\") 
                  |> filter(fn: (r) => r["sensor_type"] == "setpoint")
-                 |> filter(fn: (r) => r["source"] == "/TM023_3_20_1.204/Lon/Net/Rum_""" + room + """/Temperature_cooling_setpoint_""" + room + """")
+                 |> filter(fn: (r) => r["source"] == "/TM023_3_20_1.204/Lon/Net/Rum_""" + room["name"] + """/Temperature_cooling_setpoint_""" + room["name"] + """")
                  |> filter(fn: (r) => r["_field"] == "value") 
                  |> rename(columns: {_value: "cooling_setpoint"}) 
 
         data_lux = from(bucket:"db")
                  |> range(start: """ + date_string_from + """, stop: """ + date_string_to + """)
-                 |> filter(fn: (r) => r.room_id == \"""" + room + """\") 
+                 |> filter(fn: (r) => r.room_id == \"""" + room["name"] + """\") 
                  |> filter(fn: (r) => r["sensor_type"] == "occupancy")
-                 |> filter(fn: (r) => r["source"] == "/TM023_3_20_1.204/Lon/Net/Rum_""" + room + """/Lux_meter")
+                 |> filter(fn: (r) => r["source"] == "/TM023_3_20_1.204/Lon/Net/Rum_""" + room["name"] + """/Lux_meter""" + source_lux + """\")
                  |> filter(fn: (r) => r["_field"] == "value") 
                  |> rename(columns: {_value: "lux"}) 
-
+    
 
         solar_room = join(tables: {d1: data_solar_watt, d2: data_room_temp}, on: ["_time"])
         solar_room_heater = join(tables: {dsr: solar_room, d3: data_heating_setpoint}, on: ["_time"])
@@ -111,7 +111,6 @@ def query_data(input_from, room):
 
     # The data is fetched from the DMI API for the given date.
     dmi_results = get_temp(date_string_from, date_string_to)
-
     # The data is written to the csv file.
     # The data is fetched from the result and the DMI API and joined based on the time before writing to the csv file.
     data = list()
@@ -124,9 +123,9 @@ def query_data(input_from, room):
             counter = 0
             time = record["_time"]
             outside_temp_at_given_time = None
-            for dmi_time, dmi_temp in dmi_results.items():
-                if datetime.fromisoformat(dmi_time) == hour_rounder(
-                        time):  # The time from the DMI API is rounded to the nearest hour.
+            for dmi_time, dmi_temp in dmi_results.values:
+                if dmi_time == "datetime" or dmi_temp == "mean_temp": continue
+                if datetime.strftime(dmi_time, "%Y-%m-%d %H:%M:%S%z") == datetime.strftime(hour_rounder(time), "%Y-%m-%d %H:%M:%S%z"):  # The time from the DMI API is rounded to the nearest hour.
                     outside_temp_at_given_time = dmi_temp
                     break
             solar_watt = record.values.get("solar_watt")
@@ -148,14 +147,14 @@ def query_data(input_from, room):
     # df = remove_outliers(df)  # Remove outliers from the dataframe
     df = smooth(df, 'room_temp')  # Smooth the dataframe
 
-    df.to_csv('data/data_' + date_from.strftime("%Y-%m-%d") + '.csv', mode='w') #TODO: Make directory for each room to store data
+    df.to_csv('data/'""+ room["name"] +""'/data_' + date_from.strftime("%Y-%m-%d") + '.csv', mode='w')
 
     # Confirmation message
     print("Fetched data from: " + date_string_from + ", to: " + date_string_to)
 
 
-def query_data_period(from_date, to_date, room):
+def query_data_period(from_date, to_date, room, source_lux):
     current_date = datetime.strptime(from_date, "%Y-%m-%dT%H:%M:%SZ")
     while current_date.strftime("%Y-%m-%dT00:00:00Z") <= to_date:
-        query_data(current_date.strftime("%Y-%m-%dT00:00:00Z"), room)
+        query_data(current_date.strftime("%Y-%m-%dT00:00:00Z"), room, source_lux)
         current_date = current_date + timedelta(days=1)

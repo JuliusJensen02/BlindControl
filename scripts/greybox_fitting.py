@@ -50,7 +50,7 @@ def train_for_day(room, i, time, best_method, days):
     """
     Train the model for a specific day (used for multiprocessing).
     """
-    df = convert_csv_to_df(time)
+    df = convert_csv_to_df(time, room)
     room_temp = df["room_temp"].to_numpy()
     ambient_temp = df["ambient_temp"].to_numpy()
     solar_watt = df["solar_watt"].to_numpy()
@@ -87,7 +87,7 @@ def train_for_time_frame(room, start_time = "2025-01-01T00:00:00Z", days = 1):
         error += res[5]
 
     #Calculate the average of the constants and cache them
-    cache_constants(alpha_a/days, alpha_s/days, alpha_r/days, alpha_v/days, alpha_o/days, start_time, days, error/days)
+    cache_constants(alpha_a/days, alpha_s/days, alpha_r/days, alpha_v/days, alpha_o/days, start_time, days, error/days, "data/" + room["name"] + "/constants_cache.csv")
 
 
 """
