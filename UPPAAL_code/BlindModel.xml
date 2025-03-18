@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
 <nta>
-	<declaration>double data_1_213_2025_03_05[94][8] = {
+	<declaration>const double data_1_213_2025_03_05[94][8] = {
     {0, 1741133640, 2.9389648438, 21.225, 6.1, 21.0, 25.0, 4.0313987732},
     {1, 1741134600, 2.9389648438, 21.22222222222222, 6.1, 21.0, 25.0, 4.0999097824},
     {2, 1741135500, 2.9389648438, 21.21, 6.1, 21.0, 25.0, 4.0872440338},
@@ -98,91 +98,70 @@
     {93, 1741219080, 2.7121582031, 21.4, 6.6, 21.0, 25.0, 4.017343998}
 };
 
-int counter = 0;
-
-const int hour = 60;
 const double g_value = 0.45; //Value gotten from Rasmus
 const double blind_eff = 0.5; //assumed value (change if we find real data)
 const double watt_per_person = 100; //Assumed watt coming from 1 person
 const double lux_per_person = 300; //Lux per person
-clock x;
-int period = 15;
+const double r213[8] = {1.213, 3.64, 372, 0, 0, 0, 0, 0};
+const double r215[8] = {1.215, 5.46, 422, 0, 0, 0, 0, 0};
+const double r217[8] = {1.217, 3.64, 379, 0, 0, 0, 0, 0};
+const double r229[8] = {1.229, 5.18, 758, 0, 0, 0, 0, 0};
+const double r231[8] = {1.231, 6.86, 758, 0, 0, 0, 0, 0};
+const double r233[8] = {1.233, 7, 758, 0, 0, 0, 0, 0};
+const double current_room[8] = r213;
+
 broadcast chan fetch;
-broadcast chan new_period;
-
-struct {
-    int name;
-    int window_size;
-    int heater;
-    int constants[5];
-} Room;
-
-void init_room(Room &amp;r, int name, int window_size, int heater, int c0, int c1, int c2, int c3, int c4) {
-    r.name = name;
-    r.window_size = window_size;  // Example: 3.64 → 364
-    r.heater = heater;
-    r.constants[0] = c0;
-    r.constants[1] = c1;
-    r.constants[2] = c2;
-    r.constants[3] = c3;
-    r.constants[4] = c4;
-}
-
-
-
-Room r213;
-init_room(r213, 1213, 364, 372, 0, 0, 0, 0, 0);
-Room r215;
- = Room(1215, 546, 422, {0,0,0,0,0});
-Room r217;
- = Room(1217, 364, 379, {0,0,0,0,0});
-Room r229;
- = Room(1229, 518, 758, {0,0,0,0,0});
-Room r231;
- = Room(1231, 686, 758, {0,0,0,0,0});
-Room r233;
- = Room(1233, 700, 758, {0,0,0,0,0});
-
 double valve = 0.0; 
+double heater;
+double occupancy;
+double ambient_temp;
+hybrid clock room_temp;
+double solar;
+double heating_setpoint;
+hybrid clock cost;
 
-double S (double solar_effect, Room room) {
-    return solar_effect * g_value * room.window_size;
+void initialize() {
+    room_temp = data_1_213_2025_03_05[0][3];
+    ambient_temp = data_1_213_2025_03_05[0][4];
+    occupancy = O(data_1_213_2025_03_05[0][7]);
+    heater = H(data_1_213_2025_03_05[0][5], data_1_213_2025_03_05[0][3], current_room[2]);
+    solar = S(data_1_213_2025_03_05[0][2], current_room[1]); 
+    heating_setpoint = data_1_213_2025_03_05[0][5];
+    cost = 0;
 }
 
 
-double H (double heating_setpoint, double T_current, Room room) {
-    if (T_r &lt;= heating_setpoint) {
-        valve += 0.25;
+
+
+
+double S (double solar_effect, double window_size) {
+    return solar_effect * g_value * window_size;
+}
+
+
+double H (double heating_setpoint, double T_current, double heater_effect) {
+    if (T_current &lt;= heating_setpoint) {
+        valve = valve + 0.25;
         if (valve &gt; 1.0) {
             valve = 1.0;
         }
     }
     else if (T_current &gt; heating_setpoint) {
-        valve -= 0.25;
+        valve = valve - 0.25;
         if (valve &lt; 0.0) {
             valve = 0.0;
         }
     }
-    return room.heater * valve;
+    return heater_effect * valve;
 }
 
 double O(double lux){
     return lux / lux_per_person * watt_per_person;
 }
 
-double derivative_function(double T_a, double T_r, double S, double H, double O, Room room) {
-    return (T_a - T_r) * room.constants[0]/10000 + S * room.constants[1]/10000 + H * room.constants[2]/10000 + (T_a - T_r) * room.constants[3]/10000 + O * room.constants[4]/10000;
+double derivative_function(double T_a, double T_r, double S, double H, double O, double a_a, double a_s, double a_h, double a_v, double a_o) {
+    return (T_a - T_r) * a_a + S * a_s + H * a_h + (T_a - T_r) * a_v + O * a_o;
 }
-
-double room_temp        = data_1_213_2025_03_05[0][3];
-double ambient_temp     = data_1_213_2025_03_05[0][4];
-double occupancy        = O(data_1_213_2025_03_05[0][7]);
-double heater           = H(data_1_213_2025_03_05[0][5], data_1_213_2025_03_05[0][3], r213);
-double solar            = S(data_1_213_2025_03_05[0][2], r213); 
-double heating_setpoint = data_1_213_2025_03_05[0][5];
-double cost             = 0;
-
-
 
 
 
@@ -192,8 +171,8 @@ double cost             = 0;
 </declaration>
 	<template>
 		<name>room</name>
-		<location id="id0" x="-102" y="0">
-			<label kind="invariant" x="-467" y="17">T' = derivative_function(ambient_temp, room_temp, solar, heater, occupancy, current_room)</label>
+		<location id="id0" x="136" y="102">
+			<label kind="invariant" x="-612" y="119">room_temp' == derivative_function(ambient_temp, room_temp, solar, heater, occupancy, current_room[3], current_room[4], current_room[5], current_room[6], current_room[7])</label>
 		</location>
 		<init ref="id0"/>
 	</template>
@@ -207,132 +186,54 @@ double cost             = 0;
 		<init ref="id1"/>
 	</template>
 	<template>
-		<name>data_collection</name>
-		<declaration>void fetch_data(){
-    occupancy = O(data_1_213_2025_03_05[counter][7]);
-    solar = S(data_1_213_2025_03_05[counter][2], r213);
-    heater = H(data_1_213_2025_03_05[counter][5], room_temp, r213);
-    ambient_temp = data_1_213_2025_03_05[counter][4];
-}</declaration>
-		<location id="id2" x="0" y="0">
+		<name>controller_blinds</name>
+		<location id="id2" x="-136" y="-68">
+		</location>
+		<location id="id3" x="68" y="-68">
 		</location>
 		<init ref="id2"/>
-		<transition id="id3" controllable="false">
+		<transition id="id4">
 			<source ref="id2"/>
-			<target ref="id2"/>
-			<label kind="synchronisation" x="-51" y="-110">new_period?</label>
-			<label kind="assignment" x="-51" y="-93">fetch_data()</label>
-			<nail x="-68" y="-68"/>
-			<nail x="68" y="-68"/>
-			<nail x="68" y="-68"/>
-		</transition>
-	</template>
-	<template>
-		<name>ModBlinds</name>
-		<location id="id4" x="238" y="0">
-			<name x="221" y="-34">Down</name>
-		</location>
-		<location id="id5" x="-204" y="0">
-			<name x="-214" y="-34">Up</name>
-		</location>
-		<init ref="id5"/>
-		<transition id="id6">
-			<source ref="id4"/>
-			<target ref="id4"/>
-			<label kind="guard" x="263" y="-110">x == P,
-blinds == 0 &amp;&amp; T_room &gt;= T_setpoint</label>
-			<label kind="assignment" x="297" y="0">x = 0</label>
-			<nail x="340" y="-68"/>
-			<nail x="340" y="0"/>
-		</transition>
-		<transition id="id7">
-			<source ref="id5"/>
-			<target ref="id5"/>
-			<label kind="guard" x="-501" y="-110">x == P,
-blinds == 1 &amp;&amp; T_room &lt;= T_setpoint</label>
-			<label kind="assignment" x="-297" y="0">x = 0</label>
-			<nail x="-306" y="-68"/>
-			<nail x="-306" y="0"/>
-		</transition>
-		<transition id="id8">
-			<source ref="id4"/>
-			<target ref="id5"/>
-			<label kind="guard" x="-127" y="-153">x == P,
-blinds == 0 &amp;&amp; T_room &lt; T_setpoint</label>
-			<label kind="assignment" x="-59" y="-110">x = 0, blinds = 1</label>
-			<nail x="8" y="-85"/>
-		</transition>
-		<transition id="id9">
-			<source ref="id5"/>
-			<target ref="id4"/>
-			<label kind="guard" x="-127" y="8">x == P,
-blinds == 1 &amp;&amp; T_room &gt; T_setpoint</label>
-			<label kind="assignment" x="-59" y="51">x = 0, blinds = 0</label>
+			<target ref="id3"/>
+			<label kind="assignment" x="-59" y="-102">initialize()</label>
 		</transition>
 	</template>
 	<template>
 		<name>Clock</name>
-		<location id="id10" x="-170" y="0">
+		<declaration>int counter = 0;
+clock x;
+int period = 15;
+
+void fetch_data(){
+    occupancy = O(data_1_213_2025_03_05[counter][7]);
+    solar = S(data_1_213_2025_03_05[counter][2], current_room[1]);
+    heater = H(data_1_213_2025_03_05[counter][5], room_temp, current_room[2]);
+    ambient_temp = data_1_213_2025_03_05[counter][4];
+}</declaration>
+		<location id="id5" x="-170" y="0">
 			<name x="-187" y="17">Tick</name>
 			<label kind="invariant" x="-221" y="42">x &lt;= period</label>
 		</location>
-		<init ref="id10"/>
-		<transition id="id11" controllable="false">
-			<source ref="id10"/>
-			<target ref="id10"/>
-			<label kind="guard" x="-221" y="-68">x &gt;= period</label>
-			<label kind="synchronisation" x="-212" y="-110">new_period!</label>
-			<label kind="assignment" x="-212" y="-93">counter++</label>
+		<init ref="id5"/>
+		<transition id="id6" controllable="false">
+			<source ref="id5"/>
+			<target ref="id5"/>
+			<label kind="guard" x="-212" y="-170">x &gt;= period</label>
+			<label kind="assignment" x="-204" y="-136">counter++,
+fetch_data(),
+x = 0</label>
 			<nail x="-239" y="-68"/>
 			<nail x="-103" y="-68"/>
 		</transition>
 	</template>
 	<template>
-		<name>ModHeater</name>
-		<location id="id12" x="751" y="141">
-			<name x="734" y="107">Off</name>
+		<name>controller_heater</name>
+		<location id="id7" x="-102" y="0">
 		</location>
-		<location id="id13" x="309" y="141">
-			<name x="299" y="107">On</name>
-		</location>
-		<transition id="id14">
-			<source ref="id12"/>
-			<target ref="id12"/>
-			<label kind="guard" x="776" y="31">x == P,
-heater == 0 &amp;&amp; T_room &gt; T_setpoint</label>
-			<label kind="assignment" x="810" y="141">x = 0</label>
-			<nail x="853" y="73"/>
-			<nail x="853" y="141"/>
-		</transition>
-		<transition id="id15">
-			<source ref="id13"/>
-			<target ref="id13"/>
-			<label kind="guard" x="12" y="31">x == P,
-heater == 1 &amp;&amp; T_room &lt; T_setpoint</label>
-			<label kind="assignment" x="216" y="141">x = 0</label>
-			<nail x="207" y="73"/>
-			<nail x="207" y="141"/>
-		</transition>
-		<transition id="id16">
-			<source ref="id12"/>
-			<target ref="id13"/>
-			<label kind="guard" x="386" y="-12">x == P,
-heater == 0 &amp;&amp; T_room &lt; T_setpoint</label>
-			<label kind="assignment" x="454" y="31">x = 0, heater = 1</label>
-			<nail x="521" y="56"/>
-		</transition>
-		<transition id="id17">
-			<source ref="id13"/>
-			<target ref="id12"/>
-			<label kind="guard" x="386" y="149">x == P,
-heater == 1 &amp;&amp; T_room &gt; T_setpoint</label>
-			<label kind="assignment" x="454" y="192">x = 0, heater = 0</label>
-		</transition>
+		<init ref="id7"/>
 	</template>
-	<system>// Place template instantiations here.
-Process = Clock, data_collection;
-// List one or more processes to be composed into a system.
-system Process;
+	<system>// List one or more processes to be composed into a system.
+system room, optimization, Clock, controller_heater, controller_blinds;
 </system>
 	<queries>
 		<query>
