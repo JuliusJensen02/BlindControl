@@ -44,7 +44,6 @@ rooms = {
 
 def main():
     chosen_room = rooms["1.233"]
-    lux = chosen_room["source_lux"]
     query_data_period("2024-11-20T00:00:00Z", "2025-03-17T00:00:00Z", chosen_room)
     #constants = get_constants("data/" + chosen_room["name"] + "/constants_cache.csv", chosen_room, "2024-11-20T00:00:00Z", 50, False)
     #print(constants)
