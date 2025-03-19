@@ -165,5 +165,5 @@ def query_data(input_from, room):
 def query_data_period(from_date, to_date, room):
     current_date = datetime.strptime(from_date, "%Y-%m-%dT%H:%M:%SZ")
     while current_date.strftime("%Y-%m-%dT00:00:00Z") <= to_date:
-        query_data(current_date.strftime("%Y-%m-%dT00:00:00Z"), room, source_lux)
+        query_data(current_date.strftime("%Y-%m-%dT00:00:00Z"), room)
         current_date = current_date + timedelta(days=1)
