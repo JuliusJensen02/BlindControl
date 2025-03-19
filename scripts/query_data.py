@@ -94,15 +94,22 @@ def query_data(input_from, room, source_lux):
                  |> filter(fn: (r) => r["sensor_type"] == "occupancy")
                  |> filter(fn: (r) => r["source"] == "/TM023_3_20_1.204/Lon/Net/Rum_""" + room["name"] + """/Lux_meter""" + source_lux + """\")
                  |> filter(fn: (r) => r["_field"] == "value") 
-                 |> rename(columns: {_value: "lux"}) 
+                 |> rename(columns: {_value: "lux"})
+                 
+        data_wind = from(bucket:"db")
+                 |> range(start: """ + date_string_from + """, stop: """ + date_string_to + """)
+                 |> filter(fn: (r) => r["source"] == "/TM023_1_20_1103/SG01/Wind_velocity")
+                 |> filter(fn: (r) => r["_field"] == "value")
+                 |> rename(columns: {_value: "solar_watt"})
     
 
         solar_room = join(tables: {d1: data_solar_watt, d2: data_room_temp}, on: ["_time"])
         solar_room_heater = join(tables: {dsr: solar_room, d3: data_heating_setpoint}, on: ["_time"])
         solar_room_heater_cooler = join(tables: {dsrh: solar_room_heater, d4: data_cooling_setpoint}, on: ["_time"])
         solar_room_heater_cooler_lux = join(tables: {dsrhc: solar_room_heater_cooler, d5: data_lux}, on: ["_time"])
-        solar_room_heater_cooler_lux
-        |> keep (columns: ["_time", "solar_watt", "room_temp", "heating_setpoint", "cooling_setpoint", "lux"])
+        solar_room_heater_cooler_lux_wind = join(tables: {dsrhc: solar_room_heater_cooler_lux, d5: data_wind}, on: ["_time"])
+        solar_room_heater_cooler_lux_wind
+        |> keep (columns: ["_time", "solar_watt", "room_temp", "heating_setpoint", "cooling_setpoint", "lux", "wind"])
         """
     # The query_api is used to query the data from the InfluxDB.
     # The result is stored in the variable 'result'.
@@ -133,6 +140,7 @@ def query_data(input_from, room, source_lux):
             heating_setpoint = record.values.get("heating_setpoint")
             cooling_setpoint = record.values.get("cooling_setpoint")
             lux = record.values.get("lux")
+            wind = record.values.get("wind")
 
             # The data is appended to the list 'data' which is used to write to the csv file.
             data.append({"time": time,
@@ -141,7 +149,8 @@ def query_data(input_from, room, source_lux):
                          "ambient_temp": outside_temp_at_given_time,
                          "heating_setpoint": heating_setpoint,
                          "cooling_setpoint": cooling_setpoint,
-                         "lux": lux})
+                         "lux": lux,
+                         "wind": wind})
 
     df = pd.DataFrame(data)
     # df = remove_outliers(df)  # Remove outliers from the dataframe
