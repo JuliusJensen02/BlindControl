@@ -45,7 +45,7 @@ The data is joined based on the time.
 The data is fetched from the DMI API for the given date.
 The data is written to the csv file.
 """
-def query_data(input_from, room, source_lux):
+def query_data(input_from, room):
     # The input_from is converted to a datetime object of the format "%Y-%m-%dT%H:%M:%SZ".
     date_from = datetime.strptime(input_from, "%Y-%m-%dT%H:%M:%SZ")
 
@@ -92,7 +92,7 @@ def query_data(input_from, room, source_lux):
                  |> range(start: """ + date_string_from + """, stop: """ + date_string_to + """)
                  |> filter(fn: (r) => r.room_id == \"""" + room["name"] + """\") 
                  |> filter(fn: (r) => r["sensor_type"] == "occupancy")
-                 |> filter(fn: (r) => r["source"] == "/TM023_3_20_1.204/Lon/Net/Rum_""" + room["name"] + """/Lux_meter""" + source_lux + """\")
+                 |> filter(fn: (r) => r["source"] == "/TM023_3_20_1.204/Lon/Net/Rum_""" + room["name"] + """/Lux_meter""" + room["source_lux"] + """\")
                  |> filter(fn: (r) => r["_field"] == "value") 
                  |> rename(columns: {_value: "lux"})
                  
@@ -162,8 +162,8 @@ def query_data(input_from, room, source_lux):
     print("Fetched data from: " + date_string_from + ", to: " + date_string_to)
 
 
-def query_data_period(from_date, to_date, room, source_lux):
+def query_data_period(from_date, to_date, room):
     current_date = datetime.strptime(from_date, "%Y-%m-%dT%H:%M:%SZ")
     while current_date.strftime("%Y-%m-%dT00:00:00Z") <= to_date:
-        query_data(current_date.strftime("%Y-%m-%dT00:00:00Z"), room, source_lux)
+        query_data(current_date.strftime("%Y-%m-%dT00:00:00Z"), room)
         current_date = current_date + timedelta(days=1)
