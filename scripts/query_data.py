@@ -92,7 +92,7 @@ def query_data(input_from, room, source_lux):
                  |> range(start: """ + date_string_from + """, stop: """ + date_string_to + """)
                  |> filter(fn: (r) => r.room_id == \"""" + room["name"] + """\") 
                  |> filter(fn: (r) => r["sensor_type"] == "occupancy")
-                 |> filter(fn: (r) => r["source"] == "/TM023_3_20_1.204/Lon/Net/Rum_""" + room["name"] + """/Lux_meter""" + source_lux + """\")
+                 |> filter(fn: (r) => r["source"] == "/TM023_3_20_1.204/Lon/Net/Rum_""" + room["name"] + """/Lux_meter""" + room["source_lux"] + """\")
                  |> filter(fn: (r) => r["_field"] == "value") 
                  |> rename(columns: {_value: "lux"})
                  
