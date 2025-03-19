@@ -45,7 +45,7 @@ The data is joined based on the time.
 The data is fetched from the DMI API for the given date.
 The data is written to the csv file.
 """
-def query_data(input_from, room, source_lux):
+def query_data(input_from, room):
     # The input_from is converted to a datetime object of the format "%Y-%m-%dT%H:%M:%SZ".
     date_from = datetime.strptime(input_from, "%Y-%m-%dT%H:%M:%SZ")
 
