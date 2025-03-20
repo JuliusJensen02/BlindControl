@@ -1,6 +1,6 @@
 # BlindControl
 
-**BlindControl** is a project developed at BUILD AAU aimed at automating and optimizing the control of window blinds. The system adjusts blinds based on environmental factors to enhance energy efficiency and indoor comfort.
+**BlindControl** is a project developed for BUILD AAU aimed at automating and optimizing the control of window blinds. The system adjusts blinds based on environmental factors to enhance energy efficiency and indoor comfort.
 
 ## Features
 
@@ -27,32 +27,11 @@
    ```bash
    pip install -r requirements.txt
    ```
-
-4. **Configure the System**:
-   - Modify the `config.json` file to match your hardware setup and preferences.
-   - Ensure all hardware components are connected as specified in the configuration.
-
-5. **Run the Application**:
+4. **Run the Application**:
    ```bash
    python main.py
    ```
 
-## Usage
-
-- **Automated Mode**: The system will automatically adjust blinds based on sensor data.
-- **Manual Control**: Access the manual control interface at `http://localhost:5000` to adjust blinds as needed.
-- **Scheduling**: Use the scheduling feature in the interface to set specific times for blinds to open or close.
-
-## Contributing
-
-We welcome contributions from the community. To contribute:
-
-1. **Fork the Repository**: Click the 'Fork' button at the top right corner of this page.
-2. **Create a New Branch**: Use a descriptive name for your branch.
-3. **Make Your Changes**: Ensure your code follows the project's coding standards.
-4. **Submit a Pull Request**: Provide a clear description of your changes and the problem they solve.
-
-Please refer to our [Code of Conduct](CODE_OF_CONDUCT.md) for guidelines on contributing.
 
 ## License
 
