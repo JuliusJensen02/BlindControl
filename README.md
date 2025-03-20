@@ -40,7 +40,6 @@ This project is licensed under the GNU General Public License v3.0. See the [LIC
 ## Acknowledgments
 
 - Thanks to the BUILD AAU community for their support and resources.
-- Special mention to the developers of similar projects that inspired this work.
 
 ---
 
