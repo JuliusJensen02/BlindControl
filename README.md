@@ -5,7 +5,6 @@
 ## Features
 
 - **Automated Blind Adjustment**: Blinds are controlled automatically in response to environmental conditions such as sunlight intensity and room temperature.
-- **Manual Override**: Users can manually adjust blinds through a user-friendly interface.
 - **Scheduling**: Set schedules for blinds to open or close at specific times.
 - **Energy Efficiency**: Optimizes natural light usage to reduce reliance on artificial lighting and HVAC systems.
 
