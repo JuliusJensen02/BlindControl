@@ -26,10 +26,11 @@ def predict_for_date(room, start_time, constants, plot):
     heating_effects = np.zeros_like(heating_setpoint)
     solar_effects = np.zeros_like(solar_watt)
     lux = df["lux"].to_numpy()
+    wind = df["wind"].to_numpy()
 
     #Save the predictions to the dataframe
     df['temp_predictions'] = predict_temperature(room, constants.values(), room_temp, ambient_temp, solar_watt,
-                                heating_setpoint, cooling_setpoint, lux, heating_effects, solar_effects)
+                                heating_setpoint, cooling_setpoint, lux, wind, heating_effects, solar_effects)
     df['heating_effects'] = heating_effects
     df['solar_effects'] = solar_effects
     df = smooth(df, 'temp_predictions')

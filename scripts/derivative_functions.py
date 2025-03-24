@@ -1,6 +1,9 @@
 import numpy as np
+from sympy import false
 
 heater_valve = 0
+blinds = 0
+blinds_blocked = False
 '''
 @params constants: list of constants
 @params room_temp: list of room temperatures
@@ -11,7 +14,7 @@ heater_valve = 0
 @returns sol.y[0]: list of temperature predictions
 Function for predicting the temperature for the training functions
 '''
-def predict_temperature(room, constants, T_r, T_a, solar_watt, heating_setpoint, cooling_setpoint, lux, heating_effects = None, solar_effects = None):
+def predict_temperature(room, constants, T_r, T_a, solar_watt, heating_setpoint, cooling_setpoint, lux, wind, heating_effects = None, solar_effects = None):
     a_a, a_s, a_h, a_v, a_o = constants
 
     T = np.zeros_like(T_r)
@@ -23,7 +26,8 @@ def predict_temperature(room, constants, T_r, T_a, solar_watt, heating_setpoint,
         if heating_effects is not None:
             heating_effects[i-1] = E_h
             solar_effects[i-1] = S_t
-        T[i] = T[i - 1] + derivative_function(T_a[i], T_r[i - 1], a_a, E_h, a_h, a_v, S_t, a_s, O, a_o)
+        for j in range(15):
+            T[i] = T[i - 1] + (1/15) * derivative_function(T_a[i], T_r[i - 1], a_a, E_h, a_h, a_v, S_t, a_s, O, a_o)
     return T
 
 
@@ -47,14 +51,35 @@ def derivative_function(T_a, T_r, a_a, E_h, a_h, a_v, S_t, a_s, O, a_o):
             (T_a - T_r) * a_v +
             O * a_o)
 
+
+def blinds_control_py(solar_watt, wind):
+    global blinds
+    global blinds_blocked
+    if wind >= 10:
+        blinds_blocked = True
+    elif wind <= 8:
+        blinds_blocked = False
+    if blinds_blocked:
+        blinds = 0
+        return
+    if solar_watt > 180:
+        blinds = 1
+    elif solar_watt < 120:
+        blinds = 0
 '''
 @params df_watt: list of solar_watt
 @returns: solar effect
 Calculates the solar_watt from the sun based on the g-value and window area
 '''
 def solar_effect(room, df_watt):
+    global blinds
+    sun_block = 0
+    if blinds == 1:
+        sun_block = 0.2
+    else:
+        sun_block = 1
     G = 0.45
-    return df_watt * G * room["window_size"]
+    return df_watt * G * room["window_size"] * sun_block
 
 
 '''
