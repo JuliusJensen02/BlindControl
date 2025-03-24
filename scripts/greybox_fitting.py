@@ -3,7 +3,7 @@ import numpy as np
 from scipy.optimize import minimize
 from scripts.data_processing import convert_csv_to_df
 from scripts.derivative_constants import cache_constants
-from scripts.derivative_functions import predict_temperature
+from scripts.derivative_functions import predict_temperature, predict_temperature_rk4
 import multiprocessing
 
 '''
@@ -102,5 +102,5 @@ def train_for_time_frame(room, start_time = "2025-01-01T00:00:00Z", days = 1):
 Function for calculating the sum squared error
 """
 def sum_squared_error(constants, room, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux, wind):
-    t_r_pred = predict_temperature(room, constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux, wind)
+    t_r_pred = predict_temperature_rk4(room, constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux, wind)
     return np.sum((room_temp - t_r_pred) ** 2)

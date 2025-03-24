@@ -108,3 +108,44 @@ def occupancy_effect(lux):
     lpp = 300
     e_p = 100
     return lux / lpp * e_p #lpp is lux per person, e_p is wattage per person
+
+
+def predict_temperature_rk4(room, constants, T_r, T_a, solar_watt, heating_setpoint, cooling_setpoint, lux, wind, heating_effects = None, solar_effects = None):
+    """
+    Predicts the temperature using RK4 and stores **all** 1350 substeps as main steps.
+
+    @returns: array of size 1350 with temperature values at each RK4 step.
+    """
+    a_a, a_s, a_h, a_v, a_o = constants
+    steps_per_main_step = 15
+    total_steps = (len(T_r) - 1) * steps_per_main_step  # (90 * 15 = 1350)
+
+    T = np.zeros(total_steps + 1)  # Store all RK4 steps
+    T[0] = T_r[0]  # Initial temperature
+
+    step_index = 0  # Index for 1350 steps
+
+    # Iterate through 91 datapoints, but apply RK4 with 15 steps in between each
+    for i in range(1, len(T_r)):
+        blinds_control_py(solar_watt[i], wind[i])
+
+        S_t = solar_effect(room, solar_watt[i])
+        E_h = heater_effect(room, heating_setpoint[i], T[step_index])
+        O = max(occupancy_effect(lux[i]) - S_t, 0)
+
+        dt = 1.0 / steps_per_main_step  # Small step for RK4 (1/15)
+
+        # RK4 integration over the 15 sub-steps
+        for _ in range(steps_per_main_step):
+            def f(T_val):
+                return derivative_function(T_a[i], T_val, a_a, E_h, a_h, a_v, S_t, a_s, O, a_o)
+
+            k1 = f(T[step_index])
+            k2 = f(T[step_index] + 0.5 * dt * k1)
+            k3 = f(T[step_index] + 0.5 * dt * k2)
+            k4 = f(T[step_index] + dt * k3)
+
+            T[step_index + 1] = T[step_index] + (dt / 6.0) * (k1 + 2 * k2 + 2 * k3 + k4)
+            step_index += 1
+
+    return T

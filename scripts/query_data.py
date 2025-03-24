@@ -100,7 +100,7 @@ def query_data(input_from, room):
                  |> range(start: """ + date_string_from + """, stop: """ + date_string_to + """)
                  |> filter(fn: (r) => r["source"] == "/TM023_1_20_1103/SG01/Wind_velocity")
                  |> filter(fn: (r) => r["_field"] == "value")
-                 |> rename(columns: {_value: "solar_watt"})
+                 |> rename(columns: {_value: "wind"})
     
 
         solar_room = join(tables: {d1: data_solar_watt, d2: data_room_temp}, on: ["_time"])
