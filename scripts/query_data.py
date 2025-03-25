@@ -121,13 +121,8 @@ def query_data(input_from, room):
     # The data is written to the csv file.
     # The data is fetched from the result and the DMI API and joined based on the time before writing to the csv file.
     data = list()
-    counter = 0
     for table in result:
         for record in table:
-            if counter < 14:
-                counter += 1
-                continue
-            counter = 0
             time = record["_time"]
             outside_temp_at_given_time = None
             for dmi_time, dmi_temp in dmi_results.values:

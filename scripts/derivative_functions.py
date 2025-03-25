@@ -1,7 +1,10 @@
+import math
+
 import numpy as np
 from sympy import false
 
 heater_valve = 0
+heater_envelope = 0
 blinds = 0
 blinds_blocked = False
 '''
@@ -26,8 +29,7 @@ def predict_temperature(room, constants, T_r, T_a, solar_watt, heating_setpoint,
         if heating_effects is not None:
             heating_effects[i-1] = E_h
             solar_effects[i-1] = S_t
-        for j in range(15):
-            T[i] = T[i - 1] + (1/15) * derivative_function(T_a[i], T_r[i - 1], a_a, E_h, a_h, a_v, S_t, a_s, O, a_o)
+        T[i] = T[i - 1] + derivative_function(T_a[i], T_r[i - 1], a_a, E_h, a_h, a_v, S_t, a_s, O, a_o)
     return T
 
 
@@ -90,18 +92,19 @@ Function for calculating the heater's effect on the room
 If the current temperature is below the heating setpoint, the heater is on else off
 '''
 def heater_effect(room, heating_setpoint, current_temperature):
-    global heater_valve
+    max_heat_stored = room["heater_effect"]
+    charge_effect = 0.02
+    decay_effect = 0.02
+
+    global heater_envelope
+    # In your update step
     if current_temperature <= heating_setpoint:
-        heater_valve += 0.25
-        if heater_valve > 1:
-            heater_valve = 1
+        heater_envelope = min(heater_envelope + charge_effect * max_heat_stored, max_heat_stored)
+    else:
+        # Exponential decay
+        heater_envelope *= math.exp(-decay_effect)
 
-    elif current_temperature > heating_setpoint:
-        heater_valve -= 0.25
-        if heater_valve < 0:
-            heater_valve = 0
-
-    return room["heater_effect"] * heater_valve
+    return heater_envelope
 
 
 def occupancy_effect(lux):

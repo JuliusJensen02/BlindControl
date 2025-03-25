@@ -29,8 +29,8 @@ def predict_for_date(room, start_time, constants, plot):
     wind = df["wind"].to_numpy()
 
     #Save the predictions to the dataframe
-    print(predict_temperature_rk4(room, constants.values(), room_temp, ambient_temp, solar_watt,
-                                heating_setpoint, cooling_setpoint, lux, wind, heating_effects, solar_effects))
+    df['temp_predictions'] = predict_temperature(room, constants.values(), room_temp, ambient_temp, solar_watt,
+                                heating_setpoint, cooling_setpoint, lux, wind, heating_effects, solar_effects)
     df['heating_effects'] = heating_effects
     df['solar_effects'] = solar_effects
     #df = smooth(df, 'temp_predictions')

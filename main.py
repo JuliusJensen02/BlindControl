@@ -43,11 +43,11 @@ rooms = {
 }
 
 def main():
-    chosen_room = rooms["1.231"]
-    query_data_period("2024-11-20T00:00:00Z", "2025-03-17T00:00:00Z", chosen_room)
-    #constants = get_constants("data/" + chosen_room["name"] + "/constants_cache.csv", chosen_room, "2024-11-20T00:00:00Z", 50, False)
-    #print(constants)
-    #predict_for_date(chosen_room, "2025-03-04T00:00:00Z", constants, True)
+    chosen_room = rooms["1.213"]
+    #query_data_period("2024-11-20T00:00:00Z", "2025-03-17T00:00:00Z", chosen_room)
+    constants = get_constants("data/" + chosen_room["name"] + "/constants_cache.csv", chosen_room, "2024-11-20T00:00:00Z", 50, True)
+    print(constants)
+    predict_for_date(chosen_room, "2025-03-04T00:00:00Z", constants, True)
 
 if __name__ == '__main__':
     # This is required to ensure proper initialization of multiprocessing

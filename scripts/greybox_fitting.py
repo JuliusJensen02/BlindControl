@@ -42,7 +42,7 @@ def use_best_optimization_method(room, room_temp, ambient_temp, solar_watt, heat
                 best_result = result
         print("Best method: ", best_method)
     else:
-        best_result = minimize(sum_squared_error, np.array([0.0001, 0.0001, 0.001, 0.01, 0.0001]), method=best_method[0], bounds=bounds, args=(room, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux, wind))
+        best_result = minimize(sum_squared_error, np.array([0.00001, 0.00001, 0.0001, 0.001, 0.00001]), method=best_method[0], bounds=bounds, args=(room, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux, wind))
     return best_result
 
 def train_for_day(room, i, time, best_method, days):
@@ -102,5 +102,5 @@ def train_for_time_frame(room, start_time = "2025-01-01T00:00:00Z", days = 1):
 Function for calculating the sum squared error
 """
 def sum_squared_error(constants, room, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux, wind):
-    t_r_pred = predict_temperature_rk4(room, constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux, wind)
+    t_r_pred = predict_temperature(room, constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux, wind)
     return np.sum((room_temp - t_r_pred) ** 2)
