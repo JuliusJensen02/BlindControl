@@ -1,7 +1,5 @@
 from datetime import datetime
-
 import numpy as np
-
 from scripts.data_processing import smooth
 from scripts.data_processing import convert_csv_to_df
 from scripts.derivative_functions import predict_temperature, predict_temperature_rk4

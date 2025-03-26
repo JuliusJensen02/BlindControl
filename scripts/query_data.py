@@ -1,12 +1,9 @@
 import multiprocessing
-
 import influxdb_client
 import os
-
 import pandas as pd
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
-
 from scripts.data_processing import smooth
 from scripts.dmi_api import get_temp
 
@@ -16,8 +13,6 @@ from scripts.dmi_api import get_temp
 This function rounds the given datetime to the nearest hour.
 If the minute is greater than or equal to 30, the hour is incremented by 1.
 '''
-
-
 def hour_rounder(t):
     # Rounds to nearest hour by adding a timedelta hour if minute >= 30
     return (t.replace(second=0, microsecond=0, minute=0, hour=t.hour)

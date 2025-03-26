@@ -1,3 +1,7 @@
+import csv
+import os
+import pandas as pd
+
 """
 @params alpha_a: alpha_a constant for ambient temperature
 @params alpha_s: alpha_s constant for solar effect
@@ -7,12 +11,6 @@
 @params days: number of days to train for
 Writes the constants from the training to the cache csv file
 """
-import csv
-import os
-
-import pandas as pd
-
-
 def cache_constants(alpha_a, alpha_s, alpha_r, alpha_v, alpha_o, start_time, days, error, path):
     #Open the csv file in write mode
     with open(path, 'w+', newline='') as csvfile:

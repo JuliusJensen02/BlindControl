@@ -1,7 +1,5 @@
 import math
-
 import numpy as np
-from sympy import false
 
 heater_valve = 0
 heater_envelope = 0
