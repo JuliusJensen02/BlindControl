@@ -21,28 +21,16 @@ Determines and uses the best minimize method for the minimize function based on 
 def use_best_optimization_method(room, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux, best_method, wind):
     best_error = float("inf")
     best_result = None
-    optimization_methods = [
-        #'L-BFGS-B',
-        'TNC',
-        #'COBYLA',
-        #'SLSQP'
-    ]
     best_method[0] = 'TNC'
     bounds = [(0, 1), (0, 1), (0, 1), (0, 1), (0, 1)]  # Bounds for the constants
-    if best_method[0] is None:
-        print("Choosing best optimization algorithm...")
-        for method in optimization_methods:
-            #Calculate the best fit for the constants based on the given method and save the best method in result
-            result = minimize(sum_squared_error, np.array([0.0001, 0.0001, 0.001, 0.01, 0.0001]), method=method, bounds=bounds, args=(room, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux, wind))
-            #Check if the error is less than the best error
-            if result.fun < best_error:
-                #Set the best error and best method
-                best_error = result.fun
-                best_method[0] = method
-                best_result = result
-        print("Best method: ", best_method)
-    else:
-        best_result = minimize(sum_squared_error, np.array([0.00001, 0.00001, 0.0001, 0.001, 0.00001]), method=best_method[0], bounds=bounds, args=(room, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux, wind))
+    constraints = np.array([0.00001, 0.00001, 0.0001, 0.001, 0.00001])
+    random_guesses = np.random.uniform(low=0, high=constraints, size=5)
+    for i in range(10):
+        result = minimize(sum_squared_error, random_guesses, method=best_method[0], bounds=bounds, args=(room, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux, wind))
+        if result.fun < best_error:
+            # Set the best error and best method
+            best_error = result.fun
+            best_result = result
     return best_result
 
 def train_for_day(room, i, time, best_method, days):

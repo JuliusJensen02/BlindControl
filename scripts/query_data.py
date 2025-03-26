@@ -1,3 +1,5 @@
+import multiprocessing
+
 import influxdb_client
 import os
 
@@ -45,9 +47,10 @@ The data is joined based on the time.
 The data is fetched from the DMI API for the given date.
 The data is written to the csv file.
 """
-def query_data(input_from, room):
+def query_data(room, from_date, day):
+    from_date = datetime.strptime(from_date, "%Y-%m-%dT%H:%M:%SZ")
+    date_from = from_date + timedelta(days=day)
     # The input_from is converted to a datetime object of the format "%Y-%m-%dT%H:%M:%SZ".
-    date_from = datetime.strptime(input_from, "%Y-%m-%dT%H:%M:%SZ")
 
     # The date_to is calculated by adding the number of days to the date_from.
     date_to = date_from + timedelta(days=1)
@@ -159,6 +162,7 @@ def query_data(input_from, room):
 
 def query_data_period(from_date, to_date, room):
     current_date = datetime.strptime(from_date, "%Y-%m-%dT%H:%M:%SZ")
-    while current_date.strftime("%Y-%m-%dT00:00:00Z") <= to_date:
-        query_data(current_date.strftime("%Y-%m-%dT00:00:00Z"), room)
-        current_date = current_date + timedelta(days=1)
+    days = (datetime.strptime(to_date, "%Y-%m-%dT%H:%M:%SZ") - current_date).days
+    with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
+        # Map the days to the pool workers
+        pool.starmap(query_data, [(room, from_date, i) for i in range(days)])
