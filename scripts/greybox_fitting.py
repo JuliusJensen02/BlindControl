@@ -3,7 +3,7 @@ import numpy as np
 from scipy.optimize import minimize
 from scripts.data_processing import convert_csv_to_df
 from scripts.derivative_constants import cache_constants
-from scripts.derivative_functions import predict_temperature
+from scripts.derivative_functions import predict_temperature, predict_temperature_rk4
 import multiprocessing
 
 '''
@@ -18,31 +18,19 @@ import multiprocessing
 @returns: the best optimization fit
 Determines and uses the best minimize method for the minimize function based on the first date
 '''
-def use_best_optimization_method(room, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux, best_method):
+def use_best_optimization_method(room, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux, best_method, wind):
     best_error = float("inf")
     best_result = None
-    optimization_methods = [
-        #'L-BFGS-B',
-        'TNC',
-        #'COBYLA',
-        #'SLSQP'
-    ]
     best_method[0] = 'TNC'
     bounds = [(0, 1), (0, 1), (0, 1), (0, 1), (0, 1)]  # Bounds for the constants
-    if best_method[0] is None:
-        print("Choosing best optimization algorithm...")
-        for method in optimization_methods:
-            #Calculate the best fit for the constants based on the given method and save the best method in result
-            result = minimize(sum_squared_error, np.array([0.0001, 0.0001, 0.001, 0.01, 0.0001]), method=method, bounds=bounds, args=(room, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux))
-            #Check if the error is less than the best error
-            if result.fun < best_error:
-                #Set the best error and best method
-                best_error = result.fun
-                best_method[0] = method
-                best_result = result
-        print("Best method: ", best_method)
-    else:
-        best_result = minimize(sum_squared_error, np.array([0.0001, 0.0001, 0.001, 0.01, 0.0001]), method=best_method[0], bounds=bounds, args=(room, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux))
+    constraints = np.array([0.00001, 0.00001, 0.0001, 0.001, 0.00001])
+    random_guesses = np.random.uniform(low=0, high=constraints, size=5)
+    for i in range(10):
+        result = minimize(sum_squared_error, random_guesses, method=best_method[0], bounds=bounds, args=(room, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux, wind))
+        if result.fun < best_error:
+            # Set the best error and best method
+            best_error = result.fun
+            best_result = result
     return best_result
 
 def train_for_day(room, i, time, best_method, days):
@@ -57,9 +45,10 @@ def train_for_day(room, i, time, best_method, days):
     heating_setpoint = df["heating_setpoint"].to_numpy()
     cooling_setpoint = df["cooling_setpoint"].to_numpy()
     lux = df["lux"].to_numpy()
+    wind = df["wind"].to_numpy()
 
     result = use_best_optimization_method(room, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux,
-                                          best_method)
+                                          best_method, wind)
     # Return results to accumulate constants
     return result.x[0], result.x[1], result.x[2], result.x[3], result.x[4], result.fun
 
@@ -100,6 +89,6 @@ def train_for_time_frame(room, start_time = "2025-01-01T00:00:00Z", days = 1):
 @returns: mean squared error
 Function for calculating the sum squared error
 """
-def sum_squared_error(constants, room, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux):
-    t_r_pred = predict_temperature(room, constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux)
+def sum_squared_error(constants, room, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux, wind):
+    t_r_pred = predict_temperature(room, constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux, wind)
     return np.sum((room_temp - t_r_pred) ** 2)

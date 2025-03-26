@@ -1,3 +1,5 @@
+import multiprocessing
+
 import influxdb_client
 import os
 
@@ -45,9 +47,10 @@ The data is joined based on the time.
 The data is fetched from the DMI API for the given date.
 The data is written to the csv file.
 """
-def query_data(input_from, room):
+def query_data(room, from_date, day):
+    from_date = datetime.strptime(from_date, "%Y-%m-%dT%H:%M:%SZ")
+    date_from = from_date + timedelta(days=day)
     # The input_from is converted to a datetime object of the format "%Y-%m-%dT%H:%M:%SZ".
-    date_from = datetime.strptime(input_from, "%Y-%m-%dT%H:%M:%SZ")
 
     # The date_to is calculated by adding the number of days to the date_from.
     date_to = date_from + timedelta(days=1)
@@ -100,7 +103,7 @@ def query_data(input_from, room):
                  |> range(start: """ + date_string_from + """, stop: """ + date_string_to + """)
                  |> filter(fn: (r) => r["source"] == "/TM023_1_20_1103/SG01/Wind_velocity")
                  |> filter(fn: (r) => r["_field"] == "value")
-                 |> rename(columns: {_value: "solar_watt"})
+                 |> rename(columns: {_value: "wind"})
     
 
         solar_room = join(tables: {d1: data_solar_watt, d2: data_room_temp}, on: ["_time"])
@@ -121,13 +124,8 @@ def query_data(input_from, room):
     # The data is written to the csv file.
     # The data is fetched from the result and the DMI API and joined based on the time before writing to the csv file.
     data = list()
-    counter = 0
     for table in result:
         for record in table:
-            if counter < 14:
-                counter += 1
-                continue
-            counter = 0
             time = record["_time"]
             outside_temp_at_given_time = None
             for dmi_time, dmi_temp in dmi_results.values:
@@ -164,6 +162,7 @@ def query_data(input_from, room):
 
 def query_data_period(from_date, to_date, room):
     current_date = datetime.strptime(from_date, "%Y-%m-%dT%H:%M:%SZ")
-    while current_date.strftime("%Y-%m-%dT00:00:00Z") <= to_date:
-        query_data(current_date.strftime("%Y-%m-%dT00:00:00Z"), room)
-        current_date = current_date + timedelta(days=1)
+    days = (datetime.strptime(to_date, "%Y-%m-%dT%H:%M:%SZ") - current_date).days
+    with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
+        # Map the days to the pool workers
+        pool.starmap(query_data, [(room, from_date, i) for i in range(days)])
