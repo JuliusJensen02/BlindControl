@@ -90,7 +90,7 @@ def query_data(room, from_date, day):
                  |> range(start: """ + date_string_from + """, stop: """ + date_string_to + """)
                  |> filter(fn: (r) => r.room_id == \"""" + room["name"] + """\") 
                  |> filter(fn: (r) => r["sensor_type"] == "occupancy")
-                 |> filter(fn: (r) => r["source"] == "/TM023_3_20_1.204/Lon/Net/Rum_""" + room["name"] + """/Lux_meter""" + room["source_lux"] + """\")
+                 |> filter(fn: (r) => r["source"] == "/TM023_3_20_1.204/Lon/Net/Rum_""" + room["name"] + """/Lux""" + room["source_lux"] + """\")
                  |> filter(fn: (r) => r["_field"] == "value") 
                  |> rename(columns: {_value: "lux"})
                  
@@ -113,7 +113,7 @@ def query_data(room, from_date, day):
     # The result is stored in the variable 'result'.
     query_api = client.query_api()
     result = query_api.query(org=os.getenv("org"), query=query)
-
+    print(result)
     # The data is fetched from the DMI API for the given date.
     dmi_results = get_temp(date_string_from, date_string_to)
     # The data is written to the csv file.
@@ -147,7 +147,7 @@ def query_data(room, from_date, day):
 
     df = pd.DataFrame(data)
     # df = remove_outliers(df)  # Remove outliers from the dataframe
-    df = smooth(df, 'room_temp')  # Smooth the dataframe
+    #df = smooth(df, 'room_temp')  # Smooth the dataframe
 
     df.to_csv('data/'""+ room["name"] +""'/data_' + date_from.strftime("%Y-%m-%d") + '.csv', mode='w')
 
@@ -158,6 +158,6 @@ def query_data(room, from_date, day):
 def query_data_period(from_date, to_date, room):
     current_date = datetime.strptime(from_date, "%Y-%m-%dT%H:%M:%SZ")
     days = (datetime.strptime(to_date, "%Y-%m-%dT%H:%M:%SZ") - current_date).days
-    with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
+    with multiprocessing.Pool(processes=5) as pool:
         # Map the days to the pool workers
         pool.starmap(query_data, [(room, from_date, i) for i in range(days)])

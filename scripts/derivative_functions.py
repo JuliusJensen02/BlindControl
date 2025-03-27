@@ -5,6 +5,29 @@ heater_valve = 0
 heater_envelope = 0
 blinds = 0
 blinds_blocked = False
+
+
+def predict_temperature_for_prediction(room, constants, T_r, T_a, solar_watt, heating_setpoint, cooling_setpoint, lux, wind, heating_effects = None, solar_effects = None):
+    a_a, a_s, a_h, a_v, a_o = constants
+
+    T = np.zeros_like(T_r)
+    T[0] = T_r[0]
+    for i in range(1, len(T_r)):
+        S_t = solar_effect(room, solar_watt[i])
+        E_h = heater_effect(room, heating_setpoint[i], T[i - 1])
+        O = max(occupancy_effect(lux[i]) - S_t, 0)
+        if heating_effects is not None:
+            heating_effects[i - 1] = E_h
+            solar_effects[i - 1] = S_t
+        if i % 240 == 0:
+            T[i] = T_r[i]
+        else:
+            T[i] = T[i - 1] + derivative_function(T_a[i], T_r[i - 1], a_a, E_h, a_h, a_v, S_t, a_s, O, a_o)
+    return T
+
+
+
+
 '''
 @params constants: list of constants
 @params room_temp: list of room temperatures

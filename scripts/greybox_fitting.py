@@ -3,7 +3,8 @@ import numpy as np
 from scipy.optimize import minimize
 from scripts.data_processing import convert_csv_to_df
 from scripts.derivative_constants import cache_constants
-from scripts.derivative_functions import predict_temperature, predict_temperature_rk4
+from scripts.derivative_functions import predict_temperature, predict_temperature_rk4, \
+    predict_temperature_for_prediction
 import multiprocessing
 
 '''
@@ -24,8 +25,8 @@ def use_best_optimization_method(room, room_temp, ambient_temp, solar_watt, heat
     best_method[0] = 'TNC'
     bounds = [(0, 1), (0, 1), (0, 1), (0, 1), (0, 1)]  # Bounds for the constants
     constraints = np.array([0.00001, 0.00001, 0.0001, 0.001, 0.00001])
-    random_guesses = np.random.uniform(low=0, high=constraints, size=5)
     for i in range(10):
+        random_guesses = np.random.uniform(low=0, high=constraints, size=5)
         result = minimize(sum_squared_error, random_guesses, method=best_method[0], bounds=bounds, args=(room, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux, wind))
         if result.fun < best_error:
             # Set the best error and best method
@@ -34,7 +35,6 @@ def use_best_optimization_method(room, room_temp, ambient_temp, solar_watt, heat
     return best_result
 
 def train_for_day(room, i, time, best_method, days):
-    print("Minimizing for day "+str(i+1)+" / "+str(days))
     """
     Train the model for a specific day (used for multiprocessing).
     """
@@ -49,6 +49,7 @@ def train_for_day(room, i, time, best_method, days):
 
     result = use_best_optimization_method(room, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux,
                                           best_method, wind)
+    print("Minimized for day " + str(i + 1) + " / " + str(days))
     # Return results to accumulate constants
     return result.x[0], result.x[1], result.x[2], result.x[3], result.x[4], result.fun
 
@@ -90,5 +91,5 @@ def train_for_time_frame(room, start_time = "2025-01-01T00:00:00Z", days = 1):
 Function for calculating the sum squared error
 """
 def sum_squared_error(constants, room, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux, wind):
-    t_r_pred = predict_temperature(room, constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux, wind)
+    t_r_pred = predict_temperature_for_prediction(room, constants, room_temp, ambient_temp, solar_watt, heating_setpoint, cooling_setpoint, lux, wind)
     return np.sum((room_temp - t_r_pred) ** 2)
