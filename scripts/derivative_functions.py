@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import torch
 
 heater_valve = 0
 heater_envelope = 0
@@ -173,3 +174,72 @@ def predict_temperature_rk4(room, constants, T_r, T_a, solar_watt, heating_setpo
             step_index += 1
 
     return T
+
+
+
+def occupancy_effect_torch(lux):
+    lpp = 300  # lux per person
+    e_p = 100  # wattage per person
+    return lux / lpp * e_p
+
+
+def solar_effect_torch(solar_watt, window_size, blinds_state):
+    # blinds_state: tensor of 0 or 1 (same length as solar_watt)
+    G = 0.45
+    sun_block = torch.where(blinds_state == 1, 0.2, 1.0)
+    return solar_watt * G * window_size * sun_block
+
+
+def heater_effect_torch(heating_setpoint, room_temp, max_heat, charge=0.02, decay=0.02):
+    envelope = torch.zeros_like(room_temp)
+    decay_tensor = torch.tensor(decay, dtype=torch.float32, device=envelope.device)
+    for i in range(1, len(room_temp)):
+        is_on = room_temp[i - 1] <= heating_setpoint[i - 1]
+        if is_on:
+            envelope[i] = torch.clamp(envelope[i - 1] + charge * max_heat, max=max_heat)
+        else:
+            envelope[i] = envelope[i - 1] * torch.exp(-decay_tensor)
+    return envelope
+
+
+def blinds_logic_torch(solar_watt, wind):
+    # Based on your original logic: 1 if sun > 180, 0 if sun < 120, blocked if wind >= 10
+    blinds = torch.zeros_like(solar_watt)
+    blocked = wind >= 10
+    unblocked = wind <= 8
+
+    for i in range(len(solar_watt)):
+        if blocked[i]:
+            blinds[i] = 0
+        elif solar_watt[i] > 180:
+            blinds[i] = 1
+        elif solar_watt[i] < 120:
+            blinds[i] = 0
+        # otherwise, retain previous value
+        elif i > 0:
+            blinds[i] = blinds[i - 1]
+    return blinds
+
+
+from torchdiffeq import odeint
+
+class RoomTemperatureODE(torch.nn.Module):
+    def __init__(self, room, inputs, constants):
+        super().__init__()
+        self.room = room
+        self.inputs = inputs  # tuple of external signals
+        self.constants = constants  # [a_a, a_s, a_h, a_v, a_o]
+
+    def forward(self, t, T_r):
+        idx = int(t.item())  # Assume integer timesteps (0, 1, 2, ...)
+        T_a, S_t, E_h, O = self.inputs
+
+        a_a, a_s, a_h, a_v, a_o = self.constants
+
+        dTdt = ((T_a[idx] - T_r) * a_a +
+                S_t[idx] * a_s +
+                E_h[idx] * a_h +
+                (T_a[idx] - T_r) * a_v +
+                O[idx] * a_o)
+
+        return dTdt

@@ -1,6 +1,8 @@
 import csv
 import os
 import pandas as pd
+from greybox_fitting_torch import train_for_time_frame_pytorch
+from greybox_fitting_torch_new import train_batch
 
 """
 @params alpha_a: alpha_a constant for ambient temperature
@@ -35,13 +37,15 @@ def get_constants(path, room, start_time = "2025-01-01T00:00:00Z", days = 1, ret
     from scripts.greybox_fitting import train_for_time_frame
     #Check if the cache file is empty or if retrain is true
     if os.path.getsize(path) == 0 or retrain:
-        train_for_time_frame(room, start_time, days) #Train for the given timeframe
+        constants, error = train_for_time_frame_pytorch(room, start_time, days)
+        #train_for_time_frame(room, start_time, days) #Train for the given timeframe
         df = pd.read_csv(path) #Read the cache file
     else:
         df = pd.read_csv(path)
         #Check if valid data is loaded from the cache file to the dataframe and if the start time and days are the same as in the csv file
         if len(df) == 0 or start_time != df['start_time'][0] or days != df['days'][0]:
-            train_for_time_frame(room, start_time, days)
+            constants, error = train_for_time_frame_pytorch(room, start_time, days)
+            #train_for_time_frame(room, start_time, days)
             df = pd.read_csv(path)
     #Return the constants as a dictionary
     return {'alpha_a': df['alpha_a'][0], 'alpha_s': df['alpha_s'][0], 'alpha_r': df['alpha_r'][0],

@@ -45,7 +45,7 @@ rooms = {
 def main():
     chosen_room = rooms["1.229"]
     #query_data_period("2024-11-20T00:00:00Z", "2024-11-21T00:00:00Z", chosen_room)
-    constants = get_constants("data/" + chosen_room["name"] + "/constants_cache.csv", chosen_room, "2024-11-20T00:00:00Z", 90, True)
+    constants = get_constants("data/" + chosen_room["name"] + "/constants_cache.csv", chosen_room, "2024-11-20T00:00:00Z", 90, False)
     #print(constants)
     predict_for_date(chosen_room, "2025-02-19T00:00:00Z", constants, True)
 
