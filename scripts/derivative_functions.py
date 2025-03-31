@@ -8,50 +8,37 @@ blinds = 0
 blinds_blocked = False
 
 
-def predict_temperature_for_prediction(room, constants, T_r, T_a, solar_watt, heating_setpoint, cooling_setpoint, lux, wind, heating_effects = None, solar_effects = None):
+def predict_temperature_for_prediction(room, constants, T_r, T_a, solar_watt, heating_setpoint,
+                                       cooling_setpoint, lux, wind, heating_effects, solar_effects):
     a_a, a_s, a_h, a_v, a_o = constants
 
     T = np.zeros_like(T_r)
     T[0] = T_r[0]
     for i in range(1, len(T_r)):
+        blinds_control_py(solar_watt[i], wind[i])
         S_t = solar_effect(room, solar_watt[i])
         E_h = heater_effect(room, heating_setpoint[i], T[i - 1])
         O = max(occupancy_effect(lux[i]) - S_t, 0)
-        if heating_effects is not None:
-            heating_effects[i - 1] = E_h
-            solar_effects[i - 1] = S_t
+        heating_effects[i - 1] = E_h
+        solar_effects[i - 1] = S_t
+
         if i % 240 == 0:
             T[i] = T_r[i]
         else:
             T[i] = T[i - 1] + derivative_function(T_a[i], T_r[i - 1], a_a, E_h, a_h, a_v, S_t, a_s, O, a_o)
     return T
 
-
-
-
-'''
-@params constants: list of constants
-@params room_temp: list of room temperatures
-@params ambient_temp: list of ambient temperatures
-@params solar_watt: list of solar_watt
-@params heating_setpoint: list of heating setpoints
-@params cooling_setpoint: list of cooling setpoints
-@returns sol.y[0]: list of temperature predictions
-Function for predicting the temperature for the training functions
-'''
-def predict_temperature(room, constants, T_r, T_a, solar_watt, heating_setpoint, cooling_setpoint, lux, wind, heating_effects = None, solar_effects = None):
+def predict_temperature_for_training(room, constants, T_r, T_a, S_t, heating_setpoint, cooling_setpoint, O):
     a_a, a_s, a_h, a_v, a_o = constants
 
     T = np.zeros_like(T_r)
     T[0] = T_r[0]
     for i in range(1, len(T_r)):
-        S_t = solar_effect(room, solar_watt[i])
-        E_h = heater_effect(room, heating_setpoint[i], T[i-1])
-        O = max(occupancy_effect(lux[i]) - S_t, 0)
-        if heating_effects is not None:
-            heating_effects[i-1] = E_h
-            solar_effects[i-1] = S_t
-        T[i] = T[i - 1] + derivative_function(T_a[i], T_r[i - 1], a_a, E_h, a_h, a_v, S_t, a_s, O, a_o)
+        E_h = heater_effect(room, heating_setpoint[i], T[i - 1])
+        if i % 240 == 0:
+            T[i] = T_r[i]
+        else:
+            T[i] = T[i - 1] + derivative_function(T_a[i], T_r[i - 1], a_a, E_h, a_h, a_v, S_t, a_s, O, a_o)
     return T
 
 
@@ -135,59 +122,13 @@ def occupancy_effect(lux):
     return lux / lpp * e_p #lpp is lux per person, e_p is wattage per person
 
 
-def predict_temperature_rk4(room, constants, T_r, T_a, solar_watt, heating_setpoint, cooling_setpoint, lux, wind, heating_effects = None, solar_effects = None):
-    """
-    Predicts the temperature using RK4 and stores **all** 1350 substeps as main steps.
-
-    @returns: array of size 1350 with temperature values at each RK4 step.
-    """
-    a_a, a_s, a_h, a_v, a_o = constants
-    steps_per_main_step = 15
-    total_steps = (len(T_r) - 1) * steps_per_main_step  # (90 * 15 = 1350)
-
-    T = np.zeros(total_steps + 1)  # Store all RK4 steps
-    T[0] = T_r[0]  # Initial temperature
-
-    step_index = 0  # Index for 1350 steps
-
-    # Iterate through 91 datapoints, but apply RK4 with 15 steps in between each
-    for i in range(1, len(T_r)):
-        blinds_control_py(solar_watt[i], wind[i])
-
-        S_t = solar_effect(room, solar_watt[i])
-        E_h = heater_effect(room, heating_setpoint[i], T[step_index])
-        O = max(occupancy_effect(lux[i]) - S_t, 0)
-
-        dt = 1.0 / steps_per_main_step  # Small step for RK4 (1/15)
-
-        # RK4 integration over the 15 sub-steps
-        for _ in range(steps_per_main_step):
-            def f(T_val):
-                return derivative_function(T_a[i], T_val, a_a, E_h, a_h, a_v, S_t, a_s, O, a_o)
-
-            k1 = f(T[step_index])
-            k2 = f(T[step_index] + 0.5 * dt * k1)
-            k3 = f(T[step_index] + 0.5 * dt * k2)
-            k4 = f(T[step_index] + dt * k3)
-
-            T[step_index + 1] = T[step_index] + (dt / 6.0) * (k1 + 2 * k2 + 2 * k3 + k4)
-            step_index += 1
-
-    return T
 
 
 
-def occupancy_effect_torch(lux):
-    lpp = 300  # lux per person
-    e_p = 100  # wattage per person
-    return lux / lpp * e_p
 
 
-def solar_effect_torch(solar_watt, window_size, blinds_state):
-    # blinds_state: tensor of 0 or 1 (same length as solar_watt)
-    G = 0.45
-    sun_block = torch.where(blinds_state == 1, 0.2, 1.0)
-    return solar_watt * G * window_size * sun_block
+
+
 
 
 def heater_effect_torch(heating_setpoint, room_temp, max_heat, charge=0.02, decay=0.02):
@@ -201,27 +142,6 @@ def heater_effect_torch(heating_setpoint, room_temp, max_heat, charge=0.02, deca
             envelope[i] = envelope[i - 1] * torch.exp(-decay_tensor)
     return envelope
 
-
-def blinds_logic_torch(solar_watt, wind):
-    # Based on your original logic: 1 if sun > 180, 0 if sun < 120, blocked if wind >= 10
-    blinds = torch.zeros_like(solar_watt)
-    blocked = wind >= 10
-    unblocked = wind <= 8
-
-    for i in range(len(solar_watt)):
-        if blocked[i]:
-            blinds[i] = 0
-        elif solar_watt[i] > 180:
-            blinds[i] = 1
-        elif solar_watt[i] < 120:
-            blinds[i] = 0
-        # otherwise, retain previous value
-        elif i > 0:
-            blinds[i] = blinds[i - 1]
-    return blinds
-
-
-from torchdiffeq import odeint
 
 class RoomTemperatureODE(torch.nn.Module):
     def __init__(self, room, inputs, constants):

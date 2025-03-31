@@ -2,7 +2,6 @@ import csv
 import os
 import pandas as pd
 from greybox_fitting_torch import train_for_time_frame_pytorch
-from greybox_fitting_torch_new import train_batch
 
 """
 @params alpha_a: alpha_a constant for ambient temperature
@@ -33,20 +32,29 @@ def cache_constants(alpha_a, alpha_s, alpha_r, alpha_v, alpha_o, start_time, day
 @returns: dictionary of constants
 Function for getting the constants based on the given timeframe
 """
-def get_constants(path, room, start_time = "2025-01-01T00:00:00Z", days = 1, retrain = False):
+def get_constants(room, start_time = "2025-01-01T00:00:00Z", days = 1, retrain = False):
     from scripts.greybox_fitting import train_for_time_frame
-    #Check if the cache file is empty or if retrain is true
-    if os.path.getsize(path) == 0 or retrain:
-        constants, error = train_for_time_frame_pytorch(room, start_time, days)
+    path = "data/" + room["name"] + "/constants_cache.csv"
+
+    if is_retrain_needed(path, start_time, days, retrain):
+        train_for_time_frame_pytorch(room, start_time, days)
         #train_for_time_frame(room, start_time, days) #Train for the given timeframe
-        df = pd.read_csv(path) #Read the cache file
-    else:
-        df = pd.read_csv(path)
-        #Check if valid data is loaded from the cache file to the dataframe and if the start time and days are the same as in the csv file
-        if len(df) == 0 or start_time != df['start_time'][0] or days != df['days'][0]:
-            constants, error = train_for_time_frame_pytorch(room, start_time, days)
-            #train_for_time_frame(room, start_time, days)
-            df = pd.read_csv(path)
+    df = pd.read_csv(path)
+
     #Return the constants as a dictionary
     return {'alpha_a': df['alpha_a'][0], 'alpha_s': df['alpha_s'][0], 'alpha_r': df['alpha_r'][0],
             'alpha_v': df['alpha_v'][0], 'alpha_o': df['alpha_o'][0]}
+
+
+def is_retrain_needed(path, start_time, days, retrain):
+    df = pd.read_csv(path)
+
+    # Check if the cache file is empty or if retrain is true
+    # Check if valid data is loaded from the cache file to the dataframe and if the start time and days are the same as in the csv file
+    if (os.path.getsize(path) == 0 or
+            retrain or
+            len(df) == 0 or
+            start_time != df['start_time'][0] or
+            days != df['days'][0]):
+        return True
+    return False

@@ -113,7 +113,6 @@ def query_data(room, from_date, day):
     # The result is stored in the variable 'result'.
     query_api = client.query_api()
     result = query_api.query(org=os.getenv("org"), query=query)
-    print(result)
     # The data is fetched from the DMI API for the given date.
     dmi_results = get_temp(date_string_from, date_string_to)
     # The data is written to the csv file.
@@ -149,7 +148,7 @@ def query_data(room, from_date, day):
     # df = remove_outliers(df)  # Remove outliers from the dataframe
     #df = smooth(df, 'room_temp')  # Smooth the dataframe
 
-    df.to_csv('data/'""+ room["name"] +""'/data_' + date_from.strftime("%Y-%m-%d") + '.csv', mode='w')
+    df.to_csv('data/'""+ room["name"] +""'/query_data/data_' + date_from.strftime("%Y-%m-%d") + '.csv', mode='w')
 
     # Confirmation message
     print("Fetched data from: " + date_string_from + ", to: " + date_string_to)

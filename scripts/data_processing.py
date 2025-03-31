@@ -1,5 +1,6 @@
-import numpy as np
+from datetime import datetime, timedelta
 import pandas as pd
+from derivative_functions import occupancy_effect, solar_effect, blinds_control_py
 
 '''
 @param df: DataFrame
@@ -18,52 +19,18 @@ def normalize(df):
     # Return the normalized dataframe:
     return df
 
-
-'''
-@param df: DataFrame
-@return df_cleaned: DataFrame
-This function removes outliers from the dataframe.
-The outliers are detected using the rolling mean and the standard deviation of the columns 'solar_watt' and 'room_temp'.
-The threshold for the outliers is set to 3 times the standard deviation.
-'''
-def remove_outliers(df=pd.DataFrame()):
-    temp_df = pd.DataFrame()
-
-    # Calculate the rolling mean for the column 'solar_watt':
-    temp_df['watt_rolling_mean'] = df['solar_watt'].rolling(window=10, center=True, min_periods=1).mean()
-
-    # Calculate the absolute difference between the actual value and the rolling mean for the column 'solar_watt':
-    temp_df['watt_diff'] = np.abs(df['solar_watt'] - temp_df['watt_rolling_mean'])
-
-    # Calculate the rolling mean for the column 'room_temp':
-    temp_df['room_temp_rolling_mean'] = df['room_temp'].rolling(window=10, center=True, min_periods=1).mean()
-
-    # Calculate the absolute difference between the actual value and the rolling mean for the column 'room_temp':
-    temp_df['room_temp_diff'] = np.abs(df['room_temp'] - temp_df['room_temp_rolling_mean'])
-
-    # Calculate the threshold for the outliers:
-    # The threshold is set to 3 times the standard deviation, found using "std()" of the columns 'watt_diff' and 'room_temp_diff':
-    threshold_watt = temp_df['watt_diff'].std() * 3
-    threshold_room_temp = temp_df['room_temp_diff'].std() * 3
-
-    # Find the outliers using the threshold:
-    outliers_ts = df[(temp_df['watt_diff'] > threshold_watt) | (temp_df['room_temp_diff'] > threshold_room_temp)]
-
-    # Remove the outliers from the dataframe:
-    df_cleaned = df.drop(outliers_ts.index)
-
-    return df_cleaned
-
-
 '''
 @param csv_data: str
 @return df: DataFrame
 This function converts the csv data into a DataFrame.
 '''
-def convert_csv_to_df(from_date, room):
+def convert_csv_to_df(from_date, room, processed_data = False):
     # Read the csv data into a DataFrame:
     # The csv-data is the path to the csv file containing the data.
-    df = pd.read_csv('data/'"" + room["name"] + ""'/data_' + from_date.strftime("%Y-%m-%d") + '.csv')
+    data_path = "query_data"
+    if processed_data:
+        data_path = "processed_data"
+    df = pd.read_csv('data/'"" + room["name"] + ""'/' + data_path + '/data_' + from_date.strftime("%Y-%m-%d") + '.csv')
     df = df.sort_values(by="time")
     return df
 
@@ -79,3 +46,41 @@ def smooth(df, col):
     # Rolling works by taking the average of a window of values around the current value.
     df[col] = df[col].rolling(window=15, center=True, min_periods=1).mean()
     return df
+
+
+def get_processed_data_as_df(from_date, room):
+    return convert_csv_to_df(from_date, room, True)
+
+
+def get_raw_data_as_df(from_date, room):
+    return convert_csv_to_df(from_date, room, False)
+
+
+def pre_process_data_for_date(from_data, room):
+    df = get_raw_data_as_df(from_data, room)
+    solar_effect_list = []
+    occupancy_effect_list = []
+
+    for index, row in df.iterrows():
+        blinds_control_py(row['solar_watt'], row['wind'])
+        solar_effect_current = solar_effect(room, row['solar_watt'])
+        solar_effect_list.append(solar_effect_current)
+        occupancy_effect_list.append(max(occupancy_effect(row['lux']) - solar_effect_current, 0))
+
+    preprocessed_data = {"time": df["time"],
+                 "solar_effect": solar_effect_list,
+                 "room_temp": df["room_temp"],
+                 "ambient_temp": df["ambient_temp"],
+                 "heating_setpoint": df["heating_setpoint"],
+                 "cooling_setpoint": df["cooling_setpoint"],
+                 "occupancy_effect": occupancy_effect_list}
+
+    df = pd.DataFrame(preprocessed_data)
+    df.to_csv('data/'"" + room["name"] + ""'/processed_data/data_' + from_data.strftime("%Y-%m-%d") + '.csv', mode='w')
+
+def preprocess_data_for_all_dates(from_date, to_date, room):
+    from_date = datetime.strptime(from_date, "%Y-%m-%dT%H:%M:%SZ")
+    days = (datetime.strptime(to_date, "%Y-%m-%dT%H:%M:%SZ") - from_date).days
+    for i in range(days):
+        pre_process_data_for_date(from_date + timedelta(days=i), room)
+        print("Preprocessed for day " + str(i + 1) + " / " + str(days))
