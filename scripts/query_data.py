@@ -4,7 +4,6 @@ import os
 import pandas as pd
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
-from scripts.data_processing import smooth
 from scripts.dmi_api import get_temp
 
 '''

@@ -1,7 +1,7 @@
 import csv
 import os
 import pandas as pd
-from greybox_fitting_torch import train_for_time_frame_pytorch
+from scripts.training import train_for_time_frame
 
 """
 @params alpha_a: alpha_a constant for ambient temperature
@@ -32,13 +32,14 @@ def cache_constants(alpha_a, alpha_s, alpha_r, alpha_v, alpha_o, start_time, day
 @returns: dictionary of constants
 Function for getting the constants based on the given timeframe
 """
-def get_constants(room, start_time = "2025-01-01T00:00:00Z", days = 1, retrain = False, prediction_interval = 240):
-    from scripts.greybox_fitting import train_for_time_frame
+def get_constants(room, start_time, days, retrain, prediction_interval):
     path = "data/" + room["name"] + "/constants_cache.csv"
 
     if is_retrain_needed(path, start_time, days, retrain):
-        train_for_time_frame_pytorch(room, start_time, days, prediction_interval)
-        #train_for_time_frame(room, start_time, days) #Train for the given timeframe
+        print("Retraining...", flush=True)
+        constants, error = train_for_time_frame(room, start_time, days, prediction_interval)
+        print("Finished training", flush=True)
+        print((constants, error), flush=True)
     df = pd.read_csv(path)
 
     #Return the constants as a dictionary

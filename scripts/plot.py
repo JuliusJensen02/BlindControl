@@ -1,8 +1,6 @@
-import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
 from plotly.subplots import make_subplots
-from scripts.data_processing import normalize
 
 '''
 @params df: DataFrame

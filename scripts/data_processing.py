@@ -1,23 +1,6 @@
 from datetime import datetime, timedelta
 import pandas as pd
-from derivative_functions import occupancy_effect, solar_effect, blinds_control_py
-
-'''
-@param df: DataFrame
-@return df: DataFrame
-This function normalizes the columns 'solar_watt', 'room_temp', and 'ambient_temp' in the dataframe.
-The normalization is done using the formula:
-(x - min(x)) / (max(x) - min(x))
-where x is the column to be normalized.
-'''
-def normalize(df):
-    # Define the columns to be normalized:
-    cols_to_normalize = ['solar_watt']
-    # Using the formula to normalize the columns:
-    df[cols_to_normalize] = 20 + (df[cols_to_normalize] - df[cols_to_normalize].min()) / (
-                df[cols_to_normalize].max() - df[cols_to_normalize].min())
-    # Return the normalized dataframe:
-    return df
+import torch
 
 '''
 @param csv_data: str
@@ -57,6 +40,7 @@ def get_raw_data_as_df(from_date, room):
 
 
 def pre_process_data_for_date(from_data, room):
+    from scripts.new_derivative_functions import occupancy_effect, solar_effect, blinds_control_py
     df = get_raw_data_as_df(from_data, room)
     solar_effect_list = []
     occupancy_effect_list = []
@@ -84,3 +68,9 @@ def preprocess_data_for_all_dates(from_date, to_date, room):
     for i in range(days):
         pre_process_data_for_date(from_date + timedelta(days=i), room)
         print("Preprocessed for day " + str(i + 1) + " / " + str(days))
+
+
+def get_processed_data_as_tensor(from_date, room):
+    df = get_processed_data_as_df(from_date, room)
+    data_tensor = torch.tensor(df[["room_temp", "ambient_temp", "solar_effect", "heating_setpoint", "cooling_setpoint", "occupancy_effect"]].values, dtype=torch.float32)
+    return data_tensor

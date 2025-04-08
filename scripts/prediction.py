@@ -1,6 +1,6 @@
 from datetime import datetime
 import numpy as np
-from data_processing import get_raw_data_as_df
+from scripts.data_processing import get_raw_data_as_df
 from scripts.derivative_functions import predict_temperature_for_prediction
 from scripts.plot import plot_df
 

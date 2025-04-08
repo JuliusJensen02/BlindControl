@@ -6,6 +6,7 @@ heater_valve = 0
 heater_envelope = 0
 blinds = 0
 blinds_blocked = False
+torch.set_num_threads(64)
 
 
 def predict_temperature_for_prediction(room, constants, T_r, T_a, solar_watt, heating_setpoint,
@@ -100,11 +101,7 @@ def solar_effect(room, df_watt):
 Function for calculating the heater's effect on the room
 If the current temperature is below the heating setpoint, the heater is on else off
 '''
-def heater_effect(room, heating_setpoint, current_temperature):
-    max_heat_stored = room["heater_effect"]
-    charge_effect = 0.02
-    decay_effect = 0.02
-
+def heater_effect(heating_setpoint, current_temperature, max_heat_stored: float, charge_effect: float = 0.02, decay_effect: float = 0.02):
     global heater_envelope
     # In your update step
     if current_temperature <= heating_setpoint:
