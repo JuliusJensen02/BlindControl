@@ -108,7 +108,7 @@ def train_for_time_frame(room: dict, start_time: str, days: int, prediction_inte
 
     avg_constants = alpha / days
     avg_error = total_error / days
-    from scripts.derivative_constants import cache_constants
+    from scripts.constants import cache_constants
     cache_constants(*avg_constants, start_time, days, avg_error, f"data/{room['name']}/constants_cache.csv")
 
     return avg_constants, avg_error

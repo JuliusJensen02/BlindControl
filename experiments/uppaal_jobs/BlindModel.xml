@@ -1425,7 +1425,7 @@ const double r233[8] = {1.233, 7, 758, 0.0000482699692484434, 0.0003135142135749
 const double current_room[8] = r213;
 const double charge_effect = 0.02;
 const double decay_effect = 0.02;
-const int init_time = 480;
+const int init_time = 1320;
 const int control_interval = 30;
 int counter = init_time;
 
@@ -1659,7 +1659,7 @@ system clock_time, controller_blinds, room, optimization;
 		<option key="--truncation-time-error" value="1.0E-4"/>
 		<option key="--truncation-error" value="1.0E-4"/>
 		<query>
-			<formula>strategy GoFast = minE (cost) [&lt;=control_interval * 2] : &lt;&gt; counter == init_time + control_interval * 2</formula>
+			<formula>strategy GoFast = minE (cost) [&lt;=init_time + control_interval * 5] : &lt;&gt; counter == init_time + control_interval * 5</formula>
 			<comment>(9000 runs) Learning statistics for best strategy: Number of resets: 1 Number of iterations in last reset: 5 Number of iterations in total: 19</comment>
 		</query>
 		<query>

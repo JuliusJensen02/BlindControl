@@ -97,7 +97,7 @@ def train_for_time_frame_pytorch(room, start_time="2025-01-01T00:00:00Z", days=1
 
     avg_constants = alpha / days
     avg_error = total_error / days
-    from scripts.derivative_constants import cache_constants
+    from scripts.constants import cache_constants
     cache_constants(*avg_constants, start_time, days, avg_error, f"data/{room['name']}/constants_cache.csv")
 
     return avg_constants, avg_error
@@ -129,7 +129,7 @@ def train_for_time_frame_parallel(room, start_time="2025-01-01T00:00:00Z", days=
 
     avg_constants = alpha / days
     avg_error = total_error / days
-    from scripts.derivative_constants import cache_constants
+    from scripts.constants import cache_constants
     cache_constants(*avg_constants, start_time, days, avg_error, f"data/{room['name']}/constants_cache.csv")
 
     return avg_constants, avg_error

@@ -1,6 +1,6 @@
 import argparse
 import multiprocessing
-from scripts.derivative_constants import get_constants
+from scripts.constants import get_constants
 
 rooms = {
     "1.213": {

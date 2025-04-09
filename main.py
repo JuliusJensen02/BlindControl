@@ -1,7 +1,7 @@
 import multiprocessing
 from scripts.data_processing import preprocess_data_for_all_dates
-from scripts.query_data import query_data_period
-from scripts.derivative_constants import get_constants
+from scripts.query import query_data_period
+from scripts.constants import get_constants
 from scripts.prediction import predict_for_date
 
 rooms = {
@@ -44,7 +44,7 @@ rooms = {
 }
 
 def main():
-    chosen_room = rooms["1.233"]
+    chosen_room = rooms["1.213"]
 
     query_start_date = "2025-03-25T00:00:00Z"
     query_end_date = "2025-04-01T00:00:00Z"
@@ -59,13 +59,14 @@ def main():
 
     predict_date = "2024-12-14T00:00:00Z"
 
-    if run_query:
-        query_data_period(query_start_date, query_end_date, chosen_room)
-    if preprocess_data:
-        preprocess_data_for_all_dates(query_start_date, query_end_date, chosen_room)
-    if train:
-        constants = get_constants(chosen_room, training_start_date, training_days, force_retrain, prediction_interval)
-        predict_for_date(chosen_room, predict_date, constants, True)
+    #if run_query:
+    #    query_data_period(query_start_date, query_end_date, chosen_room)
+    #if preprocess_data:
+    #    preprocess_data_for_all_dates(query_start_date, query_end_date, chosen_room)
+    #if train:
+        #constants = get_constants(chosen_room, training_start_date, training_days, force_retrain, prediction_interval)
+    predict_for_date(chosen_room, predict_date, [1.99706603e-04, 1.12559767e-05, 7.83316484e-05, 2.98706584e-04,
+       2.33775480e-05], True, 60)
 
 if __name__ == '__main__':
     # Initialization of multiprocessing
