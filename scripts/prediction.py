@@ -1,36 +1,58 @@
 from datetime import datetime
-import numpy as np
-from scripts.data_processing import smooth
-from scripts.data_processing import convert_csv_to_df
-from scripts.derivative_functions import predict_temperature, predict_temperature_for_prediction
+import torch
+import torchdiffeq
+
+from ODE import TemperatureODE
+from scripts.data_processing import get_raw_data_as_df, get_processed_data_as_tensor
 from scripts.plot import plot_df
 
-'''
-@param start_time: a string of the date to predict
-@param constants: the constants from the training data
-@param plot: a boolean value for whether to plot the result of the prediction
-@returns: a DataFrame with the predictions
-Predicts the room temperature 
-'''
-def predict_for_date(room, start_time, constants, plot):
-    df = convert_csv_to_df(datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%SZ"),room)
 
-    #Get the values from the dataframe
-    room_temp = df["room_temp"].to_numpy()
-    ambient_temp = df["ambient_temp"].to_numpy()
-    solar_watt = df["solar_watt"].to_numpy()
-    heating_setpoint = df["heating_setpoint"].to_numpy()
-    cooling_setpoint = df["cooling_setpoint"].to_numpy()
-    heating_effects = np.zeros_like(heating_setpoint)
-    solar_effects = np.zeros_like(solar_watt)
-    lux = df["lux"].to_numpy()
-    wind = df["wind"].to_numpy()
+def simulate_with_resets(ode_class, T_r, y0, t_points, reset_interval):
+    results = []
+    current_y = y0.clone()
 
-    #Save the predictions to the dataframe
-    df['temp_predictions'] = predict_temperature_for_prediction(room, constants.values(), room_temp, ambient_temp, solar_watt,
-                                heating_setpoint, cooling_setpoint, lux, wind, heating_effects, solar_effects)
-    df['heating_effects'] = heating_effects
-    df['solar_effects'] = solar_effects
+    for i in range(0, len(t_points), reset_interval):
+        t_seg = t_points[i:i + reset_interval + 1]
+        if len(t_seg) < 2:
+            break
+
+        y_seg = torchdiffeq.odeint(ode_class, current_y, t_seg, method="euler")
+        results.append(y_seg[:-1])
+
+        # Reset temperature to real value, continue with simulated heater state
+        next_T = T_r[min(i + reset_interval, len(T_r) - 1)]
+        next_H = y_seg[-1, 1]
+        current_y = torch.stack([next_T, next_H])
+
+    return torch.cat(results, dim=0)
+
+def predict_for_date(room: dict, start_time: str, constants, plot: bool, prediction_interval: int):
+    start_time = datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%SZ")
+    data = get_processed_data_as_tensor(start_time, room)
+    T_r = data[:, 0]  # Room temperature
+    T_a = data[:, 1]  # Ambient temperature
+    S_t = data[:, 2]  # Solar effect
+    h_s = data[:, 3]  # Heating setpoint
+    c_s = data[:, 4]  # Cooling setpoint
+    O = data[:, 5]    # Occupancy effect
+    constants = torch.tensor(constants)  # Convert constants to tensor
+
+    ode_func = TemperatureODE(T_a, S_t, h_s, O, constants, room["heater_effect"])
+    T0 = T_r[0]  # Initial temperature
+    H0 = torch.tensor(0.0)  # Initial heater state
+    y0 = torch.stack([T0, H0])  # Initial state
+    t = torch.arange(len(T_r)).float()  # Time points for the simulation
+
+    y = simulate_with_resets(ode_func, T_r, y0, t, reset_interval=prediction_interval)
+    T_pred = y[:, 0]
+
+    df = get_raw_data_as_df(start_time, room)
+    df['temp_predictions'] = T_pred
+
+    #df['temp_predictions'] = predict_temperature_for_prediction(room, constants.values(), room_temp, ambient_temp, solar_watt,
+    #                            heating_setpoint, cooling_setpoint, lux, wind, heating_effects, solar_effects)
+    #df['heating_effects'] = heating_effects
+    #df['solar_effects'] = solar_effects
     #df = smooth(df, 'temp_predictions')
     #Plot the data if plot is true
     if plot:

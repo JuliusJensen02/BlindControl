@@ -1,56 +1,45 @@
 import math
 import numpy as np
+import torch
 
 heater_valve = 0
 heater_envelope = 0
 blinds = 0
 blinds_blocked = False
+torch.set_num_threads(64)
 
 
-def predict_temperature_for_prediction(room, constants, T_r, T_a, solar_watt, heating_setpoint, cooling_setpoint, lux, wind, heating_effects = None, solar_effects = None):
+def predict_temperature_for_prediction(room, constants, T_r, T_a, solar_watt, heating_setpoint,
+                                       cooling_setpoint, lux, wind, heating_effects, solar_effects):
     a_a, a_s, a_h, a_v, a_o = constants
 
     T = np.zeros_like(T_r)
     T[0] = T_r[0]
     for i in range(1, len(T_r)):
+        blinds_control_py(solar_watt[i], wind[i])
         S_t = solar_effect(room, solar_watt[i])
         E_h = heater_effect(room, heating_setpoint[i], T[i - 1])
         O = max(occupancy_effect(lux[i]) - S_t, 0)
-        if heating_effects is not None:
-            heating_effects[i - 1] = E_h
-            solar_effects[i - 1] = S_t
+        heating_effects[i - 1] = E_h
+        solar_effects[i - 1] = S_t
+
         if i % 240 == 0:
             T[i] = T_r[i]
         else:
             T[i] = T[i - 1] + derivative_function(T_a[i], T_r[i - 1], a_a, E_h, a_h, a_v, S_t, a_s, O, a_o)
     return T
 
-
-
-
-'''
-@params constants: list of constants
-@params room_temp: list of room temperatures
-@params ambient_temp: list of ambient temperatures
-@params solar_watt: list of solar_watt
-@params heating_setpoint: list of heating setpoints
-@params cooling_setpoint: list of cooling setpoints
-@returns sol.y[0]: list of temperature predictions
-Function for predicting the temperature for the training functions
-'''
-def predict_temperature(room, constants, T_r, T_a, solar_watt, heating_setpoint, cooling_setpoint, lux, wind, heating_effects = None, solar_effects = None):
+def predict_temperature_for_training(room, constants, T_r, T_a, S_t, heating_setpoint, cooling_setpoint, O):
     a_a, a_s, a_h, a_v, a_o = constants
 
     T = np.zeros_like(T_r)
     T[0] = T_r[0]
     for i in range(1, len(T_r)):
-        S_t = solar_effect(room, solar_watt[i])
-        E_h = heater_effect(room, heating_setpoint[i], T[i-1])
-        O = max(occupancy_effect(lux[i]) - S_t, 0)
-        if heating_effects is not None:
-            heating_effects[i-1] = E_h
-            solar_effects[i-1] = S_t
-        T[i] = T[i - 1] + derivative_function(T_a[i], T_r[i - 1], a_a, E_h, a_h, a_v, S_t, a_s, O, a_o)
+        E_h = heater_effect(room, heating_setpoint[i], T[i - 1])
+        if i % 240 == 0:
+            T[i] = T_r[i]
+        else:
+            T[i] = T[i - 1] + derivative_function(T_a[i], T_r[i - 1], a_a, E_h, a_h, a_v, S_t, a_s, O, a_o)
     return T
 
 
@@ -112,11 +101,7 @@ def solar_effect(room, df_watt):
 Function for calculating the heater's effect on the room
 If the current temperature is below the heating setpoint, the heater is on else off
 '''
-def heater_effect(room, heating_setpoint, current_temperature):
-    max_heat_stored = room["heater_effect"]
-    charge_effect = 0.02
-    decay_effect = 0.02
-
+def heater_effect(heating_setpoint, current_temperature, max_heat_stored: float, charge_effect: float = 0.02, decay_effect: float = 0.02):
     global heater_envelope
     # In your update step
     if current_temperature <= heating_setpoint:
@@ -134,42 +119,44 @@ def occupancy_effect(lux):
     return lux / lpp * e_p #lpp is lux per person, e_p is wattage per person
 
 
-def predict_temperature_rk4(room, constants, T_r, T_a, solar_watt, heating_setpoint, cooling_setpoint, lux, wind, heating_effects = None, solar_effects = None):
-    """
-    Predicts the temperature using RK4 and stores **all** 1350 substeps as main steps.
 
-    @returns: array of size 1350 with temperature values at each RK4 step.
-    """
-    a_a, a_s, a_h, a_v, a_o = constants
-    steps_per_main_step = 15
-    total_steps = (len(T_r) - 1) * steps_per_main_step  # (90 * 15 = 1350)
 
-    T = np.zeros(total_steps + 1)  # Store all RK4 steps
-    T[0] = T_r[0]  # Initial temperature
 
-    step_index = 0  # Index for 1350 steps
 
-    # Iterate through 91 datapoints, but apply RK4 with 15 steps in between each
-    for i in range(1, len(T_r)):
-        blinds_control_py(solar_watt[i], wind[i])
 
-        S_t = solar_effect(room, solar_watt[i])
-        E_h = heater_effect(room, heating_setpoint[i], T[step_index])
-        O = max(occupancy_effect(lux[i]) - S_t, 0)
 
-        dt = 1.0 / steps_per_main_step  # Small step for RK4 (1/15)
 
-        # RK4 integration over the 15 sub-steps
-        for _ in range(steps_per_main_step):
-            def f(T_val):
-                return derivative_function(T_a[i], T_val, a_a, E_h, a_h, a_v, S_t, a_s, O, a_o)
 
-            k1 = f(T[step_index])
-            k2 = f(T[step_index] + 0.5 * dt * k1)
-            k3 = f(T[step_index] + 0.5 * dt * k2)
-            k4 = f(T[step_index] + dt * k3)
 
-            T[step_index + 1] = T[step_index] + (dt / 6.0) * (k1 + 2 * k2 + 2 * k3 + k4)
-            step_index += 1
+def heater_effect_torch(heating_setpoint, room_temp, max_heat, charge=0.02, decay=0.02):
+    envelope = torch.zeros_like(room_temp)
+    decay_tensor = torch.tensor(decay, dtype=torch.float32, device=envelope.device)
+    for i in range(1, len(room_temp)):
+        is_on = room_temp[i - 1] <= heating_setpoint[i - 1]
+        if is_on:
+            envelope[i] = torch.clamp(envelope[i - 1] + charge * max_heat, max=max_heat)
+        else:
+            envelope[i] = envelope[i - 1] * torch.exp(-decay_tensor)
+    return envelope
 
-    return T
+
+class RoomTemperatureODE(torch.nn.Module):
+    def __init__(self, room, inputs, constants):
+        super().__init__()
+        self.room = room
+        self.inputs = inputs  # tuple of external signals
+        self.constants = constants  # [a_a, a_s, a_h, a_v, a_o]
+
+    def forward(self, t, T_r):
+        idx = int(t.item())  # Assume integer timesteps (0, 1, 2, ...)
+        T_a, S_t, E_h, O = self.inputs
+
+        a_a, a_s, a_h, a_v, a_o = self.constants
+
+        dTdt = ((T_a[idx] - T_r) * a_a +
+                S_t[idx] * a_s +
+                E_h[idx] * a_h +
+                (T_a[idx] - T_r) * a_v +
+                O[idx] * a_o)
+
+        return dTdt
