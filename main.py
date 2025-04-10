@@ -1,4 +1,6 @@
 import multiprocessing
+
+from experiments.uppaal_jobs.plot_simulation_data import convert_uppaal_to_df
 from scripts.data_processing import preprocess_data_for_all_dates
 from scripts.query import query_data_period
 from scripts.constants import get_constants
@@ -57,7 +59,7 @@ def main():
     force_retrain = True
     prediction_interval = 60
 
-    predict_date = "2024-12-14T00:00:00Z"
+    predict_date = "2025-02-13T00:00:00Z"
 
     #if run_query:
     #    query_data_period(query_start_date, query_end_date, chosen_room)
