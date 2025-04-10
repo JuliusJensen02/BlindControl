@@ -1428,11 +1428,22 @@ const double decay_effect = 0.02;
 const int init_time = 1320;
 const int control_interval = 30;
 int counter = init_time;
+const double init_temp = 21.10972600898205;
+
 
 broadcast chan tik;
+hybrid clock room_temp;
+
+void init_room_temp(){
+    if(init_temp == 0.0){
+        room_temp = data[init_time][3];
+    }
+    else{
+        room_temp = init_temp;
+    }
+}
 
 
-hybrid clock room_temp = data[init_time][3];
 hybrid clock cost = 0;
 
 double heater_envelope = 0;
@@ -1538,7 +1549,7 @@ clock y;</declaration>
 		</location>
 		<location id="id2" x="-646" y="-68">
 			<name x="-722" y="-76">Initial</name>
-			<committed/>
+			<urgent/>
 		</location>
 		<location id="id3" x="-34" y="-68">
 			<name x="-17" y="-76">Choice</name>
@@ -1607,7 +1618,8 @@ clock y;</declaration>
 		<transition id="id13">
 			<source ref="id2"/>
 			<target ref="id4"/>
-			<label kind="assignment" x="-561" y="-93">initialize()</label>
+			<label kind="assignment" x="-603" y="-136">initialize(),
+init_room_temp()</label>
 		</transition>
 	</template>
 	<template>
@@ -1659,7 +1671,7 @@ system clock_time, controller_blinds, room, optimization;
 		<option key="--truncation-time-error" value="1.0E-4"/>
 		<option key="--truncation-error" value="1.0E-4"/>
 		<query>
-			<formula>strategy GoFast = minE (cost) [&lt;=init_time + control_interval * 5] : &lt;&gt; counter == init_time + control_interval * 5</formula>
+			<formula>strategy GoFast = minE (cost) [&lt;=control_interval * 2] : &lt;&gt; counter == init_time + control_interval * 2</formula>
 			<comment>(9000 runs) Learning statistics for best strategy: Number of resets: 1 Number of iterations in last reset: 5 Number of iterations in total: 19</comment>
 		</query>
 		<query>

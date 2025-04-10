@@ -1428,11 +1428,22 @@ const double decay_effect = 0.02;
 const int init_time = 480;
 const int control_interval = 30;
 int counter = init_time;
+const double init_temp = 0.0;
+
 
 broadcast chan tik;
+hybrid clock room_temp;
+
+void init_room_temp(){
+    if(init_temp == 0.0){
+        room_temp = data[init_time][3];
+    }
+    else{
+        room_temp = init_temp;
+    }
+}
 
 
-hybrid clock room_temp = data[init_time][3];
 hybrid clock cost = 0;
 
 double heater_envelope = 0;
@@ -1538,7 +1549,7 @@ clock y;</declaration>
 		</location>
 		<location id="id2" x="-646" y="-68">
 			<name x="-722" y="-76">Initial</name>
-			<committed/>
+			<urgent/>
 		</location>
 		<location id="id3" x="-34" y="-68">
 			<name x="-17" y="-76">Choice</name>
@@ -1607,7 +1618,8 @@ clock y;</declaration>
 		<transition id="id13">
 			<source ref="id2"/>
 			<target ref="id4"/>
-			<label kind="assignment" x="-561" y="-93">initialize()</label>
+			<label kind="assignment" x="-603" y="-136">initialize(),
+init_room_temp()</label>
 		</transition>
 	</template>
 	<template>
