@@ -1,8 +1,11 @@
 from datetime import datetime
+
+import pandas as pd
 import torch
 import torchdiffeq
 
-from ODE import TemperatureODE
+from experiments.uppaal_jobs.plot_simulation_data import convert_uppaal_to_df
+from scripts.ODE import TemperatureODE
 from scripts.data_processing import get_raw_data_as_df, get_processed_data_as_tensor
 from scripts.plot import plot_df
 
@@ -17,7 +20,10 @@ def simulate_with_resets(ode_class, T_r, y0, t_points, reset_interval):
             break
 
         y_seg = torchdiffeq.odeint(ode_class, current_y, t_seg, method="euler")
-        results.append(y_seg[:-1])
+        if i + reset_interval >= len(t_points) - 1:
+            results.append(y_seg)
+        else:
+            results.append(y_seg[:-1])
 
         # Reset temperature to real value, continue with simulated heater state
         next_T = T_r[min(i + reset_interval, len(T_r) - 1)]
@@ -48,6 +54,8 @@ def predict_for_date(room: dict, start_time: str, constants, plot: bool, predict
 
     df = get_raw_data_as_df(start_time, room)
     df['temp_predictions'] = T_pred
+    uppaal_df = convert_uppaal_to_df(start_time.strftime("%Y_%m_%d"))
+    df = pd.merge(df, uppaal_df, how='left', left_index=True, right_index=True)
 
     #df['temp_predictions'] = predict_temperature_for_prediction(room, constants.values(), room_temp, ambient_temp, solar_watt,
     #                            heating_setpoint, cooling_setpoint, lux, wind, heating_effects, solar_effects)
