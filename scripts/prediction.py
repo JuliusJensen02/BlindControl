@@ -9,8 +9,18 @@ from scripts.ODE import TemperatureODE
 from scripts.data_processing import get_raw_data_as_df, get_processed_data_as_tensor
 from scripts.plot import plot_df
 
-
-def simulate_with_resets(ode_class, T_r, y0, t_points, reset_interval):
+"""
+Function that simulates the room temperature.
+Args:
+    ode_class: Class with the values needed to predict the temperature.
+    T_r: The room temperature.
+    y0: The initial state of the simulation.
+    t_points: Tensor of time points used to simulate the temperature.
+    reset_interval: The interval with which to reset the simulation.
+Returns:
+    A tensor with the predicted temperatures and time.
+"""
+def simulate_with_resets(ode_class: object, T_r: float, y0, t_points, reset_interval: int):
     results = []
     current_y = y0.clone()
 
@@ -32,6 +42,18 @@ def simulate_with_resets(ode_class, T_r, y0, t_points, reset_interval):
 
     return torch.cat(results, dim=0)
 
+
+"""
+Predicts the temperature for a specific date.
+Args:
+    room: A dict containing all information about the room.
+    start_time: The date for the prediction.
+    constants: The constants used to predict the temperature.
+    plot: A boolean that decides if the prediction should be plotted.
+    prediction_interval: The interval used to reset the prediction of the temperature.
+Returns:
+    Either plots the prediction or returns a dataframe with the predicted temperatures.
+"""
 def predict_for_date(room: dict, start_time: str, constants, plot: bool, prediction_interval: int):
     start_time = datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%SZ")
     data = get_processed_data_as_tensor(start_time, room)

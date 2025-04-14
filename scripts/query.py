@@ -6,22 +6,24 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from scripts.dmi_api import get_temp
 
-'''
-@param t: datetime
-@return t: datetime
+"""
 This function rounds the given datetime to the nearest hour.
 If the minute is greater than or equal to 30, the hour is incremented by 1.
-'''
-def hour_rounder(t):
+Args:
+    t: datetime
+Returns:
+    A datetime rounded to the nearest hour.
+"""
+def hour_rounder(t: datetime):
     # Rounds to nearest hour by adding a timedelta hour if minute >= 30
     return (t.replace(second=0, microsecond=0, minute=0, hour=t.hour)
             + timedelta(hours=t.minute // 30))
 
 
-'''
+"""
 Environment variables are loaded from the .env file.
 And used to access the InfluxDB.
-'''
+"""
 load_dotenv()
 client = influxdb_client.InfluxDBClient(
     url=os.getenv("INFLUXDB_URL"),
@@ -31,17 +33,19 @@ client = influxdb_client.InfluxDBClient(
 )
 
 """
-@param input_from: str
-@param days: int
-@return None
 This function queries the data from the InfluxDB and writes it to a csv file.
 The data is queried for the given number of days starting from the given date.
 The data is filtered based on the source and the room_id.
 The data is joined based on the time.
 The data is fetched from the DMI API for the given date.
 The data is written to the csv file.
+Args:
+    room: Dict Containing all information about the room.
+    from_date: Start date of query.
+    day: Int portraying which date the data is being collected from.
+@return None
 """
-def query_data(room, from_date, day):
+def query_data(room: dict, from_date: str, day: int):
     from_date = datetime.strptime(from_date, "%Y-%m-%dT%H:%M:%SZ")
     date_from = from_date + timedelta(days=day)
     # The input_from is converted to a datetime object of the format "%Y-%m-%dT%H:%M:%SZ".
@@ -152,8 +156,14 @@ def query_data(room, from_date, day):
     # Confirmation message
     print("Fetched data from: " + date_string_from + ", to: " + date_string_to)
 
-
-def query_data_period(from_date, to_date, room):
+"""
+Collects the data using multiprocessing.
+Args:
+    from_date: Start date of query collection.
+    to_date: End date of query collection.
+    room: Dict containing all information about the room.
+"""
+def query_data_period(from_date: str, to_date:str, room: dict):
     current_date = datetime.strptime(from_date, "%Y-%m-%dT%H:%M:%SZ")
     days = (datetime.strptime(to_date, "%Y-%m-%dT%H:%M:%SZ") - current_date).days
     with multiprocessing.Pool(processes=5) as pool:

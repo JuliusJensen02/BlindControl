@@ -5,7 +5,13 @@ import torchdiffeq
 blinds = 0
 blinds_blocked = False
 
-def blinds_control_py(solar_watt, wind):
+"""
+The current control for the solar blinds at BUILD implemented in Python.
+Args:
+    solar_watt: the amount of solar watt at a given time.
+    wind: the amount of wind at a given time.
+"""
+def blinds_control_py(solar_watt: float, wind: float):
     global blinds
     global blinds_blocked
     if wind >= 10:
@@ -20,7 +26,16 @@ def blinds_control_py(solar_watt, wind):
     elif solar_watt < 120:
         blinds = 0
 
-def solar_effect(room, df_watt):
+"""
+Function that calculates the solar effect based on the blinds, the solar watt,
+the g-value of the window and the window size.
+Args:
+    room: the room id.
+    df_watt: the amount of solar watt at a given time.
+Returns:
+    The solar effect based on the blinds, the solar watt, the g-value and the window size.
+"""
+def solar_effect(room: dict, df_watt: float) -> float:
     global blinds
     sun_block = 0
     if blinds == 1:
@@ -55,19 +70,25 @@ def derivative_function(T_a, T_r, a_a, E_h, a_h, a_v, S_t, a_s, O, a_o):
             O * a_o)
 
 
-
+"""
+Function that predicts the temperature using constants gathered from solving the ODE.
+Args:
+    constant: Constants gathered when solving the ODE.
+    T_r: The room temperature.
+    T_a: The ambient temperature.
+    S_t: The solar effect.
+    h_s: The heater effect.
+    O: The occupancy effect.
+    prediction_interval: The interval of the temperature prediction before resetting.
+    heater_max: Maximum output of the heater.
+Returns:
+    A Tensor with the predicted temperature and time.
+"""
 @torch.jit.script
-def predict_temperature(
-    constants: torch.Tensor,
-    T_r: torch.Tensor,
-    T_a: torch.Tensor,
-    S_t: torch.Tensor,
-    h_s: torch.Tensor,
-    c_s: torch.Tensor,
-    O: torch.Tensor,
-    prediction_interval: int,
-    heater_max: float
-) -> torch.Tensor:
+def predict_temperature(constants: torch.Tensor, T_r: torch.Tensor, T_a: torch.Tensor,
+                        S_t: torch.Tensor, h_s: torch.Tensor, c_s: torch.Tensor, O: torch.Tensor,
+                        prediction_interval: int, heater_max: float) -> torch.Tensor:
+
     heater_envelope = 0.0
 
     data_points = T_r.size(0)
@@ -97,11 +118,8 @@ def predict_temperature(
     return T
 
 
-
-
-
-
-
+"""
+"""
 @torch.jit.script
 def predict_temperature_steroid(
     constants: torch.Tensor,

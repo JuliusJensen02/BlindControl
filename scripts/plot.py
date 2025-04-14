@@ -5,11 +5,13 @@ import plotly.io as pio
 from pandas.core.interchange.dataframe_protocol import DataFrame
 from plotly.subplots import make_subplots
 
-'''
-@params df: DataFrame
-Plots a DataFrame with the time on x-axis and two different sets of y-axis variables in subplots
-'''
-def plot_df(df):
+"""
+Function used to plot the predicted temperatures from Python and UPPAAL alongside the 
+heating- and cooling setpoints.
+Args:
+    df: Dataframe.
+"""
+def plot_df(df: pd.DataFrame):
     # Create a subplot figure with two rows
     fig = make_subplots(rows=2, cols=1, shared_xaxes=False, subplot_titles=(
         "Room Temperature and Predictions", "Heating and Solar Effects"))
