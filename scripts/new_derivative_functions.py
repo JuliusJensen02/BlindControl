@@ -51,7 +51,7 @@ Args:
 Returns: 
     the energy effect of the occupancy in the room
 '''
-def occupancy_effect(heating_setpoint, cooling_setpoint, time, room):
+def occupancy_effect(heating_setpoint: float, cooling_setpoint: float, time: int, room: dict) -> float:
     # Energy effect of the occupancy in the room dependent on office or grouproom. Office is more heat because of pcs and other devices.
     energy_people = 150 if room["group"] else 250 
     occupancy = 0
