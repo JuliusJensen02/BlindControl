@@ -56,9 +56,6 @@ def derivative_function(T_a, T_r, a_a, E_h, a_h, a_v, S_t, a_s, O, a_o):
 
 
 
-
-
-
 @torch.jit.script
 def predict_temperature(
     constants: torch.Tensor,
