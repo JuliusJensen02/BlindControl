@@ -3,11 +3,11 @@ import os
 from datetime import datetime
 
 # Define paths
-data_dir = os.path.join(os.getcwd(), "data/1.213")
+data_dir = os.path.join(os.getcwd(), "data\\1.213\query_data")
 source_file = os.path.join(os.getcwd(), "UPPAAL_code/data_arrays.c")
 
 # Define the exact filename to look for
-data_filename = "data_2025-02-13.csv"
+data_filename = "data_2025-02-21.csv"
 file_path = os.path.join(data_dir, data_filename)
 
 # Ensure the file exists
@@ -41,7 +41,7 @@ num_cols = len(data[0])
 
 # Write the array definition in the source file
 with open(source_file, "w") as c_file:
-    c_file.write(f"double {array_name}[{num_rows}][{num_cols}] = {{\n")
+    c_file.write(f"const double {array_name}[{num_rows}][{num_cols}] = {{\n")
 
     # Write the data rows in the C source file
     for row in data:

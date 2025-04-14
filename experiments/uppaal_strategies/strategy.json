@@ -1,0 +1,97 @@
+{"version":1.0,"type":"state->regressor","representation":"map","actions":{
+		"0":"controller_blinds.Blocked->controller_blinds.Choice { !blocked, tau, 1 }",
+		"1":"controller_blinds.Wait->controller_blinds.Blocked { blocked, tau, blinds := 0 }",
+		"2":"controller_blinds.Choice->controller_blinds.Wait { 1, tau, blinds := 0 }",
+		"3":"controller_blinds.Choice->controller_blinds.Wait { 1, tau, blinds := 0.250000 }",
+		"4":"controller_blinds.Choice->controller_blinds.Wait { 1, tau, blinds := 0.500000 }",
+		"5":"controller_blinds.Choice->controller_blinds.Wait { 1, tau, blinds := 0.750000 }",
+		"6":"controller_blinds.Choice->controller_blinds.Wait { 1, tau, blinds := 1 }",
+		"7":"controller_blinds.Wait->controller_blinds.Choice { y >= control_interval, tau, y := 0 }",
+		"8":"controller_blinds.Initial->controller_blinds.Wait { 1, tau, initialize() }",
+		"9":"WAIT"
+	},"statevars":[
+		"clock_time.location",
+		"controller_blinds.location",
+		"room.location",
+		"optimization.location",
+		"counter",
+		"blocked",
+		"clock_time.period"
+	],"pointvars":[
+		"#t(0)",
+		"#time",
+		"clock_time.x",
+		"controller_blinds.y",
+		"heater_envelope",
+		"valve",
+		"blinds",
+		"heater",
+		"occupancy",
+		"ambient_temp",
+		"solar",
+		"heating_setpoint",
+		"wind"
+	],"locationnames":{
+		"clock_time.location":{
+			"0":"Tik"
+		},
+		"controller_blinds.location":{
+			"0":"Blocked",
+			"1":"Initial",
+			"2":"Choice",
+			"3":"Wait"
+		},
+		"room.location":{
+			"0":"Room"
+		},
+		"optimization.location":{
+			"0":"Cost"
+		}
+	},"regressors":{
+		"(0,2,0,0,59,0,1)":
+			{"type":"act->point->val","representation":"simpletree","minimize":1,"regressor":
+				{
+					"5":
+						0,
+					"6":
+						0,
+					"4":
+						0,
+					"3":
+						0,
+					"2":
+						0
+				}
+			},
+		"(0,2,0,0,29,0,1)":
+			{"type":"act->point->val","representation":"simpletree","minimize":1,"regressor":
+				{
+					"5":
+						0.03588481833471902,
+					"6":
+						0.03590348866325554,
+					"4":
+						0.03584771643192008,
+					"3":
+						0.03573832075730687,
+					"2":
+						0.0356846973140541
+				}
+			},
+		"(0,2,0,0,30,0,1)":
+			{"type":"act->point->val","representation":"simpletree","minimize":1,"regressor":
+				{
+					"5":
+						0.03589299861136575,
+					"6":
+						0.0359123666190574,
+					"4":
+						0.03585447838734835,
+					"3":
+						0.03574064370653141,
+					"2":
+						0.0356846973140541
+				}
+			}
+	}
+}

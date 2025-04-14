@@ -54,7 +54,7 @@ def predict_for_date(room: dict, start_time: str, constants, plot: bool, predict
 
     df = get_raw_data_as_df(start_time, room)
     df['temp_predictions'] = T_pred
-    uppaal_df = convert_uppaal_to_df()
+    uppaal_df = convert_uppaal_to_df(start_time.strftime("%Y_%m_%d"))
     df = pd.merge(df, uppaal_df, how='left', left_index=True, right_index=True)
 
     #df['temp_predictions'] = predict_temperature_for_prediction(room, constants.values(), room_temp, ambient_temp, solar_watt,

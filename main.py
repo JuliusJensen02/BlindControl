@@ -59,7 +59,7 @@ def main():
     force_retrain = True
     prediction_interval = 60
 
-    predict_date = "2025-02-13T00:00:00Z"
+    predict_date = "2025-02-21T00:00:00Z"
 
     #if run_query:
     #    query_data_period(query_start_date, query_end_date, chosen_room)
@@ -68,7 +68,7 @@ def main():
     #if train:
         #constants = get_constants(chosen_room, training_start_date, training_days, force_retrain, prediction_interval)
     predict_for_date(chosen_room, predict_date, [1.99706603e-04, 1.12559767e-05, 7.83316484e-05, 2.98706584e-04,
-       2.33775480e-05], True, 1440)
+       2.33775480e-05], True, 1341)
 
 if __name__ == '__main__':
     # Initialization of multiprocessing

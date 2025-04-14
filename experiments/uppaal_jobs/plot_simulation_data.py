@@ -10,16 +10,18 @@ from plotly.subplots import make_subplots
 from scripts.data_processing import convert_csv_to_df
 
 
-def convert_uppaal_to_df():
+def convert_uppaal_to_df(day):
     columns = ["uppaal_time", "temp_predictions_uppaal"]
     rows = []
 
     for i in range(0, 22):
-        f = open("experiments/uppaal_jobs/output_" + str(i) + ".csv", "r")
+        f = open("experiments/uppaal_jobs/output_"+day+"_" + str(i) + ".csv", "r")
         file_contents = f.read()
         raw_data = re.findall(r'\(([\d.]+),([\d.]+)\)', file_contents)
         buckets = defaultdict(list)
         for time, temp_predictions in raw_data:
+            if time == "0" and temp_predictions == "0":
+                continue
             int_time = int(float(time))
             buckets[int_time].append(float(temp_predictions))
         results = [(t + 60 * i, sum(temp_predictions) / len(temp_predictions)) for t, temp_predictions in buckets.items()]
