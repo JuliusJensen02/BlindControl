@@ -71,7 +71,7 @@ def train_day(time: datetime, room: dict, prediction_interval: int, step: int = 
     for epoch in range(epochs):
         optimizer.zero_grad() # Clear the gradients
 
-        ode_func = TemperatureODE(T_a, S_t, h_s, O, constants, room["heater_effect"]) # Initialize the ODE class
+        ode_func = TemperatureODE(T_a, S_t, h_s, c_s, O, constants, room["heater_effect"]) # Initialize the ODE class
 
         T0 = T_r[0] # Initial temperature
         H0 = torch.tensor(0.0) # Initial heater state
