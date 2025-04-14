@@ -1462,6 +1462,7 @@ double occupancy;
 double ambient_temp;
 double solar;
 double heating_setpoint;
+double cooling_setpoint;
 double wind;
 
 
@@ -1520,6 +1521,7 @@ void initialize() {
     heater = H(data[init_time][5], data[init_time][3], current_room[2]);
     solar = S(data[init_time][2], current_room[1]); 
     heating_setpoint = data[init_time][5];
+    cooling_setpoint = data[init_time][6];
     wind = data[init_time][8];
 }
 
@@ -1533,7 +1535,7 @@ void initialize() {
 </declaration>
 		<location id="id0" x="0" y="0">
 			<name x="-17" y="-34">Cost</name>
-			<label kind="invariant" x="-272" y="17">cost' == (heating_setpoint - room_temp) * (heating_setpoint - room_temp)</label>
+			<label kind="invariant" x="-544" y="34">cost' == ((heating_setpoint - room_temp) + (cooling_setpoint - room_temp)) * ((heating_setpoint - room_temp) + (cooling_setpoint - room_temp))</label>
 		</location>
 		<init ref="id0"/>
 	</template>
@@ -1634,9 +1636,11 @@ init_room_temp()</label>
 int period = 1;
 
 void fetch_data(){
+    heating_setpoint = data[counter * period][5];
+    cooling_setpoint = data[counter * period][6];
     occupancy = O(data[counter * period][7]);
     solar = S(data[counter * period][2], current_room[1]);
-    heater = H(data[counter * period][5], room_temp, current_room[2]);
+    heater = H(heating_setpoint, room_temp, current_room[2]);
     ambient_temp = data[counter * period][4];
     wind = data[counter * period][8];
     //room_temp = data[counter * period][3];
