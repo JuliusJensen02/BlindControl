@@ -40,7 +40,7 @@ Args:
 Returns:
     Dictionary of constants.
 """
-def get_constants(room: str, start_time: str, days: int, retrain: bool, prediction_interval: int):
+def get_constants(room: str, start_time: str, days: int, retrain: bool, prediction_interval: int) -> dict:
     path = "data/" + room["name"] + "/constants_cache.csv"
 
     if is_retrain_needed(path, start_time, days, retrain):
@@ -65,7 +65,7 @@ Args:
 Returns:
     A boolean indicating if retraining is necessary.
 """
-def is_retrain_needed(path: str, start_time: str, days: int, retrain: bool):
+def is_retrain_needed(path: str, start_time: str, days: int, retrain: bool) -> bool:
     df = pd.read_csv(path)
 
     # Check if the cache file is empty or if retrain is true

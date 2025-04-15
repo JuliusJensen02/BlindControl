@@ -13,10 +13,10 @@ Args:
     start: start time as a string.
     stop: stop time as a string.
 Returns:
-    temp_map: dict
+    a Dataframe
 """
 
-def get_temp(start: str="2024-11-23T00:00:00Z", stop: str="2024-11-24T00:00:00Z"):
+def get_temp(start: str="2024-11-23T00:00:00Z", stop: str="2024-11-24T00:00:00Z") -> pd.DataFrame:
     url = 'https://dmigw.govcloud.dk/v2/climateData/collections/municipalityValue/items?municipalityId=0851&api-key='+DMIAPIKEY+'&timeResolution=hour&parameterId=mean_temp&limit=10000&datetime='+start+'/'+stop
     r = requests.get(url)
     dmi_data = json.loads(r.text)

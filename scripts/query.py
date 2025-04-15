@@ -14,7 +14,7 @@ Args:
 Returns:
     A datetime rounded to the nearest hour.
 """
-def hour_rounder(t: datetime):
+def hour_rounder(t: datetime) -> datetime:
     # Rounds to nearest hour by adding a timedelta hour if minute >= 30
     return (t.replace(second=0, microsecond=0, minute=0, hour=t.hour)
             + timedelta(hours=t.minute // 30))
@@ -45,7 +45,7 @@ Args:
     day: Int portraying which date the data is being collected from.
 @return None
 """
-def query_data(room: dict, from_date: str, day: int):
+def query_data(room: dict, from_date: str, day: int) -> None:
     from_date = datetime.strptime(from_date, "%Y-%m-%dT%H:%M:%SZ")
     date_from = from_date + timedelta(days=day)
     # The input_from is converted to a datetime object of the format "%Y-%m-%dT%H:%M:%SZ".
@@ -163,7 +163,7 @@ Args:
     to_date: End date of query collection.
     room: Dict containing all information about the room.
 """
-def query_data_period(from_date: str, to_date:str, room: dict):
+def query_data_period(from_date: str, to_date:str, room: dict) -> None:
     current_date = datetime.strptime(from_date, "%Y-%m-%dT%H:%M:%SZ")
     days = (datetime.strptime(to_date, "%Y-%m-%dT%H:%M:%SZ") - current_date).days
     with multiprocessing.Pool(processes=5) as pool:

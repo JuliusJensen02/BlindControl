@@ -11,7 +11,7 @@ heating- and cooling setpoints.
 Args:
     df: Dataframe.
 """
-def plot_df(df: pd.DataFrame):
+def plot_df(df: pd.DataFrame) -> None:
     # Create a subplot figure with two rows
     fig = make_subplots(rows=2, cols=1, shared_xaxes=False, subplot_titles=(
         "Room Temperature and Predictions", "Heating and Solar Effects"))

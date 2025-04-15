@@ -11,7 +11,7 @@ Args:
 Returns
     df: DataFrame
 """
-def convert_csv_to_df(from_date: datetime, room: dict, processed_data = False):
+def convert_csv_to_df(from_date: datetime, room: dict, processed_data = False) -> pd.DataFrame:
     # Read the csv data into a DataFrame:
     # The csv-data is the path to the csv file containing the data.
     data_path = "query_data"
@@ -29,7 +29,7 @@ Function that converts the processed data to a csv.
     Returns:
         A dataframe containing the processed data.
 """
-def get_processed_data_as_df(from_date: datetime, room: dict):
+def get_processed_data_as_df(from_date: datetime, room: dict) -> pd.DataFrame:
     return convert_csv_to_df(from_date, room, True)
 
 """
@@ -40,7 +40,7 @@ Function that converts raw data to a csv.
     Returns:
         A dataframe containing the raw data.
 """
-def get_raw_data_as_df(from_date: datetime, room: dict):
+def get_raw_data_as_df(from_date: datetime, room: dict) -> pd.DataFrame:
     return convert_csv_to_df(from_date, room, False)
 
 """
@@ -49,7 +49,7 @@ Function that gathers the pre-processed data and converts it to a csv.
         from_date: Date of the data.
         room: Dict containing information regarding the room that the data is converted from.
 """
-def pre_process_data_for_date(from_data: datetime, room: dict):
+def pre_process_data_for_date(from_data: datetime, room: dict) -> None:
     from scripts.new_derivative_functions import occupancy_effect, solar_effect, blinds_control_py
     df = get_raw_data_as_df(from_data, room)
     solar_effect_list = []
@@ -79,7 +79,7 @@ Function that pre-processes all data in a specific timeframe.
         to_date: End-date of the data.
         room: Dict containing information regarding the room that the data is converted from.
 """
-def preprocess_data_for_all_dates(from_date: str, to_date: str, room: dict):
+def preprocess_data_for_all_dates(from_date: str, to_date: str, room: dict) -> None:
     from_date = datetime.strptime(from_date, "%Y-%m-%dT%H:%M:%SZ")
     days = (datetime.strptime(to_date, "%Y-%m-%dT%H:%M:%SZ") - from_date).days
     for i in range(days):
@@ -94,7 +94,7 @@ Function that converts the pre-processed data to a tensor (mulit-dimensional arr
     Returns:
         A tensor containing the pre-processed data.
 """
-def get_processed_data_as_tensor(from_date: datetime, room: dict):
+def get_processed_data_as_tensor(from_date: datetime, room: dict) -> torch.Tensor:
     df = get_processed_data_as_df(from_date, room)
     data_tensor = torch.tensor(df[["room_temp", "ambient_temp", "solar_effect", "heating_setpoint", "cooling_setpoint", "occupancy_effect"]].values, dtype=torch.float32)
     return data_tensor

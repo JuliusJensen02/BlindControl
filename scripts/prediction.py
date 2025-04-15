@@ -20,7 +20,7 @@ Args:
 Returns:
     A tensor with the predicted temperatures and time.
 """
-def simulate_with_resets(ode_class: object, T_r: float, y0, t_points, reset_interval: int):
+def simulate_with_resets(ode_class: object, T_r: float, y0, t_points, reset_interval: int) -> torch.Tensor:
     results = []
     current_y = y0.clone()
 
@@ -54,7 +54,7 @@ Args:
 Returns:
     Either plots the prediction or returns a dataframe with the predicted temperatures.
 """
-def predict_for_date(room: dict, start_time: str, constants, plot: bool, prediction_interval: int):
+def predict_for_date(room: dict, start_time: str, constants, plot: bool, prediction_interval: int) -> pd.DataFrame | None:
     start_time = datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%SZ")
     data = get_processed_data_as_tensor(start_time, room)
     T_r = data[:, 0]  # Room temperature

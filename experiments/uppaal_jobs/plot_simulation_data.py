@@ -17,7 +17,7 @@ Args:
 Returns:
     A dataframe containing the temperature predictions from UPPAAL simulations.
 """
-def convert_uppaal_to_df(day: str):
+def convert_uppaal_to_df(day: str) -> pd.DataFrame:
     columns = ["uppaal_time", "temp_predictions_uppaal"]
     rows = []
 

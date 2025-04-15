@@ -22,9 +22,14 @@ class TemperatureODE(torch.nn.Module):
         self.heater_max = heater_max
 
     """
-    
+    Moves forward to the next step of the ODE.
+    Args:
+        t: The current time.
+        y: The initial values of the temperature and heater.
+    Returns:
+        An array containing the changes of the temperature and heater.
     """
-    def forward(self, t, y):
+    def forward(self, t: float, y: float) -> torch.Tensor:
         T, H = y[0], y[1]
         idx = min(int(t), len(self.T_a) - 1)
 
