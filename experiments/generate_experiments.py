@@ -1,5 +1,8 @@
 import os
-
+"""
+File used to generate the different experiments carried out on the DEIS cluster. 
+The experiments are defined as a date, how many days the ODE should be solved for, a prediction interval and a date that is predicted for.
+"""
 room = "1.213"
 room_short = "1213"
 jobs = [

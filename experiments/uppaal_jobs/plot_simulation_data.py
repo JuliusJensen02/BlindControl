@@ -9,7 +9,6 @@ from plotly.subplots import make_subplots
 
 from scripts.data_processing import convert_csv_to_df
 
-
 def convert_uppaal_to_df(day):
     columns = ["uppaal_time", "temp_predictions_uppaal"]
     rows = []
