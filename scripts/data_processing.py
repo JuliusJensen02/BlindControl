@@ -59,7 +59,7 @@ def pre_process_data_for_date(from_data: datetime, room: dict) -> None:
         blinds_control_py(row['solar_watt'], row['wind'])
         solar_effect_current = solar_effect(room, row['solar_watt'])
         solar_effect_list.append(solar_effect_current)
-        occupancy_effect_list.append(max(occupancy_effect(row['lux']) - solar_effect_current, 0))
+        occupancy_effect_list.append(occupancy_effect(row['heating_setpoint'], row['cooling_setpoint'], index, room))
 
     preprocessed_data = {"time": df["time"],
                  "solar_effect": solar_effect_list,

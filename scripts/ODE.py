@@ -17,9 +17,32 @@ class TemperatureODE(torch.nn.Module):
         self.T_a = T_a
         self.S_t = S_t
         self.h_s = h_s
+        self.c_s = c_s
         self.O = O
         self.a_a, self.a_s, self.a_h, self.a_v, self.a_o = constants
         self.heater_max = heater_max
+
+   """
+   Calculates the ventilation effect based on the ambient temperature given a function and the openness of a valve
+    Args:
+        idx: The index of the current time step.
+        T: The previously calculated temperature.
+    Returns:
+        A temperature difference based on the ambient temperature, current temperature and the openness for a valve.
+    """
+    def V(self, idx: int, T: float) -> float:
+        ventilation_temp = self.T_a[idx]
+        ventilation_valve = 0.3
+        if self.T_a[idx] <= 5:
+            ventilation_temp = 21
+        elif 5 < self.T_a[idx] <= 17.8:
+            ventilation_temp = -0.25 * self.T_a[idx] + 22.25
+
+        if T > self.c_s[idx]:
+            ventilation_valve = 1
+
+        return ventilation_valve * (ventilation_temp - T)
+
 
     """
     Moves forward to the next step of the ODE.
@@ -41,6 +64,6 @@ class TemperatureODE(torch.nn.Module):
         dT = ((self.T_a[idx] - T) * self.a_a +
               self.S_t[idx] * self.a_s +
               H * self.a_h +
-              (self.T_a[idx] - T) * self.a_v +
+              self.V(idx, T) * self.a_v +
               self.O[idx] * self.a_o)
         return torch.stack([dT, dH])

@@ -14,8 +14,14 @@ file_path = os.path.join(data_dir, data_filename)
 if not os.path.isfile(file_path):
     raise FileNotFoundError(f"File not found: {file_path}")
 
-# Function to convert datetime string to Unix timestamp
-def convert_to_unix_timestamp(date_string):
+"""
+Function to convert datetime string to Unix timestamp.
+Args: 
+    date_string: A string of the date in datetime format.
+Returns: 
+    A int object representing the unix timestamp.
+"""
+def convert_to_unix_timestamp(date_string: str) -> int:
     dt_obj = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S%z")
     return int(dt_obj.timestamp())
 
