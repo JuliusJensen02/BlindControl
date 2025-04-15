@@ -1414,7 +1414,6 @@
     {1409, 1739923140, 3.3330078125, 22.174999999999997, -3.6, 21.0, 25.0, 4.0472822189, 1.3913288116}
 };
 
-
 const double g_value = 0.45; //Value gotten from Rasmus
 const double blind_eff = 0.5; //assumed value (change if we find real data)
 const double watt_per_person = 100; //Assumed watt coming from 1 person
@@ -1431,7 +1430,7 @@ const double decay_effect = 0.02;
 const int init_time = 1320;
 const int control_interval = 30;
 int counter = init_time;
-const double init_temp = 21.13377617845331;
+const double init_temp = 21.08376864403492;
 
 
 broadcast chan tik;
@@ -1455,11 +1454,13 @@ double blinds = 0;
 bool blocked = false;
 
 double heater;
-double occupancy;
 double ambient_temp;
 double solar;
 double heating_setpoint;
+double cooling_setpoint;
 double wind;
+
+double occupancy_effect;
 
 
 double S(double solar_effect, double window_size) {
@@ -1474,10 +1475,6 @@ double S(double solar_effect, double window_size) {
             sun_block = 0.2 / blinds;
         }
     return solar_effect * sun_block * g_value * window_size;
-}
-
-double O(double lux){
-    return lux / lux_per_person * watt_per_person;
 }
 
 double derivative_function(double T_a, double T_r, double S, double H, double O, double a_a, double a_s, double a_h, double a_v, double a_o) {
@@ -1513,10 +1510,10 @@ double H(double heating_setpoint, double T_current, double heater_effect) {
 
 void initialize() {
     ambient_temp = data[init_time][4];
-    occupancy = O(data[init_time][7]);
     heater = H(data[init_time][5], data[init_time][3], current_room[2]);
     solar = S(data[init_time][2], current_room[1]); 
     heating_setpoint = data[init_time][5];
+    cooling_setpoint = data[init_time][6];
     wind = data[init_time][8];
 }
 
@@ -1530,7 +1527,7 @@ void initialize() {
 </declaration>
 		<location id="id0" x="0" y="0">
 			<name x="-17" y="-34">Cost</name>
-			<label kind="invariant" x="-272" y="17">cost' == (heating_setpoint - room_temp) * (heating_setpoint - room_temp)</label>
+			<label kind="invariant" x="-518" y="17">cost' == ((heating_setpoint - room_temp) + (cooling_setpoint - room_temp)) * ((heating_setpoint - room_temp) + (cooling_setpoint - room_temp))</label>
 		</location>
 		<init ref="id0"/>
 	</template>
@@ -1631,9 +1628,10 @@ init_room_temp()</label>
 int period = 1;
 
 void fetch_data(){
-    occupancy = O(data[counter * period][7]);
+    heating_setpoint = data[counter * period][5];
+    cooling_setpoint = data[counter * period][6];
     solar = S(data[counter * period][2], current_room[1]);
-    heater = H(data[counter * period][5], room_temp, current_room[2]);
+    heater = H(heating_setpoint, room_temp, current_room[2]);
     ambient_temp = data[counter * period][4];
     wind = data[counter * period][8];
     //room_temp = data[counter * period][3];
@@ -1662,12 +1660,155 @@ x = 0</label>
 			<label kind="invariant" x="374" y="34">room_temp' == (ambient_temp - room_temp) * current_room[3]
 + solar * current_room[4] + heater * current_room[5]
 + (ambient_temp - room_temp) * current_room[6] 
-+ occupancy * current_room[7]</label>
++ occupancy_effect * current_room[7]</label>
 		</location>
 		<init ref="id16"/>
 	</template>
+	<template>
+		<name>occupancy</name>
+		<declaration>const int probabilities[4][7] = {
+    {50, 75, 90, 95, 98, 99, 100},  // Probabilities for 0-8 AM
+    {10, 25, 45, 65, 80, 90, 100}, // Probabilities for 8 AM-12 PM
+    {5, 15, 30, 50, 70, 85, 100},  // Probabilities for 12-4 PM
+    {20, 45, 65, 80, 90, 96, 100}   // Probabilities for 4-12 AM
+};
+
+
+const int energy_people_office = 250;
+const int energy_people_group = 150;
+
+int energy_people = 0;
+int occupancy = 0;
+int group = 1;
+double random_number = 0;
+
+
+void update_energy_effect() {
+    if (group == 1) {
+        energy_people = energy_people_group;
+    } else {
+        energy_people = energy_people_office;
+    }
+    occupancy_effect = occupancy * energy_people;
+}
+
+
+void choose_occupancy(int time_frame) {
+    random_number = random(100);
+
+    if (random_number &lt; probabilities[time_frame][0]) {  
+        occupancy = 1;
+    } else if (random_number &lt; probabilities[time_frame][1]) {  
+        occupancy = 2;
+    } else if (random_number &lt; probabilities[time_frame][2]) { 
+        occupancy = 3;
+    } else if (random_number &lt; probabilities[time_frame][3]) {  
+        occupancy = 4;
+    } else if (random_number &lt; probabilities[time_frame][4]) {
+        occupancy = 5;
+    } else if (random_number &lt; probabilities[time_frame][5]) {
+        occupancy = 6;
+    } else if (random_number &lt; probabilities[time_frame][6]) {
+        occupancy = 7;
+    }
+
+    update_energy_effect();
+
+    
+}
+</declaration>
+		<location id="id17" x="238" y="-204">
+			<urgent/>
+		</location>
+		<location id="id18" x="136" y="-204">
+			<urgent/>
+		</location>
+		<location id="id19" x="-68" y="-204">
+			<urgent/>
+		</location>
+		<location id="id20" x="-170" y="-204">
+			<urgent/>
+		</location>
+		<location id="id21" x="34" y="-68">
+		</location>
+		<location id="id22" x="34" y="136">
+		</location>
+		<init ref="id22"/>
+		<transition id="id23" controllable="false">
+			<source ref="id17"/>
+			<target ref="id21"/>
+			<label kind="assignment" x="85" y="-297">choose_occupancy(3)</label>
+			<nail x="238" y="-272"/>
+			<nail x="34" y="-272"/>
+		</transition>
+		<transition id="id24" controllable="false">
+			<source ref="id21"/>
+			<target ref="id17"/>
+			<label kind="guard" x="144" y="-68">counter &gt;= 960</label>
+			<label kind="synchronisation" x="178" y="-93">tik?</label>
+			<nail x="238" y="-68"/>
+		</transition>
+		<transition id="id25" controllable="false">
+			<source ref="id18"/>
+			<target ref="id21"/>
+			<label kind="assignment" x="51" y="-238">choose_occupancy(2)</label>
+			<nail x="34" y="-204"/>
+		</transition>
+		<transition id="id26" controllable="false">
+			<source ref="id21"/>
+			<target ref="id18"/>
+			<label kind="guard" x="76" y="-161">counter &gt;= 720 &amp;&amp; 
+counter &lt; 960</label>
+			<label kind="synchronisation" x="76" y="-93">tik?</label>
+			<nail x="136" y="-68"/>
+		</transition>
+		<transition id="id27" controllable="false">
+			<source ref="id19"/>
+			<target ref="id21"/>
+			<label kind="assignment" x="-153" y="-238">choose_occupancy(1)</label>
+			<nail x="34" y="-204"/>
+		</transition>
+		<transition id="id28" controllable="false">
+			<source ref="id21"/>
+			<target ref="id19"/>
+			<label kind="guard" x="-127" y="-161">counter &gt;= 480 &amp;&amp; 
+counter &lt; 720</label>
+			<label kind="synchronisation" x="-51" y="-93">tik?</label>
+			<nail x="-68" y="-68"/>
+		</transition>
+		<transition id="id29" controllable="false">
+			<source ref="id21"/>
+			<target ref="id22"/>
+			<label kind="guard" x="-195" y="8">data[counter][6]
+-data[counter][5] != 1</label>
+			<label kind="assignment" x="-195" y="51">occupancy_effect = 0, 
+occupancy = 0</label>
+			<nail x="0" y="34"/>
+		</transition>
+		<transition id="id30" controllable="false">
+			<source ref="id20"/>
+			<target ref="id21"/>
+			<label kind="assignment" x="-170" y="-297">choose_occupancy(0)</label>
+			<nail x="-170" y="-272"/>
+			<nail x="34" y="-272"/>
+		</transition>
+		<transition id="id31" controllable="false">
+			<source ref="id21"/>
+			<target ref="id20"/>
+			<label kind="guard" x="-187" y="-68">counter &lt; 480</label>
+			<label kind="synchronisation" x="-144" y="-93">tik?</label>
+			<nail x="-170" y="-68"/>
+		</transition>
+		<transition id="id32" controllable="false">
+			<source ref="id22"/>
+			<target ref="id21"/>
+			<label kind="guard" x="76" y="17">data[counter][6]
+-data[counter][5] == 1</label>
+			<nail x="68" y="34"/>
+		</transition>
+	</template>
 	<system>// List one or more processes to be composed into a system.
-system clock_time, controller_blinds, room, optimization;
+system clock_time, controller_blinds, room, optimization, occupancy;
 </system>
 	<queries>
 		<option key="--discretization" value="1.0E-4"/>
