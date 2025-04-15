@@ -1624,11 +1624,11 @@ int period = 1;
 void fetch_data(){
     heating_setpoint = data[counter * period][5];
     cooling_setpoint = data[counter * period][6];
+    occupancy = O(data[counter * period][7]);
     solar = S(data[counter * period][2], current_room[1]);
     heater = H(heating_setpoint, room_temp, current_room[2]);
     ambient_temp = data[counter * period][4];
     wind = data[counter * period][8];
-    //room_temp = data[counter * period][3];
 }</declaration>
 		<location id="id14" x="-170" y="0">
 			<name x="-187" y="17">Tik</name>
