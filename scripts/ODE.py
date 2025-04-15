@@ -18,7 +18,7 @@ class TemperatureODE(torch.nn.Module):
         idx: The index of the current time step.
         T: The previously calculated temperature.
     Returns:
-        A temperateure difference based on the ambient temperature, current temperature and the openness for a valve.
+        A temperature difference based on the ambient temperature, current temperature and the openness for a valve.
     """
     def V(self, idx: int, T: float):
         ventilation_temp = self.T_a[idx]
