@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from scripts.ODE import TemperatureODE
 from scripts.data_processing import get_processed_data_as_tensor
 
-'''
+"""
 Reset the temperature to the room temperature value every reset_interval steps.
 Args:
     ode_class: The ODE class to be used for simulation.
@@ -18,8 +18,8 @@ Args:
     reset_interval: The interval at which to reset the temperature.
 Returns:
     A tensor containing the simulated values of the system.
-'''
-def simulate_with_resets(ode_class, T_r, y0, t_points, reset_interval):
+"""
+def simulate_with_resets(ode_class: TemperatureODE, T_r: torch.Tensor, y0: torch.Tensor, t_points: torch.Tensor, reset_interval: int) -> torch.Tensor:
     results = []
     current_y = y0.clone()
 
@@ -43,7 +43,7 @@ def simulate_with_resets(ode_class, T_r, y0, t_points, reset_interval):
 
 
 
-'''
+"""
 Finds the optimal constants for the ODE model by training it on a single day of data.
 Args:
     time: The time for which to train the model.
@@ -52,8 +52,8 @@ Args:
     step: The step size for the data.
 Returns:
     A tuple containing the optimized constants and the loss value.
-'''
-def train_day(time: datetime, room: dict, prediction_interval: int, step: int = 1):
+"""
+def train_day(time: datetime, room: dict, prediction_interval: int, step: int = 1) -> tuple[str, int | float | bool] :
     data = get_processed_data_as_tensor(time, room)
     T_r = data[:, 0][::step]   # Room temperature
     T_a = data[:, 1][::step]   # Ambient temperature
@@ -86,13 +86,29 @@ def train_day(time: datetime, room: dict, prediction_interval: int, step: int = 
         optimizer.step()
     return constants.detach().numpy(), loss.item()
 
-
-def _train_day(args: list):
+"""
+A function that runs the train_day function and prints which day it is training for.
+Args:
+    args: A list containing the time, room and interval needed for the training.
+Returns:
+    Returns a tuple containing the optimized constants and the loss value.
+"""
+def _train_day(args: list) -> tuple[str, int | float | bool]:
     time, room, prediction_interval = args
     print("Training for", time.strftime("%Y-%m-%dT%H:%M:%SZ"), flush=True)
     return train_day(time, room, prediction_interval)
 
-def train_for_time_frame(room: dict, start_time: str, days: int, prediction_interval: int):
+"""
+A function which trains the data for a full time frame.
+Args:
+    room: A dict containing all of the information of the room.
+    start_time: The start date of the training.
+    days: The amount of days the function should train for.
+    prediction_interval: The interval at which to reset the temperature.
+Returns:
+    Returns an average of the constants and an average of the errors.
+"""
+def train_for_time_frame(room: dict, start_time: str, days: int, prediction_interval: int) -> tuple[tuple[float, str], float]:
     time = datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%SZ") #Convert start_time to datetime object
     args_list = [(time + timedelta(days=i), room, prediction_interval) for i in range(days)] #Pack the arguments for each day into a list
 

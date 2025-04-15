@@ -4,15 +4,19 @@ import pandas as pd
 from scripts.training import train_for_time_frame
 
 """
-@params alpha_a: alpha_a constant for ambient temperature
-@params alpha_s: alpha_s constant for solar effect
-@params alpha_r: alpha_r constant for heater effect
-@params alpha_v: alpha_v constant for ventilation effect
-@params start_time: start time as a string
-@params days: number of days to train for
-Writes the constants from the training to the cache csv file
+Writes the constants from the training to the cache csv file.
+Args:
+    alpha_a: alpha_a constant for ambient temperature.
+    alpha_s: alpha_s constant for solar effect.
+    alpha_r: alpha_r constant for heater effect.
+    alpha_v: alpha_v constant for ventilation effect.
+    start_time: start time as a string.
+    days: number of days to train for.
+    error: the error value extracted from the training.
+    path: the path of the cache.csv file.
 """
-def cache_constants(alpha_a, alpha_s, alpha_r, alpha_v, alpha_o, start_time, days, error, path):
+def cache_constants(alpha_a: float, alpha_s: float, alpha_r: float, alpha_v: float, alpha_o: float,
+                    start_time: str, days: int, error: float, path: str):
     #Open the csv file in write mode
     with open(path, 'w+', newline='') as csvfile:
         fieldnames = ['alpha_a', 'alpha_s', 'alpha_r', 'alpha_v', 'alpha_o', 'start_time', 'days', 'error'] # The fieldnames for the csv file.
@@ -26,13 +30,17 @@ def cache_constants(alpha_a, alpha_s, alpha_r, alpha_v, alpha_o, start_time, day
 
 
 """
-@params start_time: start time as a string
-@params days: number of days to train for
-@params retrain: boolean for retraining
-@returns: dictionary of constants
-Function for getting the constants based on the given timeframe
+Function for getting the constants based on the given timeframe.
+Args:
+    room: the room number as a string.
+    start_time: start time as a string.
+    days: number of days to train for.
+    retrain: boolean for retraining.
+    prediction_interval: interval for how far ahead the temperature is predicted.
+Returns:
+    Dictionary of constants.
 """
-def get_constants(room, start_time, days, retrain, prediction_interval):
+def get_constants(room: str, start_time: str, days: int, retrain: bool, prediction_interval: int) -> dict:
     path = "data/" + room["name"] + "/constants_cache.csv"
 
     if is_retrain_needed(path, start_time, days, retrain):
@@ -46,8 +54,18 @@ def get_constants(room, start_time, days, retrain, prediction_interval):
     return {'alpha_a': df['alpha_a'][0], 'alpha_s': df['alpha_s'][0], 'alpha_r': df['alpha_r'][0],
             'alpha_v': df['alpha_v'][0], 'alpha_o': df['alpha_o'][0]}
 
-
-def is_retrain_needed(path, start_time, days, retrain):
+"""
+A function that evaluates if retraining is necessary, based on whether there is cached data or if 
+the retrain parameter is set to true.
+Args:
+    path: the path of the cache.csv file.
+    start_time: start time as a string.
+    days: number of days to train for.
+    retrain: boolean for retraining.
+Returns:
+    A boolean indicating if retraining is necessary.
+"""
+def is_retrain_needed(path: str, start_time: str, days: int, retrain: bool) -> bool:
     df = pd.read_csv(path)
 
     # Check if the cache file is empty or if retrain is true
