@@ -12,7 +12,7 @@ class TemperatureODE(torch.nn.Module):
         constants: The constants used to predict the temperature.
         heater_max: The maximum heater output.
     """
-    def __init__(self, T_a, S_t, h_s, O, constants, heater_max):
+    def __init__(self, T_a, S_t, h_s, c_s, O, constants, heater_max):
         super().__init__()
         self.T_a = T_a
         self.S_t = S_t
@@ -22,7 +22,7 @@ class TemperatureODE(torch.nn.Module):
         self.a_a, self.a_s, self.a_h, self.a_v, self.a_o = constants
         self.heater_max = heater_max
 
-   """
+    """
    Calculates the ventilation effect based on the ambient temperature given a function and the openness of a valve
     Args:
         idx: The index of the current time step.
