@@ -1448,6 +1448,7 @@ double blinds = 0;
 bool blocked = false;
 
 double heater;
+double ventilation;
 double ambient_temp;
 double solar;
 double heating_setpoint;
@@ -1504,8 +1505,8 @@ double H(double heating_setpoint, double T_current, double heater_effect) {
 
 
 double V(double cooling_setpoint, double ambient_temp, double T_current){
-    ventilation_temp = ambient_temp;
-    ventilation_valve = 0.3;
+    double ventilation_temp = ambient_temp;
+    double ventilation_valve = 0.3;
     if (ambient_temp &lt;= 5){
         ventilation_temp = 21;
     }
@@ -1513,7 +1514,7 @@ double V(double cooling_setpoint, double ambient_temp, double T_current){
         ventilation_temp = -0.25 * ambient_temp + 22.25;
     }
 
-    if (T &gt; cooling_setpoint){
+    if (T_current &gt; cooling_setpoint){
         ventilation_valve = 1;
     }
 
