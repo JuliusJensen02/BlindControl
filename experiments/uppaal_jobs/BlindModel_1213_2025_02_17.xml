@@ -1419,8 +1419,6 @@ const double r229[8] = {1.229, 5.18, 758, 0.00004841750569834047,0.0004048344549
 const double r231[8] = {1.231, 6.86, 758, 0.00006641455619518232, 0.00019325396554338846, 0.0009765717733458412, 0.009957940987549275, 0.00013935217612309091};
 const double r233[8] = {1.233, 7, 758, 0.0000482699692484434, 0.0003135142135749358, 0.0010239398245252662, 0.009508719194294865, 0.00033553867308414584};
 const double current_room[8] = r213;
-const double charge_effect = 0.02;
-const double decay_effect = 0.02;
 const int init_time = 1320;
 const int control_interval = 30;
 int counter = init_time;
@@ -1491,20 +1489,28 @@ double min(double a, double b){
     }
 }
 
-double H(double heating_setpoint, double T_current, double heater_effect) {
-    double max_heat_stored = heater_effect;
-
+double H(double heating_setpoint, double T_current, double ambient_temp) {
+    double heater_valve = 0;
+    double heater_temp = 40;
     if (T_current &lt;= heating_setpoint) {
-        heater_envelope = min(heater_envelope + charge_effect * max_heat_stored, max_heat_stored);
-    } else {
-        heater_envelope = heater_envelope * exp(-decay_effect);
+        heater_valve = 1;
+    } else (T_current &gt; heating_setpoint) {
+        heater_valve = 0;
     }
-    return heater_envelope;
+
+    if (ambient_temp &lt;= -12) {
+        heater_temp = 77;
+    } else if (-12 &lt; ambient_temp &lt;= 5) {
+        heater_temp = -ambient_temp + 65;
+    } else if (5 &lt; ambient_temp &lt;= 20) {
+        heater_temp = -1.33 * ambient_temp + 66.67;
+    }
+    return heater_valve * (heater_temp - T_current);
 }
 
 void initialize() {
     ambient_temp = data[init_time][4];
-    heater = H(data[init_time][5], data[init_time][3], current_room[2]);
+    heater = H(data[init_time][5], data[init_time][3], ambient_temp);
     solar = S(data[init_time][2], current_room[1]); 
     heating_setpoint = data[init_time][5];
     cooling_setpoint = data[init_time][6];
@@ -1624,10 +1630,10 @@ int period = 1;
 void fetch_data(){
     heating_setpoint = data[counter * period][5];
     cooling_setpoint = data[counter * period][6];
+    ambient_temp = data[counter * period][4];
     occupancy = O(data[counter * period][7]);
     solar = S(data[counter * period][2], current_room[1]);
-    heater = H(heating_setpoint, room_temp, current_room[2]);
-    ambient_temp = data[counter * period][4];
+    heater = H(heating_setpoint, room_temp, ambient_temp);
     wind = data[counter * period][8];
 }</declaration>
 		<location id="id14" x="-170" y="0">

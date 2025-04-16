@@ -45,7 +45,7 @@ class TemperatureODE(torch.nn.Module):
 
 
     """
-       Calculates the ventilation effect based on the ambient temperature given a function and the openness of a valve
+       Calculates the heating effect based on the ambient temperature given a function and the openness of a valve
         Args:
             idx: The index of the current time step.
             T: The previously calculated temperature.
