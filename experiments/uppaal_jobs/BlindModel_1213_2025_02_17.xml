@@ -1495,9 +1495,7 @@ double H(double heating_setpoint, double T_current, double ambient_temp) {
     double heater_temp = 40;
     if (T_current &lt;= heating_setpoint) {
         heater_valve = 1;
-    } else (T_current &gt; heating_setpoint) {
-        heater_valve = 0;
-    }
+    } 
 
     if (ambient_temp &lt;= -12) {
         heater_temp = 77;
@@ -1647,13 +1645,10 @@ init_room_temp()</label>
 		<declaration>clock x;
 int period = 1;
 
-double V(double cooling_setpoint, double ambient_temp, double T_current){
-
 void fetch_data(){
     heating_setpoint = data[counter * period][5];
     cooling_setpoint = data[counter * period][6];
     ambient_temp = data[counter * period][4];
-    occupancy = O(data[counter * period][7]);
     solar = S(data[counter * period][2], current_room[1]);
     heater = H(heating_setpoint, room_temp, ambient_temp);
     ventilation = V(cooling_setpoint, ambient_temp, room_temp);
