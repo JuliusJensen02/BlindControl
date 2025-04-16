@@ -1502,6 +1502,24 @@ double H(double heating_setpoint, double T_current, double heater_effect) {
     return heater_envelope;
 }
 
+
+double V(double cooling_setpoint, double ambient_temp, double T_current){
+    ventilation_temp = ambient_temp;
+    ventilation_valve = 0.3;
+    if (ambient_temp &lt;= 5){
+        ventilation_temp = 21;
+    }
+    else if (5 &lt; ambient_temp &lt;= 17.8){
+        ventilation_temp = -0.25 * ambient_temp + 22.25;
+    }
+
+    if (T &gt; cooling_setpoint){
+        ventilation_valve = 1;
+    }
+
+    return ventilation_valve * (ventilation_temp - T_current);
+}
+
 void initialize() {
     ambient_temp = data[init_time][4];
     heater = H(data[init_time][5], data[init_time][3], current_room[2]);
@@ -1509,6 +1527,7 @@ void initialize() {
     heating_setpoint = data[init_time][5];
     cooling_setpoint = data[init_time][6];
     wind = data[init_time][8];
+    ventilation = V(cooling_setpoint, ambient_temp, room_temp);
 }
 
 
@@ -1621,6 +1640,8 @@ init_room_temp()</label>
 		<declaration>clock x;
 int period = 1;
 
+double V(double cooling_setpoint, double ambient_temp, double T_current){
+
 void fetch_data(){
     heating_setpoint = data[counter * period][5];
     cooling_setpoint = data[counter * period][6];
@@ -1628,6 +1649,7 @@ void fetch_data(){
     solar = S(data[counter * period][2], current_room[1]);
     heater = H(heating_setpoint, room_temp, current_room[2]);
     ambient_temp = data[counter * period][4];
+    ventilation = V(cooling_setpoint, ambient_temp, room_temp);
     wind = data[counter * period][8];
 }</declaration>
 		<location id="id14" x="-170" y="0">
@@ -1653,7 +1675,7 @@ x = 0</label>
 			<name x="586" y="-34">Room</name>
 			<label kind="invariant" x="374" y="34">room_temp' == (ambient_temp - room_temp) * current_room[3]
 + solar * current_room[4] + heater * current_room[5]
-+ (ambient_temp - room_temp) * current_room[6] 
++ ventilation * current_room[6] 
 + occupancy_effect * current_room[7]</label>
 		</location>
 		<init ref="id16"/>
