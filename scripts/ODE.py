@@ -60,6 +60,7 @@ class TemperatureODE(torch.nn.Module):
             heater_valve = 1
         elif T > self.h_s[idx]:
             heater_valve = 0
+            return 0
 
         if self.T_a[idx] <= -12:
             heater_temp = 77

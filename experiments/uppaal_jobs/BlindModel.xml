@@ -92,6 +92,10 @@ double H(double heating_setpoint, double T_current, double ambient_temp) {
     if (T_current &lt;= heating_setpoint) {
         heater_valve = 1;
     } 
+    else {
+        heating_valve = 0;
+        return 0;
+    }
 
     if (ambient_temp &lt;= -12) {
         heater_temp = 77;
