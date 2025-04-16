@@ -32,9 +32,7 @@ def simulate_with_resets(ode_class: TemperatureODE, T_r: torch.Tensor, y0: torch
         results.append(y_seg[:-1])
 
         # Reset temperature to real value, continue with simulated heater state
-        next_T = T_r[min(i + reset_interval, len(T_r) - 1)]
-        next_H = y_seg[-1, 1]
-        current_y = torch.stack([next_T, next_H])
+        current_y = T_r[min(i + reset_interval, len(T_r) - 1)]
 
     return torch.cat(results, dim=0)
 
@@ -73,9 +71,7 @@ def train_day(time: datetime, room: dict, prediction_interval: int, step: int = 
 
         ode_func = TemperatureODE(T_a, S_t, h_s, c_s, O, constants, room["heater_effect"]) # Initialize the ODE class
 
-        T0 = T_r[0] # Initial temperature
-        H0 = torch.tensor(0.0) # Initial heater state
-        y0 = torch.stack([T0, H0]) # Initial state
+        y0 = T_r[0] # Initial temperature
         t = torch.arange(len(T_r)).float() # Time points for the simulation
 
         y = simulate_with_resets(ode_func, T_r, y0, t, reset_interval=prediction_interval)
