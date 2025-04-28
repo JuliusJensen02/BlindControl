@@ -8,7 +8,7 @@ const double g_value = 0.45; //Value gotten from Rasmus
 const double blind_eff = 0.5; //assumed value (change if we find real data)
 const double watt_per_person = 100; //Assumed watt coming from 1 person
 const double lux_per_person = 300; //Lux per person
-const double r213[8] = {1.213, 3.64, 372, 1.40226106e-04, -4.84448046e-06,  1.07263012e-04,  2.39226095e-04, 3.57875259e-05};
+const double r213[8] = {1.213, 3.64, 372, 1.26363017e-04, 5.92279404e-06, 5.01907442e-04, 2.89596003e-03, -6.36406737e-05};
 const double r215[8] = {1.215, 5.46, 422, 0.00006654616536711289, 0.0002178432103546357, 0.001052809993242162, 0.009573171305359684, 0.0001001959631084448};
 const double r217[8] = {1.217, 3.64, 379, 0.00008403719002189947, 0.0001662483920148472, 0.0009650930757849907, 0.009980847043215571, 0.0001604311015424853};
 const double r229[8] = {1.229, 5.18, 758, 0.00004841750569834047,0.0004048344549600047, 0.0009720673114826017, 0.009243668292515059, 0.0003024374591161649};
@@ -93,7 +93,7 @@ double H(double heating_setpoint, double T_current, double ambient_temp) {
         heater_valve = 1;
     } 
     else {
-        heating_valve = 0;
+        heater_valve = 0;
         return 0;
     }
 
