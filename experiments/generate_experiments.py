@@ -1,4 +1,5 @@
 import os
+
 """
 File used to generate the different experiments carried out on the DEIS cluster. 
 The experiments are defined as a date, how many days the ODE should be solved for, a prediction interval and a date that is predicted for.
@@ -45,8 +46,8 @@ cd /nfs/home/student.aau.dk/tb30jn/BlindControl || exit 1
 python3 -u -m main_args --room='{room}' --training-start-date='{start}' --training-days={days} --interval={interval} --prediction-date='{pred}'
 """
 
-os.makedirs("jobs_"+room_short, exist_ok=True)
-os.makedirs("logs_"+room_short, exist_ok=True)
+os.makedirs("jobs_" + room_short, exist_ok=True)
+os.makedirs("logs_" + room_short, exist_ok=True)
 
 for start, days, interval, pred in jobs:
     short_start = start.split("T")[0]  # "2025-01-01"

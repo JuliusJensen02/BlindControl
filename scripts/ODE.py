@@ -80,7 +80,7 @@ class TemperatureODE(torch.nn.Module):
         An array containing the changes of the temperature and heater.
     """
     def forward(self, t: float, y: float) -> torch.Tensor:
-        T = y[0]
+        T = y
         idx = min(int(t), len(self.T_a) - 1)
 
         dT = ((self.T_a[idx] - T) * self.a_a +
