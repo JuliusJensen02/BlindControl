@@ -44,10 +44,9 @@ def get_constants(room: str, start_time: str, days: int, retrain: bool, predicti
     path = "data/" + room["name"] + "/constants_cache.csv"
 
     if is_retrain_needed(path, start_time, days, retrain):
-        print("Retraining...", flush=True)
         constants, error = train_for_time_frame(room, start_time, days, prediction_interval)
-        print("Finished training", flush=True)
-        print((constants, error), flush=True)
+        print(constants, flush=True)
+        print(error, flush = True)
     df = pd.read_csv(path)
 
     #Return the constants as a dictionary

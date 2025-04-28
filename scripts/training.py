@@ -31,7 +31,7 @@ def simulate_with_resets(ode_class: TemperatureODE, T_r: torch.Tensor, y0: torch
         y_seg = torchdiffeq.odeint(ode_class, current_y, t_seg, method="euler")
         results.append(y_seg[:-1])
 
-        # Reset temperature to real value, continue with simulated heater state
+        # Reset temperature to real value
         current_y = T_r[min(i + reset_interval, len(T_r) - 1)]
 
     return torch.cat(results, dim=0)
@@ -74,8 +74,7 @@ def train_day(time: datetime, room: dict, prediction_interval: int, step: int = 
         y0 = T_r[0] # Initial temperature
         t = torch.arange(len(T_r)).float() # Time points for the simulation
 
-        y = simulate_with_resets(ode_func, T_r, y0, t, reset_interval=prediction_interval)
-        T_pred = y[:, 0]
+        T_pred = simulate_with_resets(ode_func, T_r, y0, t, reset_interval=prediction_interval)
 
         loss = torch.mean((T_pred - T_r[:len(T_pred)]) ** 2)
         loss.backward()
@@ -91,7 +90,6 @@ Returns:
 """
 def _train_day(args: list) -> tuple[str, int | float | bool]:
     time, room, prediction_interval = args
-    print("Training for", time.strftime("%Y-%m-%dT%H:%M:%SZ"), flush=True)
     return train_day(time, room, prediction_interval)
 
 """

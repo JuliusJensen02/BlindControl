@@ -1,0 +1,1 @@
+ssh mcc3 "bash -i -c 'cd BlindControl/experiments && chmod +x run_all_experiments_*.sh && ./run_all_experiments_1213.sh && ./run_all_experiments_1215.sh && ./run_all_experiments_1217.sh && ./run_all_experiments_1229.sh && ./run_all_experiments_1231.sh && ./run_all_experiments_1233.sh'"

@@ -57,7 +57,6 @@ def main():
     force_retrain = True
     prediction_interval = args.interval
 
-    print("Getting constants...", flush=True)
     get_constants(chosen_room, training_start_date, training_days, force_retrain, prediction_interval)
 
 if __name__ == '__main__':

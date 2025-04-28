@@ -15,7 +15,7 @@ def create_c_array(file_path):
     #data_filename = "data_2025-02-21.csv"
     #file_path = os.path.join(data_dir, data_filename)
 
-    source_file = os.path.join(os.getcwd(), "UPPAAL_code/data_arrays.c")
+    source_file = os.path.join(os.getcwd(), "data_arrays.c")
 
     # Ensure the file exists
     if not os.path.isfile(file_path):
@@ -44,13 +44,15 @@ def create_c_array(file_path):
 
     # Write the array definition in the source file
     with open(source_file, "w") as c_file:
-        c_file.write(f"const double {data}[{num_rows}][{num_cols}] = {{\n")
+        c_file.write(f"const double data[{num_rows}][{num_cols}] = {{")
 
         # Write the data rows in the C source file
         for row in data:
-            c_file.write("    {" + ", ".join(row) + "},\n")
-
-        c_file.write("};\n\n")
+            if row == data[-1]:
+                c_file.write("{" + ", ".join(row) + "}")
+            else:
+                c_file.write("{" + ", ".join(row) + "},")
+        c_file.write("};")
 
 # Write the number of rows and columns in the C source file     
 create_c_array(args.file_path)
