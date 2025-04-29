@@ -5,9 +5,6 @@
 
 
 const double g_value = 0.45; //Value gotten from Rasmus
-const double blind_eff = 0.5; //assumed value (change if we find real data)
-const double watt_per_person = 100; //Assumed watt coming from 1 person
-const double lux_per_person = 300; //Lux per person
 const double r213[8] = {1.213, 3.64, 372, 1.26363017e-04, 5.92279404e-06, 5.01907442e-04, 2.89596003e-03, -6.36406737e-05};
 const double r215[8] = {1.215, 5.46, 422, 0.00006654616536711289, 0.0002178432103546357, 0.001052809993242162, 0.009573171305359684, 0.0001001959631084448};
 const double r217[8] = {1.217, 3.64, 379, 0.00008403719002189947, 0.0001662483920148472, 0.0009650930757849907, 0.009980847043215571, 0.0001604311015424853};
@@ -17,122 +14,43 @@ const double r233[8] = {1.233, 7, 758, 0.0000482699692484434, 0.0003135142135749
 const double current_room[8] = r213;
 const int init_time = 1320;
 const int control_interval = 30;
-int counter = init_time;
 const double init_temp = 21.08376864403492;
+
+int counter = init_time;
 
 
 broadcast chan tik;
-hybrid clock room_temp;
 
-void init_room_temp(){
+hybrid clock room_temp;
+hybrid clock cost = 0;
+
+double blinds = 0;
+bool blocked = false;
+
+double solar;
+double ambient_temp;
+double heating_setpoint;
+double cooling_setpoint;
+double wind;
+
+double ventilation_effect;
+double solar_effect;
+double occupancy_effect;
+double heater_effect;
+
+void initialize() {
     if(init_temp == 0.0){
         room_temp = data[init_time][3];
     }
     else{
         room_temp = init_temp;
     }
-}
 
-
-hybrid clock cost = 0;
-
-double heater_envelope = 0;
-double valve = 0.0; 
-double blinds = 0;
-bool blocked = false;
-
-double heater;
-double ventilation;
-double ambient_temp;
-double solar;
-double heating_setpoint;
-double cooling_setpoint;
-double wind;
-
-double occupancy_effect;
-
-
-double S(double solar_effect, double window_size) {
-    double sun_block = 1;
-        if(blinds == 1){
-            sun_block = 0.2;
-        }
-        else if(blinds == 0){
-            sun_block = 1;
-        }
-        else{
-            sun_block = 0.2 / blinds;
-        }
-    return solar_effect * sun_block * g_value * window_size;
-}
-
-double derivative_function(double T_a, double T_r, double S, double H, double O, double a_a, double a_s, double a_h, double a_v, double a_o) {
-    return (T_a - T_r) * a_a + S * a_s + H * a_h + (T_a - T_r) * a_v + O * a_o;
-}
-
-double max(double a,double b){
-    if (a &gt; b){
-        return a;
-    } else {
-        return b;
-    }
-}
-
-double min(double a, double b){
-    if (a &lt; b) {
-        return a;
-    } else {
-        return b;
-    }
-}
-
-double H(double heating_setpoint, double T_current, double ambient_temp) {
-    double heater_valve = 0;
-    double heater_temp = 40;
-    if (T_current &lt;= heating_setpoint) {
-        heater_valve = 1;
-    } 
-    else {
-        heater_valve = 0;
-        return 0;
-    }
-
-    if (ambient_temp &lt;= -12) {
-        heater_temp = 77;
-    } else if (-12 &lt; ambient_temp &lt;= 5) {
-        heater_temp = -ambient_temp + 65;
-    } else if (5 &lt; ambient_temp &lt;= 20) {
-        heater_temp = -1.33 * ambient_temp + 66.67;
-    }
-    return heater_valve * (heater_temp - T_current);
-}
-
-
-double V(double cooling_setpoint, double ambient_temp, double T_current){
-    double ventilation_temp = ambient_temp;
-    double ventilation_valve = 0.3;
-    if (ambient_temp &lt;= 5){
-        ventilation_temp = 21;
-    }
-    else if (5 &lt; ambient_temp &lt;= 17.8){
-        ventilation_temp = -0.25 * ambient_temp + 22.25;
-    }
-
-    if (T_current &gt; cooling_setpoint){
-        ventilation_valve = 1;
-    }
-
-    return ventilation_valve * (ventilation_temp - T_current);
-}
-
-void initialize() {
+    solar = data[init_time][2];
     ambient_temp = data[init_time][4];
-    heater = H(data[init_time][5], data[init_time][3], ambient_temp);
-    solar = S(data[init_time][2], current_room[1]); 
     heating_setpoint = data[init_time][5];
     cooling_setpoint = data[init_time][6];
     wind = data[init_time][7];
-    ventilation = V(cooling_setpoint, ambient_temp, room_temp);
 }
 
 
@@ -140,14 +58,55 @@ void initialize() {
 
 </declaration>
 	<template>
+		<name>room</name>
+		<location id="id0" x="603" y="0">
+			<name x="586" y="-34">Room</name>
+			<label kind="invariant" x="374" y="34">room_temp' == (ambient_temp - room_temp) * current_room[3]
++ solar_effect * current_room[4] + heater_effect * current_room[5]
++ ventilation_effect * current_room[6] 
++ occupancy_effect * current_room[7]</label>
+		</location>
+		<init ref="id0"/>
+	</template>
+	<template>
+		<name>clock_time</name>
+		<declaration>clock x;
+int period = 1;
+
+void fetch_data(){
+    solar = data[counter * init_time][2];
+    ambient_temp = data[counter * period][4];
+    heating_setpoint = data[counter * period][5];
+    cooling_setpoint = data[counter * period][6];
+    wind = data[counter * period][7];
+
+}</declaration>
+		<location id="id1" x="-170" y="0">
+			<name x="-187" y="17">Tik</name>
+			<label kind="invariant" x="-221" y="42">x &lt;= period</label>
+		</location>
+		<init ref="id1"/>
+		<transition id="id2" controllable="false">
+			<source ref="id1"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-161" y="-161">x &gt;= period</label>
+			<label kind="synchronisation" x="-195" y="-110">tik!</label>
+			<label kind="assignment" x="-331" y="-93">counter++,
+fetch_data(),
+x = 0</label>
+			<nail x="-68" y="-136"/>
+			<nail x="-272" y="-136"/>
+		</transition>
+	</template>
+	<template>
 		<name x="5" y="5">optimization</name>
 		<declaration>// Place local declarations here.
 </declaration>
-		<location id="id0" x="0" y="0">
+		<location id="id3" x="0" y="0">
 			<name x="-17" y="-34">Cost</name>
 			<label kind="invariant" x="-518" y="17">cost' == ((heating_setpoint - room_temp) + (cooling_setpoint - room_temp)) * ((heating_setpoint - room_temp) + (cooling_setpoint - room_temp))</label>
 		</location>
-		<init ref="id0"/>
+		<init ref="id3"/>
 	</template>
 	<template>
 		<name>controller_blinds</name>
@@ -162,128 +121,85 @@ void initialize() {
 }
 
 clock y;</declaration>
-		<location id="id1" x="-136" y="0">
+		<location id="id4" x="-136" y="0">
 			<name x="-170" y="17">Blocked</name>
 		</location>
-		<location id="id2" x="-646" y="-68">
+		<location id="id5" x="-646" y="-68">
 			<name x="-722" y="-76">Initial</name>
 			<urgent/>
 		</location>
-		<location id="id3" x="-34" y="-68">
+		<location id="id6" x="-34" y="-68">
 			<name x="-17" y="-76">Choice</name>
 			<urgent/>
 		</location>
-		<location id="id4" x="-442" y="-68">
+		<location id="id7" x="-442" y="-68">
 			<name x="-493" y="-68">Wait</name>
 			<label kind="invariant" x="-433" y="-59">y &lt;= control_interval</label>
 			<label kind="exponentialrate" x="-452" y="-34">1</label>
 		</location>
-		<init ref="id2"/>
-		<transition id="id5">
-			<source ref="id1"/>
-			<target ref="id3"/>
+		<init ref="id5"/>
+		<transition id="id8">
+			<source ref="id4"/>
+			<target ref="id6"/>
 			<label kind="guard" x="-119" y="-25">!blocked</label>
 			<nail x="-34" y="0"/>
 		</transition>
-		<transition id="id6">
-			<source ref="id4"/>
-			<target ref="id1"/>
+		<transition id="id9">
+			<source ref="id7"/>
+			<target ref="id4"/>
 			<label kind="guard" x="-433" y="-25">blocked</label>
 			<label kind="assignment" x="-255" y="0">blinds = 0</label>
 			<nail x="-442" y="0"/>
 		</transition>
-		<transition id="id7">
-			<source ref="id3"/>
-			<target ref="id4"/>
+		<transition id="id10">
+			<source ref="id6"/>
+			<target ref="id7"/>
 			<label kind="assignment" x="-433" y="-297">blinds = 0</label>
 			<nail x="-34" y="-272"/>
 			<nail x="-442" y="-272"/>
 		</transition>
-		<transition id="id8">
-			<source ref="id3"/>
-			<target ref="id4"/>
+		<transition id="id11">
+			<source ref="id6"/>
+			<target ref="id7"/>
 			<label kind="assignment" x="-433" y="-263">blinds = 0.25</label>
 			<nail x="-34" y="-238"/>
 			<nail x="-442" y="-238"/>
 		</transition>
-		<transition id="id9">
-			<source ref="id3"/>
-			<target ref="id4"/>
+		<transition id="id12">
+			<source ref="id6"/>
+			<target ref="id7"/>
 			<label kind="assignment" x="-433" y="-229">blinds = 0.5</label>
 			<nail x="-34" y="-204"/>
 			<nail x="-442" y="-204"/>
 		</transition>
-		<transition id="id10">
-			<source ref="id3"/>
-			<target ref="id4"/>
+		<transition id="id13">
+			<source ref="id6"/>
+			<target ref="id7"/>
 			<label kind="assignment" x="-433" y="-195">blinds = 0.75</label>
 			<nail x="-34" y="-170"/>
 			<nail x="-442" y="-170"/>
 		</transition>
-		<transition id="id11">
-			<source ref="id3"/>
-			<target ref="id4"/>
+		<transition id="id14">
+			<source ref="id6"/>
+			<target ref="id7"/>
 			<label kind="assignment" x="-433" y="-161">blinds = 1</label>
 			<nail x="-34" y="-136"/>
 			<nail x="-442" y="-136"/>
 		</transition>
-		<transition id="id12">
-			<source ref="id4"/>
-			<target ref="id3"/>
+		<transition id="id15">
+			<source ref="id7"/>
+			<target ref="id6"/>
 			<label kind="guard" x="-416" y="-93">y &gt;= control_interval</label>
 			<label kind="assignment" x="-93" y="-68">y = 0</label>
 		</transition>
-		<transition id="id13">
-			<source ref="id2"/>
-			<target ref="id4"/>
-			<label kind="assignment" x="-603" y="-136">initialize(),
-init_room_temp()</label>
+		<transition id="id16">
+			<source ref="id5"/>
+			<target ref="id7"/>
+			<label kind="assignment" x="-629" y="-93">initialize()</label>
 		</transition>
 	</template>
 	<template>
-		<name>clock_time</name>
-		<declaration>clock x;
-int period = 1;
-
-void fetch_data(){
-    heating_setpoint = data[counter * period][5];
-    cooling_setpoint = data[counter * period][6];
-    ambient_temp = data[counter * period][4];
-    solar = S(data[counter * period][2], current_room[1]);
-    heater = H(heating_setpoint, room_temp, ambient_temp);
-    ventilation = V(cooling_setpoint, ambient_temp, room_temp);
-    wind = data[counter * period][7];
-}</declaration>
-		<location id="id14" x="-170" y="0">
-			<name x="-187" y="17">Tik</name>
-			<label kind="invariant" x="-221" y="42">x &lt;= period</label>
-		</location>
-		<init ref="id14"/>
-		<transition id="id15" controllable="false">
-			<source ref="id14"/>
-			<target ref="id14"/>
-			<label kind="guard" x="-161" y="-161">x &gt;= period</label>
-			<label kind="synchronisation" x="-195" y="-110">tik!</label>
-			<label kind="assignment" x="-331" y="-93">counter++,
-fetch_data(),
-x = 0</label>
-			<nail x="-68" y="-136"/>
-			<nail x="-272" y="-136"/>
-		</transition>
-	</template>
-	<template>
-		<name>room</name>
-		<location id="id16" x="603" y="0">
-			<name x="586" y="-34">Room</name>
-			<label kind="invariant" x="374" y="34">room_temp' == (ambient_temp - room_temp) * current_room[3]
-+ solar * current_room[4] + heater * current_room[5]
-+ ventilation * current_room[6] 
-+ occupancy_effect * current_room[7]</label>
-		</location>
-		<init ref="id16"/>
-	</template>
-	<template>
-		<name>occupancy</name>
+		<name>occupancy_model</name>
 		<declaration>const int probabilities[4][7] = {
     {50, 75, 90, 95, 98, 99, 100},  // Probabilities for 0-8 AM
     {10, 25, 45, 65, 80, 90, 100}, // Probabilities for 8 AM-12 PM
@@ -336,20 +252,26 @@ void choose_occupancy(int time_frame) {
 }
 </declaration>
 		<location id="id17" x="238" y="-204">
+			<name x="263" y="-212">After_16</name>
 			<urgent/>
 		</location>
 		<location id="id18" x="136" y="-204">
+			<name x="51" y="-195">_12_to_16</name>
 			<urgent/>
 		</location>
 		<location id="id19" x="-68" y="-204">
+			<name x="-153" y="-195">_8_to_12</name>
 			<urgent/>
 		</location>
 		<location id="id20" x="-170" y="-204">
+			<name x="-255" y="-204">Before_8</name>
 			<urgent/>
 		</location>
 		<location id="id21" x="34" y="-68">
+			<name x="59" y="-59">Activity</name>
 		</location>
 		<location id="id22" x="34" y="136">
+			<name x="59" y="136">Wait</name>
 		</location>
 		<init ref="id22"/>
 		<transition id="id23" controllable="false">
@@ -407,6 +329,7 @@ occupancy = 0</label>
 			<source ref="id20"/>
 			<target ref="id21"/>
 			<label kind="assignment" x="-170" y="-297">choose_occupancy(0)</label>
+			<nail x="-170" y="-221"/>
 			<nail x="-170" y="-272"/>
 			<nail x="34" y="-272"/>
 		</transition>
@@ -425,8 +348,148 @@ occupancy = 0</label>
 			<nail x="68" y="34"/>
 		</transition>
 	</template>
+	<template>
+		<name>solar_model</name>
+		<declaration>double window_size = current_room[1];
+double sun_block = 1;
+
+void update_solar() {
+    solar_effect = solar * sun_block * g_value * window_size;
+}</declaration>
+		<location id="id33" x="0" y="0">
+			<name x="17" y="-8">Sun</name>
+		</location>
+		<init ref="id33"/>
+		<transition id="id34">
+			<source ref="id33"/>
+			<target ref="id33"/>
+			<label kind="guard" x="-280" y="34">blinds != 0 &amp;&amp; blinds != 1</label>
+			<label kind="synchronisation" x="-93" y="-8">tik?</label>
+			<label kind="assignment" x="-272" y="-68">sun_block = 0.2/blinds,
+update_solar()</label>
+			<nail x="-102" y="34"/>
+			<nail x="-102" y="-34"/>
+		</transition>
+		<transition id="id35">
+			<source ref="id33"/>
+			<target ref="id33"/>
+			<label kind="guard" x="25" y="68">blinds == 0</label>
+			<label kind="synchronisation" x="-17" y="42">tik?</label>
+			<label kind="assignment" x="-102" y="76">sun_block = 1,
+update_solar()</label>
+			<nail x="34" y="68"/>
+			<nail x="-34" y="68"/>
+		</transition>
+		<transition id="id36">
+			<source ref="id33"/>
+			<target ref="id33"/>
+			<label kind="guard" x="-76" y="-110">blinds == 1</label>
+			<label kind="synchronisation" x="-17" y="-59">tik?</label>
+			<label kind="assignment" x="25" y="-119">sun_block = 0.2,
+update_solar()</label>
+			<nail x="-34" y="-68"/>
+			<nail x="34" y="-68"/>
+		</transition>
+	</template>
+	<template>
+		<name>heater_model</name>
+		<declaration>double heater_temp;
+
+void update_heat() {
+    if (ambient_temp &lt; 12) {
+        heater_temp = 77;
+    } else if (-12 &lt; ambient_temp &amp;&amp; ambient_temp &lt;= 5) {
+        heater_temp = -ambient_temp + 65;
+    } else if (5 &lt; ambient_temp &amp;&amp; ambient_temp &lt;= 20) {
+        heater_temp = -1.33 * ambient_temp + 66.67;
+    } else if (20 &lt; ambient_temp) {
+        heater_temp = 40;
+    }
+    heater_effect = heater_temp - room_temp;
+}</declaration>
+		<location id="id37" x="170" y="0">
+			<name x="195" y="8">On</name>
+		</location>
+		<location id="id38" x="34" y="0">
+			<name x="-9" y="0">Off</name>
+		</location>
+		<init ref="id38"/>
+		<transition id="id39" controllable="false">
+			<source ref="id37"/>
+			<target ref="id37"/>
+			<label kind="synchronisation" x="161" y="-93">tik?</label>
+			<label kind="assignment" x="136" y="-127">update_heat()</label>
+			<nail x="136" y="-102"/>
+			<nail x="238" y="-102"/>
+		</transition>
+		<transition id="id40" controllable="false">
+			<source ref="id37"/>
+			<target ref="id38"/>
+			<label kind="guard" x="127" y="34">room_temp &gt; heating_setpoint</label>
+			<nail x="102" y="34"/>
+		</transition>
+		<transition id="id41" controllable="false">
+			<source ref="id38"/>
+			<target ref="id37"/>
+			<label kind="guard" x="-170" y="-51">room_temp &lt;= heating_setpoint</label>
+			<nail x="102" y="-34"/>
+		</transition>
+	</template>
+	<template>
+		<name>ventilation_model</name>
+		<declaration>double ventilation_valve = 0.3;
+
+void update_vent() {
+    double ventilation_temp = ambient_temp;
+    if (ambient_temp &lt;= 5){
+        ventilation_temp = 21;
+    } 
+    else if (5 &lt; ambient_temp &lt;= 17.8){
+        ventilation_temp = -0.25 * ambient_temp + 22.25;
+    }
+
+    ventilation_effect = ventilation_valve * (ventilation_temp - room_temp);
+}
+</declaration>
+		<location id="id42" x="238" y="0">
+			<name x="255" y="8">Power</name>
+		</location>
+		<location id="id43" x="-136" y="0">
+			<name x="-204" y="8">Passive</name>
+		</location>
+		<init ref="id43"/>
+		<transition id="id44" controllable="false">
+			<source ref="id42"/>
+			<target ref="id42"/>
+			<label kind="synchronisation" x="238" y="-93">tik?</label>
+			<label kind="assignment" x="212" y="-127">update_vent()</label>
+			<nail x="204" y="-102"/>
+			<nail x="306" y="-102"/>
+		</transition>
+		<transition id="id45" controllable="false">
+			<source ref="id43"/>
+			<target ref="id43"/>
+			<label kind="synchronisation" x="-170" y="-93">tik?</label>
+			<label kind="assignment" x="-204" y="-127">update_vent()</label>
+			<nail x="-204" y="-102"/>
+			<nail x="-102" y="-102"/>
+		</transition>
+		<transition id="id46" controllable="false">
+			<source ref="id42"/>
+			<target ref="id43"/>
+			<label kind="guard" x="76" y="59">room_temp &lt; cooling_setpoint</label>
+			<label kind="assignment" x="-212" y="59">ventilation_valve = 0.3</label>
+			<nail x="34" y="68"/>
+		</transition>
+		<transition id="id47" controllable="false">
+			<source ref="id43"/>
+			<target ref="id42"/>
+			<label kind="guard" x="-102" y="-25">room_temp &gt; cooling_setpoint</label>
+			<label kind="assignment" x="17" y="0">ventilation_valve = 1</label>
+		</transition>
+	</template>
 	<system>// List one or more processes to be composed into a system.
-system clock_time, controller_blinds, room, optimization, occupancy;
+system clock_time, controller_blinds, room, optimization, occupancy_model, solar_model, heater_model, ventilation_model;
 </system>
 	<queries>
 		<option key="--discretization" value="1.0E-4"/>
