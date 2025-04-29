@@ -214,7 +214,9 @@ const int energy_people_group = 150;
 int energy_people = 0;
 int occupancy = 0;
 int group = 1;
+int P = 5;
 double random_number = 0;
+clock y;
 
 
 void update_energy_effect() {
@@ -269,6 +271,7 @@ void choose_occupancy(int time_frame) {
 		</location>
 		<location id="id21" x="34" y="-68">
 			<name x="59" y="-59">Activity</name>
+			<label kind="invariant" x="-42" y="-59">y &lt;= P</label>
 		</location>
 		<location id="id22" x="34" y="136">
 			<name x="59" y="136">Wait</name>
@@ -277,42 +280,45 @@ void choose_occupancy(int time_frame) {
 		<transition id="id23" controllable="false">
 			<source ref="id17"/>
 			<target ref="id21"/>
-			<label kind="assignment" x="85" y="-297">choose_occupancy(3)</label>
+			<label kind="assignment" x="85" y="-297">choose_occupancy(3), y = 0</label>
 			<nail x="238" y="-272"/>
 			<nail x="34" y="-272"/>
 		</transition>
 		<transition id="id24" controllable="false">
 			<source ref="id21"/>
 			<target ref="id17"/>
-			<label kind="guard" x="144" y="-68">counter &gt;= 960</label>
+			<label kind="guard" x="144" y="-68">counter &gt;= 960
+&amp;&amp; y &gt;= P</label>
 			<label kind="synchronisation" x="178" y="-93">tik?</label>
 			<nail x="238" y="-68"/>
 		</transition>
 		<transition id="id25" controllable="false">
 			<source ref="id18"/>
 			<target ref="id21"/>
-			<label kind="assignment" x="51" y="-238">choose_occupancy(2)</label>
+			<label kind="assignment" x="51" y="-238">choose_occupancy(2), y = 0</label>
 			<nail x="34" y="-204"/>
 		</transition>
 		<transition id="id26" controllable="false">
 			<source ref="id21"/>
 			<target ref="id18"/>
 			<label kind="guard" x="76" y="-161">counter &gt;= 720 &amp;&amp; 
-counter &lt; 960</label>
+counter &lt; 960
+&amp;&amp; y &gt;= P</label>
 			<label kind="synchronisation" x="76" y="-93">tik?</label>
 			<nail x="136" y="-68"/>
 		</transition>
 		<transition id="id27" controllable="false">
 			<source ref="id19"/>
 			<target ref="id21"/>
-			<label kind="assignment" x="-153" y="-238">choose_occupancy(1)</label>
+			<label kind="assignment" x="-153" y="-238">choose_occupancy(1), y = 0</label>
 			<nail x="34" y="-204"/>
 		</transition>
 		<transition id="id28" controllable="false">
 			<source ref="id21"/>
 			<target ref="id19"/>
 			<label kind="guard" x="-127" y="-161">counter &gt;= 480 &amp;&amp; 
-counter &lt; 720</label>
+counter &lt; 720 
+&amp;&amp; y &gt;= P</label>
 			<label kind="synchronisation" x="-51" y="-93">tik?</label>
 			<nail x="-68" y="-68"/>
 		</transition>
@@ -328,7 +334,7 @@ occupancy = 0</label>
 		<transition id="id30" controllable="false">
 			<source ref="id20"/>
 			<target ref="id21"/>
-			<label kind="assignment" x="-170" y="-297">choose_occupancy(0)</label>
+			<label kind="assignment" x="-170" y="-297">choose_occupancy(0), y = 0</label>
 			<nail x="-170" y="-221"/>
 			<nail x="-170" y="-272"/>
 			<nail x="34" y="-272"/>
@@ -336,7 +342,8 @@ occupancy = 0</label>
 		<transition id="id31" controllable="false">
 			<source ref="id21"/>
 			<target ref="id20"/>
-			<label kind="guard" x="-187" y="-68">counter &lt; 480</label>
+			<label kind="guard" x="-187" y="-68">counter &lt; 480
+&amp;&amp; y &gt;= P</label>
 			<label kind="synchronisation" x="-144" y="-93">tik?</label>
 			<nail x="-170" y="-68"/>
 		</transition>
