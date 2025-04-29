@@ -289,7 +289,6 @@ void choose_occupancy(int time_frame) {
 			<target ref="id17"/>
 			<label kind="guard" x="144" y="-68">counter &gt;= 960
 &amp;&amp; y &gt;= P</label>
-			<label kind="synchronisation" x="178" y="-93">tik?</label>
 			<nail x="238" y="-68"/>
 		</transition>
 		<transition id="id25" controllable="false">
@@ -304,7 +303,6 @@ void choose_occupancy(int time_frame) {
 			<label kind="guard" x="76" y="-161">counter &gt;= 720 &amp;&amp; 
 counter &lt; 960
 &amp;&amp; y &gt;= P</label>
-			<label kind="synchronisation" x="76" y="-93">tik?</label>
 			<nail x="136" y="-68"/>
 		</transition>
 		<transition id="id27" controllable="false">
@@ -319,7 +317,6 @@ counter &lt; 960
 			<label kind="guard" x="-127" y="-161">counter &gt;= 480 &amp;&amp; 
 counter &lt; 720 
 &amp;&amp; y &gt;= P</label>
-			<label kind="synchronisation" x="-51" y="-93">tik?</label>
 			<nail x="-68" y="-68"/>
 		</transition>
 		<transition id="id29" controllable="false">
@@ -344,7 +341,6 @@ occupancy = 0</label>
 			<target ref="id20"/>
 			<label kind="guard" x="-187" y="-68">counter &lt; 480
 &amp;&amp; y &gt;= P</label>
-			<label kind="synchronisation" x="-144" y="-93">tik?</label>
 			<nail x="-170" y="-68"/>
 		</transition>
 		<transition id="id32" controllable="false">
