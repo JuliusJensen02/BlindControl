@@ -40,7 +40,7 @@ Args:
 Returns:
     Dictionary of constants.
 """
-def get_constants(room: str, start_time: str, days: int, retrain: bool, prediction_interval: int) -> dict:
+def get_constants(room: dict, start_time: str, days: int, retrain: bool, prediction_interval: int) -> dict:
     path = "data/" + room["name"] + "/constants_cache.csv"
 
     if is_retrain_needed(path, start_time, days, retrain):

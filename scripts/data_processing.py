@@ -170,11 +170,11 @@ def occupancy_effect(heating_setpoint: float, cooling_setpoint: float, time: int
 
     if cooling_setpoint - heating_setpoint == 1 :
 
-        if (time < 480):
+        if time <= 480:
             occupancy = np.random.choice(room["values"], p=room["prob_dist"][0]) # Occupancy probability distribution from 0 to 8 hours
-        elif (time < 720):
+        elif time <= 720:
             occupancy = np.random.choice(room["values"], p=room["prob_dist"][1]) # Occupancy probability distribution from 8 to 12 hours
-        elif (time < 960):
+        elif time <= 960:
             occupancy = np.random.choice(room["values"], p=room["prob_dist"][2]) # Occupancy probability distribution from 12 to 16 hours
         else:
             occupancy = np.random.choice(room["values"], p=room["prob_dist"][3]) # Occupancy probability distribution from 16 to 24 hours
