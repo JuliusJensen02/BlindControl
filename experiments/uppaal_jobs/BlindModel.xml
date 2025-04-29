@@ -360,7 +360,7 @@ void update_solar() {
 			<name x="17" y="-8">Sun</name>
 		</location>
 		<init ref="id33"/>
-		<transition id="id34">
+		<transition id="id34" controllable="false">
 			<source ref="id33"/>
 			<target ref="id33"/>
 			<label kind="guard" x="-280" y="34">blinds != 0 &amp;&amp; blinds != 1</label>
@@ -370,7 +370,7 @@ update_solar()</label>
 			<nail x="-102" y="34"/>
 			<nail x="-102" y="-34"/>
 		</transition>
-		<transition id="id35">
+		<transition id="id35" controllable="false">
 			<source ref="id33"/>
 			<target ref="id33"/>
 			<label kind="guard" x="25" y="68">blinds == 0</label>
@@ -380,7 +380,7 @@ update_solar()</label>
 			<nail x="34" y="68"/>
 			<nail x="-34" y="68"/>
 		</transition>
-		<transition id="id36">
+		<transition id="id36" controllable="false">
 			<source ref="id33"/>
 			<target ref="id33"/>
 			<label kind="guard" x="-76" y="-110">blinds == 1</label>
