@@ -73,6 +73,15 @@ void initialize() {
 		<declaration>clock x;
 int period = 1;
 
+void blinds_blocked(){
+    if (wind &gt;= 10) {
+        blocked = true;
+    }
+    if (wind &lt;= 8) {
+        blocked = false;
+    }
+}
+
 void fetch_data(){
     solar = data[counter * init_time][2];
     ambient_temp = data[counter * period][4];
@@ -80,7 +89,10 @@ void fetch_data(){
     cooling_setpoint = data[counter * period][6];
     wind = data[counter * period][7];
 
-}</declaration>
+    blinds_blocked();
+}
+
+</declaration>
 		<location id="id1" x="-170" y="0">
 			<name x="-187" y="17">Tik</name>
 			<label kind="invariant" x="-221" y="42">x &lt;= period</label>
@@ -110,92 +122,82 @@ x = 0</label>
 	</template>
 	<template>
 		<name>controller_blinds</name>
-		<declaration>bool blinds_blocked(){
-    if (wind &gt;= 10) {
-        blocked = true;
-    }
-    if (wind &lt;= 8) {
-        blocked = false;
-    }
-    return blocked;
-}
-
-clock y;</declaration>
-		<location id="id4" x="-136" y="0">
-			<name x="-170" y="17">Blocked</name>
+		<declaration>clock y;</declaration>
+		<location id="id4" x="-374" y="136">
+			<name x="-400" y="102">Blocked</name>
 		</location>
-		<location id="id5" x="-646" y="-68">
-			<name x="-722" y="-76">Initial</name>
+		<location id="id5" x="-170" y="34">
+			<name x="-153" y="17">Wait</name>
+			<label kind="invariant" x="-153" y="34">y &lt;= control_interval</label>
+		</location>
+		<location id="id6" x="-578" y="34">
+			<name x="-561" y="0">Choice</name>
 			<urgent/>
 		</location>
-		<location id="id6" x="-34" y="-68">
-			<name x="-17" y="-76">Choice</name>
+		<location id="id7" x="-739" y="34">
+			<name x="-815" y="26">Initial</name>
 			<urgent/>
 		</location>
-		<location id="id7" x="-442" y="-68">
-			<name x="-493" y="-68">Wait</name>
-			<label kind="invariant" x="-433" y="-59">y &lt;= control_interval</label>
-			<label kind="exponentialrate" x="-452" y="-34">1</label>
-		</location>
-		<init ref="id5"/>
-		<transition id="id8">
+		<init ref="id7"/>
+		<transition id="id8" controllable="false">
 			<source ref="id4"/>
 			<target ref="id6"/>
-			<label kind="guard" x="-119" y="-25">!blocked</label>
-			<nail x="-34" y="0"/>
+			<label kind="guard" x="-484" y="110">!blocked</label>
+			<label kind="assignment" x="-578" y="136">y = 0</label>
+			<nail x="-578" y="136"/>
 		</transition>
-		<transition id="id9">
-			<source ref="id7"/>
+		<transition id="id9" controllable="false">
+			<source ref="id5"/>
 			<target ref="id4"/>
-			<label kind="guard" x="-433" y="-25">blocked</label>
-			<label kind="assignment" x="-255" y="0">blinds = 0</label>
-			<nail x="-442" y="0"/>
+			<label kind="guard" x="-237" y="110">blocked</label>
+			<label kind="assignment" x="-348" y="144">blinds = 0</label>
+			<nail x="-170" y="136"/>
 		</transition>
 		<transition id="id10">
 			<source ref="id6"/>
-			<target ref="id7"/>
-			<label kind="assignment" x="-433" y="-297">blinds = 0</label>
-			<nail x="-34" y="-272"/>
-			<nail x="-442" y="-272"/>
+			<target ref="id5"/>
+			<label kind="assignment" x="-551" y="-170">blinds = 0</label>
+			<nail x="-578" y="-170"/>
+			<nail x="-170" y="-169"/>
 		</transition>
 		<transition id="id11">
 			<source ref="id6"/>
-			<target ref="id7"/>
-			<label kind="assignment" x="-433" y="-263">blinds = 0.25</label>
-			<nail x="-34" y="-238"/>
-			<nail x="-442" y="-238"/>
+			<target ref="id5"/>
+			<label kind="assignment" x="-551" y="-136">blinds = 0.25</label>
+			<nail x="-578" y="-136"/>
+			<nail x="-170" y="-135"/>
 		</transition>
 		<transition id="id12">
 			<source ref="id6"/>
-			<target ref="id7"/>
-			<label kind="assignment" x="-433" y="-229">blinds = 0.5</label>
-			<nail x="-34" y="-204"/>
-			<nail x="-442" y="-204"/>
+			<target ref="id5"/>
+			<label kind="assignment" x="-551" y="-102">blinds = 0.5</label>
+			<nail x="-578" y="-102"/>
+			<nail x="-170" y="-101"/>
 		</transition>
 		<transition id="id13">
 			<source ref="id6"/>
-			<target ref="id7"/>
-			<label kind="assignment" x="-433" y="-195">blinds = 0.75</label>
-			<nail x="-34" y="-170"/>
-			<nail x="-442" y="-170"/>
+			<target ref="id5"/>
+			<label kind="assignment" x="-551" y="-68">blinds = 0.75</label>
+			<nail x="-578" y="-68"/>
+			<nail x="-170" y="-67"/>
 		</transition>
 		<transition id="id14">
-			<source ref="id6"/>
-			<target ref="id7"/>
-			<label kind="assignment" x="-433" y="-161">blinds = 1</label>
-			<nail x="-34" y="-136"/>
-			<nail x="-442" y="-136"/>
+			<source ref="id5"/>
+			<target ref="id6"/>
+			<label kind="guard" x="-382" y="8">y &gt;= control_interval</label>
+			<label kind="assignment" x="-551" y="34">y = 0</label>
 		</transition>
 		<transition id="id15">
-			<source ref="id7"/>
-			<target ref="id6"/>
-			<label kind="guard" x="-416" y="-93">y &gt;= control_interval</label>
-			<label kind="assignment" x="-93" y="-68">y = 0</label>
+			<source ref="id6"/>
+			<target ref="id5"/>
+			<label kind="assignment" x="-551" y="-34">blinds = 1</label>
+			<nail x="-578" y="-34"/>
+			<nail x="-170" y="-33"/>
 		</transition>
 		<transition id="id16">
-			<source ref="id5"/>
-			<target ref="id7"/>
-			<label kind="assignment" x="-629" y="-93">initialize()</label>
+			<source ref="id7"/>
+			<target ref="id6"/>
+			<label kind="assignment" x="-713" y="9">initialize()</label>
 		</transition>
 	</template>
 	<template>
