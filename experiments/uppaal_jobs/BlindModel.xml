@@ -61,8 +61,10 @@ void initialize() {
 		<name>room</name>
 		<location id="id0" x="603" y="0">
 			<name x="586" y="-34">Room</name>
-			<label kind="invariant" x="374" y="34">room_temp' == (ambient_temp - room_temp) * current_room[3]
-+ solar_effect * current_room[4] + heater_effect * current_room[5]
+			<label kind="invariant" x="425" y="0">room_temp' == 
+(ambient_temp - room_temp) * current_room[3]
++ solar_effect * current_room[4] 
++ heater_effect * current_room[5]
 + ventilation_effect * current_room[6] 
 + occupancy_effect * current_room[7]</label>
 		</location>
@@ -93,30 +95,28 @@ void fetch_data(){
 }
 
 </declaration>
-		<location id="id1" x="-170" y="0">
-			<name x="-187" y="17">Tik</name>
-			<label kind="invariant" x="-221" y="42">x &lt;= period</label>
+		<location id="id1" x="-204" y="0">
+			<name x="-255" y="-8">Tik</name>
+			<label kind="invariant" x="-255" y="17">x &lt;= period</label>
 		</location>
 		<init ref="id1"/>
 		<transition id="id2" controllable="false">
 			<source ref="id1"/>
 			<target ref="id1"/>
-			<label kind="guard" x="-161" y="-161">x &gt;= period</label>
-			<label kind="synchronisation" x="-195" y="-110">tik!</label>
-			<label kind="assignment" x="-331" y="-93">counter++,
-fetch_data(),
-x = 0</label>
-			<nail x="-68" y="-136"/>
-			<nail x="-272" y="-136"/>
+			<label kind="guard" x="-255" y="-102">x &gt;= period</label>
+			<label kind="synchronisation" x="-221" y="-59">tik!</label>
+			<label kind="assignment" x="-331" y="-136">counter++, fetch_data(), x = 0</label>
+			<nail x="-119" y="-110"/>
+			<nail x="-280" y="-110"/>
 		</transition>
 	</template>
 	<template>
 		<name x="5" y="5">optimization</name>
 		<declaration>// Place local declarations here.
 </declaration>
-		<location id="id3" x="0" y="0">
-			<name x="-17" y="-34">Cost</name>
-			<label kind="invariant" x="-518" y="17">cost' == ((heating_setpoint - room_temp) + (cooling_setpoint - room_temp)) * ((heating_setpoint - room_temp) + (cooling_setpoint - room_temp))</label>
+		<location id="id3" x="-263" y="25">
+			<label kind="invariant" x="-314" y="-9">cost' == ((heating_setpoint - room_temp) + (cooling_setpoint - room_temp)) * 
+	         ((heating_setpoint - room_temp) + (cooling_setpoint - room_temp))</label>
 		</location>
 		<init ref="id3"/>
 	</template>
@@ -128,7 +128,8 @@ x = 0</label>
 		</location>
 		<location id="id5" x="-170" y="34">
 			<name x="-153" y="17">Wait</name>
-			<label kind="invariant" x="-153" y="34">y &lt;= control_interval</label>
+			<label kind="invariant" x="-357" y="42">y &lt;= control_interval</label>
+			<urgent/>
 		</location>
 		<location id="id6" x="-578" y="34">
 			<name x="-561" y="0">Choice</name>
