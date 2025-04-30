@@ -22,7 +22,7 @@ def convert_uppaal_to_df(day: str) -> pd.DataFrame:
     rows = []
 
     for i in range(0, 22):
-        f = open("experiments/uppaal_jobs/output_"+day+"_" + str(i) + ".csv", "r")
+        f = open("experiments/uppaal_logs/output_"+day+"_" + str(i) + ".csv", "r")
         file_contents = f.read()
         raw_data = re.findall(r'\(([\d.]+),([\d.]+)\)', file_contents)
         buckets = defaultdict(list)

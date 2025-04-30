@@ -50,7 +50,7 @@ void initialize() {
     ambient_temp = data[init_time][4];
     heating_setpoint = data[init_time][5];
     cooling_setpoint = data[init_time][6];
-    wind = data[init_time][7];
+    wind = data[init_time][8];
 }
 
 
@@ -87,7 +87,7 @@ void fetch_data(){
     ambient_temp = data[counter * period][4];
     heating_setpoint = data[counter * period][5];
     cooling_setpoint = data[counter * period][6];
-    wind = data[counter * period][7];
+    wind = data[counter * period][8];
 
     blinds_blocked();
 }

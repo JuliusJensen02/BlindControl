@@ -16,7 +16,7 @@ for ((i=0; i<=22; i++)); do
     init_time=$((i*60))
 
     cd ../../BlindControl/UPPAAL_code || exit 1
-    python3 -u -m data_uppaal_format --file_path="../data/1.213/processed_data/data_2025-02-17.csv"
+    python3 -u -m data_uppaal_format --file_path="../data/1.213/query_data/data_2025-02-17.csv"
 
     data_path="data_arrays.c"
     data_content=$(< "$data_path")
