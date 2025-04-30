@@ -80,7 +80,7 @@ rooms = {
         "source_lux": "_meter",
         "max_people": 5,
         "prob_dist": [[0.6, 0.3, 0.05, 0.04, 0.01],
-                      [0.05, 0.25, 0.3, 0.25, 0.2],
+                      [0.05, 0.20, 0.3, 0.25, 0.2],
                       [0.1, 0.1, 0.3, 0.3, 0.2],
                       [0.3, 0.35, 0.2, 0.1, 0.05]],
         "values": [1,2,3,4,5],
@@ -89,7 +89,7 @@ rooms = {
 }
 
 def main():
-    chosen_room = rooms["1.213"]
+    chosen_room = rooms["1.233"]
 
     query_start_date = "2024-11-20T00:00:00Z"
     query_end_date = "2025-04-01T00:00:00Z"

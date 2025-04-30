@@ -74,12 +74,14 @@ def pre_process_data_for_date(from_data: datetime, room: dict) -> None:
     df = get_raw_data_as_df(from_data, room)
     solar_effect_list = []
     occupancy_effect_list = []
-
+    last_occupancy = 0
     for index, row in df.iterrows():
         blinds_control_py(row['solar_watt'], row['wind'])
         solar_effect_current = solar_effect(room, row['solar_watt'])
         solar_effect_list.append(solar_effect_current)
-        occupancy_effect_list.append(occupancy_effect(row['heating_setpoint'], row['cooling_setpoint'], index, room))
+        if int(index) % 5 == 0:
+            last_occupancy = occupancy_effect(row['heating_setpoint'], row['cooling_setpoint'], index, room)
+        occupancy_effect_list.append(last_occupancy)
 
     preprocessed_data = {"time": df["time"],
                  "solar_effect": solar_effect_list,
@@ -164,12 +166,11 @@ Returns:
     the energy effect of the occupancy in the room
 """
 def occupancy_effect(heating_setpoint: float, cooling_setpoint: float, time: int, room: dict) -> float:
-    # Energy effect of the occupancy in the room dependent on office or grouproom. Office is more heat because of pcs and other devices.
+    # Energy effect of the occupancy in the room dependent on office or group room. Office is more heat because of pcs and other devices.
     energy_people = 150 if room["group"] else 250 
     occupancy = 0
 
-    if cooling_setpoint - heating_setpoint == 1 :
-
+    if cooling_setpoint - heating_setpoint == 1:
         if time <= 480:
             occupancy = np.random.choice(room["values"], p=room["prob_dist"][0]) # Occupancy probability distribution from 0 to 8 hours
         elif time <= 720:
