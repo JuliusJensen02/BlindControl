@@ -15,15 +15,12 @@ cd /nfs/home/student.aau.dk/tb30jn/uppaal/bin || exit 1
 for ((i=0; i<=22; i++)); do
     init_time=$((i*60))
 
-    cd ../../BlindControl/UPPAAL_code || exit 1
-    python3 -u -m data_uppaal_format --file_path="../data/1.213/query_data/data_2025-02-17.csv"
+    cd ../../BlindControl/experiments/uppaal_jobs || exit 1
+    python3 -u -m data_uppaal_format --file_path="../../data/1.213/query_data/data_2025-02-17.csv"
 
     data_path="data_arrays.c"
     data_content=$(< "$data_path")
     escaped_data_content=$(echo "$data_content" | sed 's/[\/&\[\]\\]/\\&/g')
-
-    cd ../experiments/uppaal_jobs || exit 1
-
     new_name="strategy_$i.json"
 
     sed -i -E "s|saveStrategy[[:space:]]*\\(\"([^\"]*/)(strategy(_[0-9])*\.json)\"|saveStrategy (\"\1$new_name\"|" query.q

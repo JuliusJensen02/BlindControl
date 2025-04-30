@@ -5,7 +5,7 @@
 
 
 const double g_value = 0.45; //Value gotten from Rasmus
-const double r213[8] = {1.213, 3.64, 372, 1.26363017e-04, 5.92279404e-06, 5.01907442e-04, 2.89596003e-03, -6.36406737e-05};
+const double r213[8] = {1.213, 3.64, 372, 1.33743576e-04, 1.41231052e-05, 4.95835071e-04, 2.78526852e-03, 9.72844963e-06};
 const double r215[8] = {1.215, 5.46, 422, 0.00006654616536711289, 0.0002178432103546357, 0.001052809993242162, 0.009573171305359684, 0.0001001959631084448};
 const double r217[8] = {1.217, 3.64, 379, 0.00008403719002189947, 0.0001662483920148472, 0.0009650930757849907, 0.009980847043215571, 0.0001604311015424853};
 const double r229[8] = {1.229, 5.18, 758, 0.00004841750569834047,0.0004048344549600047, 0.0009720673114826017, 0.009243668292515059, 0.0003024374591161649};
@@ -40,17 +40,17 @@ double heater_effect;
 
 void initialize() {
     if(init_temp == 0.0){
-        room_temp = data[init_time][3];
+        room_temp = data[init_time][1];
     }
     else{
         room_temp = init_temp;
     }
 
-    solar = data[init_time][2];
-    ambient_temp = data[init_time][4];
-    heating_setpoint = data[init_time][5];
-    cooling_setpoint = data[init_time][6];
-    wind = data[init_time][8];
+    solar = data[init_time][0];
+    ambient_temp = data[init_time][2];
+    heating_setpoint = data[init_time][3];
+    cooling_setpoint = data[init_time][4];
+    wind = data[init_time][6];
 }
 
 
@@ -85,11 +85,11 @@ void blinds_blocked(){
 }
 
 void fetch_data(){
-    solar = data[counter * init_time][2];
-    ambient_temp = data[counter * period][4];
-    heating_setpoint = data[counter * period][5];
-    cooling_setpoint = data[counter * period][6];
-    wind = data[counter * period][8];
+    solar = data[counter * init_time][0];
+    ambient_temp = data[counter * period][2];
+    heating_setpoint = data[counter * period][3];
+    cooling_setpoint = data[counter * period][4];
+    wind = data[counter * period][6];
 
     blinds_blocked();
 }

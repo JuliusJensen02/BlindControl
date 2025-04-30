@@ -3,6 +3,8 @@ import os
 import argparse
 from datetime import datetime
 
+import numpy as np
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--file_path", required=True, type=str)
 args = parser.parse_args()
@@ -32,12 +34,13 @@ def create_c_array(file_path):
         data = [row for row in reader]
 
     # Skip the first row (header row)
+    data = np.array(data)
     data = data[1:]
-
+    data = data[:, 2:]
     # Convert date strings to Unix timestamps in each row
-    for row in data:
-        # Assuming the date string is in the second column (index 1)
-        row[1] = str(convert_to_unix_timestamp(row[1]))
+    #for row in data:
+    #    # Assuming the date string is in the second column (index 1)
+    #    row[1] = str(convert_to_unix_timestamp(row[1]))
 
     num_rows = len(data)
     num_cols = len(data[0])
@@ -48,7 +51,7 @@ def create_c_array(file_path):
 
         # Write the data rows in the C source file
         for row in data:
-            if row == data[-1]:
+            if np.array_equal(row, data[-1]):
                 c_file.write("{" + ", ".join(row) + "}")
             else:
                 c_file.write("{" + ", ".join(row) + "},")
