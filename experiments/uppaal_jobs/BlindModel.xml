@@ -25,6 +25,7 @@ hybrid clock room_temp;
 hybrid clock cost = 0;
 
 double blinds = 0;
+double sun_block = 1;
 bool blocked = false;
 
 double solar;
@@ -59,14 +60,10 @@ void initialize() {
 </declaration>
 	<template>
 		<name>room</name>
-		<location id="id0" x="603" y="0">
-			<name x="586" y="-34">Room</name>
-			<label kind="invariant" x="425" y="0">room_temp' == 
-(ambient_temp - room_temp) * current_room[3]
-+ solar_effect * current_room[4] 
-+ heater_effect * current_room[5]
-+ ventilation_effect * current_room[6] 
-+ occupancy_effect * current_room[7]</label>
+		<location id="id0" x="34" y="-25">
+			<name x="24" y="-59">Room</name>
+			<label kind="invariant" x="-399" y="0">room_temp' == (ambient_temp - room_temp) * current_room[3]+ solar_effect * sun_block * current_room[4] 
++ heater_effect * current_room[5]+ ventilation_effect * current_room[6] + occupancy_effect * current_room[7]</label>
 		</location>
 		<init ref="id0"/>
 	</template>
@@ -127,15 +124,15 @@ void fetch_data(){
 			<name x="-400" y="102">Blocked</name>
 		</location>
 		<location id="id5" x="-170" y="34">
-			<name x="-153" y="17">Wait</name>
+			<name x="-212" y="8">Wait</name>
 			<label kind="invariant" x="-357" y="42">y &lt;= control_interval</label>
 		</location>
 		<location id="id6" x="-578" y="34">
-			<name x="-561" y="0">Choice</name>
+			<name x="-569" y="8">Choice</name>
 			<urgent/>
 		</location>
 		<location id="id7" x="-739" y="34">
-			<name x="-815" y="26">Initial</name>
+			<name x="-773" y="0">Initial</name>
 			<urgent/>
 		</location>
 		<init ref="id7"/>
@@ -184,7 +181,7 @@ void fetch_data(){
 		<transition id="id14">
 			<source ref="id5"/>
 			<target ref="id6"/>
-			<label kind="guard" x="-382" y="8">y &gt;= control_interval</label>
+			<label kind="guard" x="-408" y="8">y &gt;= control_interval</label>
 			<label kind="assignment" x="-551" y="34">y = 0</label>
 		</transition>
 		<transition id="id15">
@@ -197,7 +194,7 @@ void fetch_data(){
 		<transition id="id16">
 			<source ref="id7"/>
 			<target ref="id6"/>
-			<label kind="assignment" x="-713" y="9">initialize()</label>
+			<label kind="assignment" x="-697" y="8">initialize()</label>
 		</transition>
 	</template>
 	<template>
@@ -356,10 +353,9 @@ occupancy = 0</label>
 	<template>
 		<name>solar_model</name>
 		<declaration>double window_size = current_room[1];
-double sun_block = 1;
 
 void update_solar() {
-    solar_effect = solar * sun_block * g_value * window_size;
+    solar_effect = solar * g_value * window_size;
 }</declaration>
 		<location id="id33" x="0" y="0">
 			<name x="17" y="-8">Sun</name>
