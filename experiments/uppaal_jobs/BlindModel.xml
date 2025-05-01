@@ -401,8 +401,8 @@ counter &lt; 720
 		<transition id="id41" controllable="false">
 			<source ref="id33"/>
 			<target ref="id34"/>
-			<label kind="guard" x="-195" y="8">data[counter][4]
--data[counter][3] != 1</label>
+			<label kind="guard" x="-195" y="8">cooling_setpoint
+-heating_setpoint != 1</label>
 			<label kind="assignment" x="-195" y="51">occupancy_effect = 0, 
 occupancy = 0</label>
 			<nail x="0" y="34"/>
@@ -425,8 +425,8 @@ occupancy = 0</label>
 		<transition id="id44" controllable="false">
 			<source ref="id34"/>
 			<target ref="id33"/>
-			<label kind="guard" x="76" y="17">data[counter][4]
--data[counter][3] == 1</label>
+			<label kind="guard" x="76" y="17">cooling_setpoint
+-heating_setpoint == 1</label>
 			<nail x="68" y="34"/>
 		</transition>
 	</template>
