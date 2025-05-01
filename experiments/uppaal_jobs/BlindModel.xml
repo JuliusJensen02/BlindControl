@@ -296,7 +296,7 @@ void choose_occupancy(int time_frame) {
 		<transition id="id25" controllable="false">
 			<source ref="id18"/>
 			<target ref="id21"/>
-			<label kind="assignment" x="51" y="-238">choose_occupancy(2), y = 0</label>
+			<label kind="assignment" x="76" y="-238">choose_occupancy(2), y = 0</label>
 			<nail x="34" y="-204"/>
 		</transition>
 		<transition id="id26" controllable="false">
@@ -310,7 +310,7 @@ counter &lt; 960
 		<transition id="id27" controllable="false">
 			<source ref="id19"/>
 			<target ref="id21"/>
-			<label kind="assignment" x="-153" y="-238">choose_occupancy(1), y = 0</label>
+			<label kind="assignment" x="-161" y="-238">choose_occupancy(1), y = 0</label>
 			<nail x="34" y="-204"/>
 		</transition>
 		<transition id="id28" controllable="false">
@@ -324,8 +324,8 @@ counter &lt; 720
 		<transition id="id29" controllable="false">
 			<source ref="id21"/>
 			<target ref="id22"/>
-			<label kind="guard" x="-195" y="8">data[counter][4]
--data[counter][3] != 1</label>
+			<label kind="guard" x="-195" y="8">cooling_setpoint
+-heating_setpoint != 1</label>
 			<label kind="assignment" x="-195" y="51">occupancy_effect = 0, 
 occupancy = 0</label>
 			<nail x="0" y="34"/>
@@ -348,8 +348,8 @@ occupancy = 0</label>
 		<transition id="id32" controllable="false">
 			<source ref="id22"/>
 			<target ref="id21"/>
-			<label kind="guard" x="76" y="17">data[counter][4]
--data[counter][3] == 1</label>
+			<label kind="guard" x="76" y="17">cooling_setpoint
+-heating_setpoint == 1</label>
 			<nail x="68" y="34"/>
 		</transition>
 	</template>
@@ -368,7 +368,7 @@ void update_solar() {
 		<transition id="id34" controllable="false">
 			<source ref="id33"/>
 			<target ref="id33"/>
-			<label kind="guard" x="-280" y="34">blinds != 0 &amp;&amp; blinds != 1</label>
+			<label kind="guard" x="-331" y="8">blinds != 0 &amp;&amp; blinds != 1</label>
 			<label kind="synchronisation" x="-93" y="-8">tik?</label>
 			<label kind="assignment" x="-272" y="-68">sun_block = 0.2/blinds,
 update_solar()</label>
@@ -493,7 +493,7 @@ void update_vent() {
 		<transition id="id47" controllable="false">
 			<source ref="id43"/>
 			<target ref="id42"/>
-			<label kind="guard" x="-86" y="-50">room_temp &gt; cooling_setpoint</label>
+			<label kind="guard" x="-86" y="-50">room_temp &gt;= cooling_setpoint</label>
 			<label kind="assignment" x="33" y="-25">ventilation_valve = 1</label>
 		</transition>
 	</template>
