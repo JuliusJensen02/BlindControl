@@ -29,13 +29,11 @@ for ((i=0; i<=22; i++)); do
     sed -i "s|$init_time_placeholder|$init_time|g" "BlindModel.xml"
     sed -i "s|$init_temp_placeholder|0|g" "BlindModel.xml"
 
-    # Run the UPPAAL model checker
     cd ../../../uppaal/bin || exit 1
-    ./verifyta.sh "../../BlindControl/experiments/uppaal_jobs/BlindModel.xml" "../../BlindControl/experiments/uppaal_jobs/simulation.q" | tee "../../BlindControl/experiments/uppaal_jobs/output_2025_02_${j}_${i}.csv"
+    ./verifyta.sh -O 'csv' "../../BlindControl/experiments/uppaal_jobs/BlindModel.xml" "../../BlindControl/experiments/uppaal_jobs/query.q"
     cd ../../BlindControl/experiments/uppaal_jobs || exit 1
 
-    sed -i '/^const double data\[.*\] = {/,/^};/c\const double data[][] = {};' "BlindModel.xml"
-    sed -i -E "s/(const int init_time = )$init_time;/\1$init_time_placeholder;/" "BlindModel.xml"
-    sed -i -E "s/(const double init_temp = )0;/\1$init_temp_placeholder;/" "BlindModel.xml"
-
+    sed -i '/^const double data\[.*\] = {/,/^};/c\const double data[][] = {};' "../../BlindControl/experiments/uppaal_jobs/BlindModel.xml"
+    sed -i -E "s/(const int init_time = )$init_time;/\1__INIT_TIME__;/" "BlindModel.xml"
+    sed -i -E "s/(const double init_temp = )*;/\1__INIT_TEMP__;/" "BlindModel.xml"
 done

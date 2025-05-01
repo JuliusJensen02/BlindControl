@@ -36,12 +36,9 @@ def simulate_with_resets(ode_class: object, T_r: float, y0, t_points, reset_inte
             results.append(y_seg[:-1])
 
         # Reset temperature to real value, continue with simulated heater state
-        next_T = T_r[min(i + reset_interval, len(T_r) - 1)]
-        next_H = y_seg[-1, 1]
-        current_y = torch.stack([next_T, next_H])
+        current_y = T_r[min(i + reset_interval, len(T_r) - 1)]
 
     return torch.cat(results, dim=0)
-
 
 """
 Predicts the temperature for a specific date.
@@ -65,25 +62,24 @@ def predict_for_date(room: dict, start_time: str, constants, plot: bool, predict
     O = data[:, 5]    # Occupancy effect
     constants = torch.tensor(constants)  # Convert constants to tensor
 
-    ode_func = TemperatureODE(T_a, S_t, h_s, O, constants, room["heater_effect"])
-    T0 = T_r[0]  # Initial temperature
-    H0 = torch.tensor(0.0)  # Initial heater state
-    y0 = torch.stack([T0, H0])  # Initial state
+    ode_func = TemperatureODE(T_a, S_t, h_s, c_s, O, constants, room["heater_effect"])
+    y0 = T_r[0]  # Initial temperature
     t = torch.arange(len(T_r)).float()  # Time points for the simulation
 
-    y = simulate_with_resets(ode_func, T_r, y0, t, reset_interval=prediction_interval)
-    T_pred = y[:, 0]
+    T_pred = simulate_with_resets(ode_func, T_r, y0, t, reset_interval=prediction_interval)
 
     df = get_raw_data_as_df(start_time, room)
     df['temp_predictions'] = T_pred
     uppaal_df = convert_uppaal_to_df(start_time.strftime("%Y_%m_%d"))
     df = pd.merge(df, uppaal_df, how='left', left_index=True, right_index=True)
 
-    #df['temp_predictions'] = predict_temperature_for_prediction(room, constants.values(), room_temp, ambient_temp, solar_watt,
-    #                            heating_setpoint, cooling_setpoint, lux, wind, heating_effects, solar_effects)
-    #df['heating_effects'] = heating_effects
-    #df['solar_effects'] = solar_effects
-    #df = smooth(df, 'temp_predictions')
+    uppaal_temp = torch.tensor(df['temp_predictions_uppaal'])
+    real_temp = torch.tensor(df['temp_predictions'])
+    H = torch.tensor(df['heating_setpoint'])
+    C = torch.tensor(df['cooling_setpoint'])
+    df['temp_predictions_uppaal_deviation_from_setpoints'] = torch.where(uppaal_temp > C, uppaal_temp - C, torch.where(uppaal_temp < H, uppaal_temp - H, torch.zeros_like(uppaal_temp)))
+    df['temp_predictions_deviation_from_setpoints'] = torch.where(real_temp > C, real_temp - C, torch.where(real_temp < H, real_temp - H, torch.zeros_like(real_temp)))
+
     #Plot the data if plot is true
     if plot:
         plot_df(df)

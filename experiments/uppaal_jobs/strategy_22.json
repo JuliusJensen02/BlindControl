@@ -1,96 +1,150 @@
 {"version":1.0,"type":"state->regressor","representation":"map","actions":{
-		"0":"controller_blinds.Blocked->controller_blinds.Choice { !blocked, tau, 1 }",
-		"1":"controller_blinds.Wait->controller_blinds.Blocked { blocked, tau, blinds := 0 }",
-		"2":"controller_blinds.Choice->controller_blinds.Wait { 1, tau, blinds := 0 }",
-		"3":"controller_blinds.Choice->controller_blinds.Wait { 1, tau, blinds := 0.250000 }",
-		"4":"controller_blinds.Choice->controller_blinds.Wait { 1, tau, blinds := 0.500000 }",
-		"5":"controller_blinds.Choice->controller_blinds.Wait { 1, tau, blinds := 0.750000 }",
-		"6":"controller_blinds.Choice->controller_blinds.Wait { 1, tau, blinds := 1 }",
-		"7":"controller_blinds.Wait->controller_blinds.Choice { y >= control_interval, tau, y := 0 }",
-		"8":"controller_blinds.Initial->controller_blinds.Wait { 1, tau, initialize() }",
-		"9":"WAIT"
+		"0":"controller_blinds.Choice->controller_blinds.Wait { 1, tau, blinds := 0 }",
+		"1":"controller_blinds.Choice->controller_blinds.Wait { 1, tau, blinds := 0.250000 }",
+		"2":"controller_blinds.Choice->controller_blinds.Wait { 1, tau, blinds := 0.500000 }",
+		"3":"controller_blinds.Choice->controller_blinds.Wait { 1, tau, blinds := 0.750000 }",
+		"4":"controller_blinds.Wait->controller_blinds.Choice { y >= control_interval, tau, y := 0 }",
+		"5":"controller_blinds.Choice->controller_blinds.Wait { 1, tau, blinds := 1 }",
+		"6":"controller_blinds.Initial->controller_blinds.Choice { 1, tau, initialize() }",
+		"7":"WAIT"
 	},"statevars":[
 		"clock_time.location",
 		"controller_blinds.location",
 		"room.location",
 		"optimization.location",
+		"occupancy_model.location",
+		"solar_model.location",
+		"heater_model.location",
+		"ventilation_model.location",
 		"counter",
 		"blocked",
-		"clock_time.period"
+		"clock_time.period",
+		"occupancy_model.energy_people",
+		"occupancy_model.occupancy",
+		"occupancy_model.group",
+		"occupancy_model.P"
 	],"pointvars":[
 		"#t(0)",
 		"#time",
 		"clock_time.x",
 		"controller_blinds.y",
-		"heater_envelope",
-		"valve",
+		"occupancy_model.y",
 		"blinds",
-		"heater",
-		"occupancy",
-		"ambient_temp",
 		"solar",
+		"ambient_temp",
 		"heating_setpoint",
-		"wind"
+		"cooling_setpoint",
+		"wind",
+		"ventilation_effect",
+		"solar_effect",
+		"occupancy_effect",
+		"heater_effect",
+		"occupancy_model.random_number",
+		"solar_model.window_size",
+		"solar_model.sun_block",
+		"heater_model.heater_temp",
+		"ventilation_model.ventilation_valve"
 	],"locationnames":{
 		"clock_time.location":{
 			"0":"Tik"
 		},
 		"controller_blinds.location":{
 			"0":"Blocked",
-			"1":"Initial",
+			"1":"Wait",
 			"2":"Choice",
-			"3":"Wait"
+			"3":"Initial"
 		},
 		"room.location":{
 			"0":"Room"
 		},
 		"optimization.location":{
-			"0":"Cost"
+			"0":"_id3"
+		},
+		"occupancy_model.location":{
+			"0":"After_16",
+			"1":"_12_to_16",
+			"2":"_8_to_12",
+			"3":"Before_8",
+			"4":"Activity",
+			"5":"Wait"
+		},
+		"solar_model.location":{
+			"0":"Sun"
+		},
+		"heater_model.location":{
+			"0":"On",
+			"1":"Off"
+		},
+		"ventilation_model.location":{
+			"0":"Power",
+			"1":"Passive"
 		}
 	},"regressors":{
-		"(0,2,0,0,1349,0,1)":
+		"(0,2,0,0,5,0,1,1,1319,0,1,0,0,1,5)":
 			{"type":"act->point->val","representation":"simpletree","minimize":1,"regressor":
 				{
 					"5":
-						0.3000388862522273,
-					"6":
-						0.3002425665386103,
-					"4":
-						0.2996317626807606,
-					"3":
-						0.2984122879736405,
-					"2":
-						0.2978036171244354
-				}
-			},
-		"(0,2,0,0,1350,0,1)":
-			{"type":"act->point->val","representation":"simpletree","minimize":1,"regressor":
-				{
-					"5":
-						0.2999045593556955,
-					"6":
-						0.30009598240272,
-					"4":
-						0.299521927323251,
-					"3":
-						0.2983757446548793,
-					"2":
-						0.2978036171244354
-				}
-			},
-		"(0,2,0,0,1379,0,1)":
-			{"type":"act->point->val","representation":"simpletree","minimize":1,"regressor":
-				{
-					"5":
-						0,
-					"6":
-						0,
-					"4":
-						0,
-					"3":
-						0,
-					"2":
 						0
+				}
+			},
+		"(0,2,0,0,5,0,0,1,1319,0,1,0,0,1,5)":
+			{"type":"act->point->val","representation":"simpletree","minimize":1,"regressor":
+				{
+					"3":
+						0,
+					"1":
+						0,
+					"0":
+						0,
+					"2":
+						0,
+					"5":
+						0
+				}
+			},
+		"(0,2,0,0,5,0,1,1,1289,0,1,0,0,1,5)":
+			{"type":"act->point->val","representation":"simpletree","minimize":1,"regressor":
+				{
+					"3":
+						476.8823305750033,
+					"1":
+						476.8757705804123,
+					"0":
+						476.8660167054727,
+					"2":
+						476.8374468649703,
+					"5":
+						476.8969559279654
+				}
+			},
+		"(0,2,0,0,5,0,1,1,1260,0,1,0,0,1,5)":
+			{"type":"act->point->val","representation":"simpletree","minimize":1,"regressor":
+				{
+					"3":
+						934.8875782669271,
+					"1":
+						934.9948075101664,
+					"0":
+						934.8945764375678,
+					"2":
+						934.7716255073465,
+					"5":
+						934.8995422227719
+				}
+			},
+		"(0,2,0,0,5,0,1,1,1290,0,1,0,0,1,5)":
+			{"type":"act->point->val","representation":"simpletree","minimize":1,"regressor":
+				{
+					"3":
+						476.8817100169538,
+					"1":
+						476.9798091345765,
+					"0":
+						476.945212830206,
+					"2":
+						476.8396439570594,
+					"5":
+						476.9011352502067
 				}
 			}
 	}
