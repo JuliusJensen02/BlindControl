@@ -12,9 +12,9 @@ const double r229[8] = {1.229, 5.18, 758, 0.00004841750569834047,0.0004048344549
 const double r231[8] = {1.231, 6.86, 758, 0.00006641455619518232, 0.00019325396554338846, 0.0009765717733458412, 0.009957940987549275, 0.00013935217612309091};
 const double r233[8] = {1.233, 7, 758, 0.0000482699692484434, 0.0003135142135749358, 0.0010239398245252662, 0.009508719194294865, 0.00033553867308414584};
 const double current_room[8] = r213;
-const int init_time = 1320;
+const int init_time = __INIT_TIME__;
 const int control_interval = 30;
-const double init_temp = 21.08376864403492;
+const double init_temp = __INIT_TEMP__;
 
 int counter = init_time;
 
@@ -85,11 +85,11 @@ void blinds_blocked(){
 }
 
 void fetch_data(){
-    solar = data[counter * init_time][0];
-    ambient_temp = data[counter * period][2];
-    heating_setpoint = data[counter * period][3];
-    cooling_setpoint = data[counter * period][4];
-    wind = data[counter * period][6];
+    solar = data[counter][0];
+    ambient_temp = data[counter][2];
+    heating_setpoint = data[counter][3];
+    cooling_setpoint = data[counter][4];
+    wind = data[counter][6];
 
     blinds_blocked();
 }
@@ -129,7 +129,6 @@ void fetch_data(){
 		<location id="id5" x="-170" y="34">
 			<name x="-153" y="17">Wait</name>
 			<label kind="invariant" x="-357" y="42">y &lt;= control_interval</label>
-			<urgent/>
 		</location>
 		<location id="id6" x="-578" y="34">
 			<name x="-561" y="0">Choice</name>
@@ -325,8 +324,8 @@ counter &lt; 720
 		<transition id="id29" controllable="false">
 			<source ref="id21"/>
 			<target ref="id22"/>
-			<label kind="guard" x="-195" y="8">data[counter][6]
--data[counter][5] != 1</label>
+			<label kind="guard" x="-195" y="8">data[counter][4]
+-data[counter][3] != 1</label>
 			<label kind="assignment" x="-195" y="51">occupancy_effect = 0, 
 occupancy = 0</label>
 			<nail x="0" y="34"/>
@@ -349,8 +348,8 @@ occupancy = 0</label>
 		<transition id="id32" controllable="false">
 			<source ref="id22"/>
 			<target ref="id21"/>
-			<label kind="guard" x="76" y="17">data[counter][6]
--data[counter][5] == 1</label>
+			<label kind="guard" x="76" y="17">data[counter][4]
+-data[counter][3] == 1</label>
 			<nail x="68" y="34"/>
 		</transition>
 	</template>
@@ -417,12 +416,13 @@ void update_heat() {
 			<name x="195" y="8">On</name>
 		</location>
 		<location id="id38" x="34" y="0">
-			<name x="-9" y="0">Off</name>
+			<name x="17" y="17">Off</name>
 		</location>
 		<init ref="id38"/>
 		<transition id="id39" controllable="false">
 			<source ref="id37"/>
 			<target ref="id37"/>
+			<label kind="guard" x="85" y="-161">room_temp &lt;= heating_setpoint</label>
 			<label kind="synchronisation" x="161" y="-93">tik?</label>
 			<label kind="assignment" x="136" y="-127">update_heat()</label>
 			<nail x="136" y="-102"/>
@@ -431,13 +431,16 @@ void update_heat() {
 		<transition id="id40" controllable="false">
 			<source ref="id37"/>
 			<target ref="id38"/>
-			<label kind="guard" x="127" y="34">room_temp &gt; heating_setpoint</label>
+			<label kind="guard" x="-17" y="59">room_temp &gt; heating_setpoint</label>
+			<label kind="synchronisation" x="85" y="76">tik?</label>
+			<label kind="assignment" x="34" y="42">heater_effect = 0</label>
 			<nail x="102" y="34"/>
 		</transition>
 		<transition id="id41" controllable="false">
 			<source ref="id38"/>
 			<target ref="id37"/>
-			<label kind="guard" x="-170" y="-51">room_temp &lt;= heating_setpoint</label>
+			<label kind="guard" x="-102" y="-59">room_temp &lt;= heating_setpoint</label>
+			<label kind="synchronisation" x="0" y="-76">tik?</label>
 			<nail x="102" y="-34"/>
 		</transition>
 	</template>
@@ -467,7 +470,7 @@ void update_vent() {
 		<transition id="id44" controllable="false">
 			<source ref="id42"/>
 			<target ref="id42"/>
-			<label kind="synchronisation" x="238" y="-93">tik?</label>
+			<label kind="synchronisation" x="238" y="-102">tik?</label>
 			<label kind="assignment" x="212" y="-127">update_vent()</label>
 			<nail x="204" y="-102"/>
 			<nail x="306" y="-102"/>
@@ -475,7 +478,7 @@ void update_vent() {
 		<transition id="id45" controllable="false">
 			<source ref="id43"/>
 			<target ref="id43"/>
-			<label kind="synchronisation" x="-170" y="-93">tik?</label>
+			<label kind="synchronisation" x="-170" y="-102">tik?</label>
 			<label kind="assignment" x="-204" y="-127">update_vent()</label>
 			<nail x="-204" y="-102"/>
 			<nail x="-102" y="-102"/>
@@ -490,8 +493,8 @@ void update_vent() {
 		<transition id="id47" controllable="false">
 			<source ref="id43"/>
 			<target ref="id42"/>
-			<label kind="guard" x="-102" y="-25">room_temp &gt; cooling_setpoint</label>
-			<label kind="assignment" x="17" y="0">ventilation_valve = 1</label>
+			<label kind="guard" x="-86" y="-50">room_temp &gt; cooling_setpoint</label>
+			<label kind="assignment" x="33" y="-25">ventilation_valve = 1</label>
 		</transition>
 	</template>
 	<system>// List one or more processes to be composed into a system.
