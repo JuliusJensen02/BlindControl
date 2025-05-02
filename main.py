@@ -102,7 +102,7 @@ def main():
     force_retrain = False
     prediction_interval = 60
 
-    predict_date = "2025-02-21T00:00:00Z"
+    predict_date = "2025-02-17T00:00:00Z"
 
     if run_query:
         query_data_period(query_start_date, query_end_date, chosen_room)

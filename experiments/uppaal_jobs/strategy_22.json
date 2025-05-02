@@ -6,7 +6,16 @@
 		"4":"controller_blinds.Wait->controller_blinds.Choice { y >= control_interval, tau, y := 0 }",
 		"5":"controller_blinds.Choice->controller_blinds.Wait { 1, tau, blinds := 1 }",
 		"6":"controller_blinds.Initial->controller_blinds.Choice { 1, tau, initialize() }",
-		"7":"WAIT"
+		"7":"optimization._id6->optimization.Above_Cooling { room_temp > cooling_setpoint, tau, 1 }",
+		"8":"optimization._id6->optimization.Between { room_temp >= heating_setpoint && room_temp <= cooling_setpoint, tau, 1 }",
+		"9":"optimization._id6->optimization.Below_Heating { room_temp < heating_setpoint, tau, 1 }",
+		"10":"optimization.Below_Heating->optimization.Above_Cooling { room_temp > cooling_setpoint, tau, 1 }",
+		"11":"optimization.Above_Cooling->optimization.Below_Heating { room_temp < heating_setpoint, tau, 1 }",
+		"12":"optimization.Between->optimization.Below_Heating { room_temp < heating_setpoint, tau, 1 }",
+		"13":"optimization.Above_Cooling->optimization.Between { room_temp >= heating_setpoint && room_temp <= cooling_setpoint, tau, 1 }",
+		"14":"optimization.Between->optimization.Above_Cooling { room_temp > cooling_setpoint, tau, 1 }",
+		"15":"optimization.Below_Heating->optimization.Between { room_temp >= heating_setpoint && room_temp <= cooling_setpoint, tau, 1 }",
+		"16":"WAIT"
 	},"statevars":[
 		"clock_time.location",
 		"controller_blinds.location",
@@ -58,7 +67,10 @@
 			"0":"Room"
 		},
 		"optimization.location":{
-			"0":"_id3"
+			"0":"Below_Heating",
+			"1":"Between",
+			"2":"Above_Cooling",
+			"3":"_id6"
 		},
 		"occupancy_model.location":{
 			"0":"After_16",
@@ -80,71 +92,90 @@
 			"1":"Passive"
 		}
 	},"regressors":{
-		"(0,2,0,0,5,0,1,1,1319,0,1,0,0,1,5)":
+		"(0,2,0,1,5,0,1,1,1379,0,1,0,0,1,5)":
 			{"type":"act->point->val","representation":"simpletree","minimize":1,"regressor":
 				{
+					"3":
+						0,
 					"5":
+						0,
+					"1":
+						0,
+					"0":
+						0,
+					"2":
 						0
 				}
 			},
-		"(0,2,0,0,5,0,0,1,1319,0,1,0,0,1,5)":
+		"(0,2,0,3,5,0,1,1,1320,0,1,0,0,1,5)":
 			{"type":"act->point->val","representation":"simpletree","minimize":1,"regressor":
 				{
 					"3":
+						0,
+					"8":
+						0,
+					"5":
 						0,
 					"1":
 						0,
 					"0":
 						0,
 					"2":
-						0,
-					"5":
 						0
 				}
 			},
-		"(0,2,0,0,5,0,1,1,1289,0,1,0,0,1,5)":
+		"(0,2,0,1,5,0,1,1,1349,0,1,0,0,1,5)":
 			{"type":"act->point->val","representation":"simpletree","minimize":1,"regressor":
 				{
 					"3":
-						476.8823305750033,
-					"1":
-						476.8757705804123,
-					"0":
-						476.8660167054727,
-					"2":
-						476.8374468649703,
+						0,
 					"5":
-						476.8969559279654
+						0,
+					"1":
+						0,
+					"0":
+						0,
+					"2":
+						0
 				}
 			},
-		"(0,2,0,0,5,0,1,1,1260,0,1,0,0,1,5)":
+		"(0,3,0,3,5,0,1,1,1320,0,1,0,0,1,5)":
 			{"type":"act->point->val","representation":"simpletree","minimize":1,"regressor":
 				{
-					"3":
-						934.8875782669271,
-					"1":
-						934.9948075101664,
-					"0":
-						934.8945764375678,
-					"2":
-						934.7716255073465,
-					"5":
-						934.8995422227719
+					"8":
+						0,
+					"6":
+						0
 				}
 			},
-		"(0,2,0,0,5,0,1,1,1290,0,1,0,0,1,5)":
+		"(0,2,0,1,5,0,1,1,1320,0,1,0,0,1,5)":
 			{"type":"act->point->val","representation":"simpletree","minimize":1,"regressor":
 				{
 					"3":
-						476.8817100169538,
-					"1":
-						476.9798091345765,
-					"0":
-						476.945212830206,
-					"2":
-						476.8396439570594,
+						0,
 					"5":
-						476.9011352502067
+						0,
+					"1":
+						0,
+					"0":
+						0,
+					"2":
+						0
+				}
+			},
+		"(0,2,0,1,5,0,1,1,1350,0,1,0,0,1,5)":
+			{"type":"act->point->val","representation":"simpletree","minimize":1,"regressor":
+				{
+					"3":
+						0,
+					"5":
+						0,
+					"1":
+						0,
+					"0":
+						0,
+					"2":
+						0
 				}
 			}
 	}
