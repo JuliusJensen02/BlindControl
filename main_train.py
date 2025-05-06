@@ -1,6 +1,8 @@
 import argparse
 import multiprocessing
-from scripts.constants import get_constants
+
+from scripts.training import train_for_time_frame
+
 
 rooms = {
     "1.213": {
@@ -54,10 +56,11 @@ def main():
 
     training_start_date = args.training_start_date
     training_days = args.training_days
-    force_retrain = True
     prediction_interval = args.interval
 
-    get_constants(chosen_room, training_start_date, training_days, force_retrain, prediction_interval)
+    constants, error = train_for_time_frame(chosen_room, training_start_date, training_days, prediction_interval)
+    print(constants, flush=True)
+    print(error, flush=True)
 
 if __name__ == '__main__':
     # This is required to ensure proper initialization of multiprocessing

@@ -28,7 +28,7 @@
    ```
 4. **Run the Application**:
    ```bash
-   python main.py
+   python main_predict.py
    ```
 
 

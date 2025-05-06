@@ -1,78 +1,157 @@
-import csv
-import os
-import pandas as pd
-from scripts.training import train_for_time_frame
+rooms = {
+    "1.213": {
+        "name": "1.213",
+        "window_size": 3.64,
+        "heater_effect": 372,
+        "source_lux": "_meter",
+        "max_people": 7,
+        "prob_dist":    [[0.5, 0.25, 0.15, 0.05, 0.03, 0.01, 0.01],
+                        [0.1, 0.15, 0.2, 0.2, 0.15, 0.1, 0.1],
+                        [0.05, 0.1, 0.15, 0.2, 0.2, 0.15, 0.15],
+                        [0.2, 0.25, 0.2, 0.15, 0.1, 0.06, 0.04]],
+        "values": [1,2,3,4,5,6,7],
+        "group": True,
+        "constants": {
+            "winter": {
+                1: [1.33743576e-04, 1.41231052e-05, 4.95835071e-04, 2.78526852e-03, 9.72844963e-06],
+                4: [],
+                12: [],
+                24: []
+            },
+            "spring": {
+                1: [],
+                4: [],
+                12: [],
+                24: []
+            },
+            "december": {
+                1: [],
+                4: [],
+                12: [],
+                24: []
+            },
+            "january": {
+                1: [],
+                4: [],
+                12: [],
+                24: []
+            },
+            "february": {
+                1: [],
+                4: [],
+                12: [],
+                24: []
+            },
+            "march": {
+                1: [],
+                4: [],
+                12: [],
+                24: []
+            },
+            "april": {
+                1: [],
+                4: [],
+                12: [],
+                24: []
+            }
+        }
+    },
+    "1.215": {
+        "name": "1.215",
+        "window_size": 5.46,
+        "heater_effect": 422,
+        "source_lux": "_meter_1.215",
+        "max_people": 7,
+        "prob_dist":    [[0.5, 0.25, 0.15, 0.05, 0.03, 0.01, 0.01],
+                        [0.1, 0.15, 0.2, 0.2, 0.15, 0.1, 0.1],
+                        [0.05, 0.1, 0.15, 0.2, 0.2, 0.15, 0.15],
+                        [0.2, 0.25, 0.2, 0.15, 0.1, 0.06, 0.04]],
+        "values": [1,2,3,4,5,6,7],
+        "group": True,
+    },
+    "1.217": {
+        "name": "1.217",
+        "window_size": 3.64,
+        "heater_effect": 379,
+        "source_lux": "_meter",
+        "max_people": 7,
+        "prob_dist":    [[0.5, 0.25, 0.15, 0.05, 0.03, 0.01, 0.01],
+                        [0.1, 0.15, 0.2, 0.2, 0.15, 0.1, 0.1],
+                        [0.05, 0.1, 0.15, 0.2, 0.2, 0.15, 0.15],
+                        [0.2, 0.25, 0.2, 0.15, 0.1, 0.06, 0.04]],
+        "values": [1,2,3,4,5,6,7],
+        "group": True,
+    },
+    "1.229": {
+        "name": "1.229",
+        "window_size": 5.18,
+        "heater_effect": 758,
+        "source_lux": "_meter",
+        "max_people": 2,
+        "prob_dist": [[0.8, 0.2],
+                      [0.3, 0.7],
+                      [0.3, 0.7],
+                      [0.8, 0.2]],
+        "values": [1,2],
+        "group": False,
+    },
+    "1.231": {
+        "name": "1.231",
+        "window_size": 6.86,
+        "heater_effect": 758,
+        "source_lux": "_meter",
+        "max_people": 3,
+        "prob_dist": [[0.9, 0.09, 0.01],
+                      [0.3, 0.4, 0.3],
+                      [0.3, 0.4, 0.3],
+                      [0.8, 0.15, 0.05]],
+        "values": [1,2,3],
+        "group": False,
+    },
+    "1.233": {
+        "name": "1.233",
+        "window_size": 7,
+        "heater_effect": 758,
+        "source_lux": "_meter",
+        "max_people": 5,
+        "prob_dist": [[0.6, 0.3, 0.05, 0.04, 0.01],
+                      [0.05, 0.20, 0.3, 0.25, 0.2],
+                      [0.1, 0.1, 0.3, 0.3, 0.2],
+                      [0.3, 0.35, 0.2, 0.1, 0.05]],
+        "values": [1,2,3,4,5],
+        "group": False,
+    }
+}
 
-"""
-Writes the constants from the training to the cache csv file.
-Args:
-    alpha_a: alpha_a constant for ambient temperature.
-    alpha_s: alpha_s constant for solar effect.
-    alpha_r: alpha_r constant for heater effect.
-    alpha_v: alpha_v constant for ventilation effect.
-    start_time: start time as a string.
-    days: number of days to train for.
-    error: the error value extracted from the training.
-    path: the path of the cache.csv file.
-"""
-def cache_constants(alpha_a: float, alpha_s: float, alpha_r: float, alpha_v: float, alpha_o: float,
-                    start_time: str, days: int, error: float, path: str):
-    #Open the csv file in write mode
-    with open(path, 'w+', newline='') as csvfile:
-        fieldnames = ['alpha_a', 'alpha_s', 'alpha_r', 'alpha_v', 'alpha_o', 'start_time', 'days', 'error'] # The fieldnames for the csv file.
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)  # The csv writer.
-        writer.writeheader()
-        #Write the constants to the csv file
-        writer.writerow({'alpha_a': alpha_a, 'alpha_s': alpha_s, 'alpha_r': alpha_r,
-                         'alpha_v': alpha_v, 'alpha_o': alpha_o, 'start_time': start_time,
-                         'days': days, 'error': error})
+periods = {
+    "winter": {
+        "start": "2024-12-01T00:00:00Z",
+        "days": 90
+    },
+    "spring": {
+        "start": "2024-03-01T00:00:00Z",
+        "days": 61
+    },
+    "december": {
+        "start": "2024-12-01T00:00:00Z",
+        "day": 31
+    },
+    "january": {
+        "start": "2025-01-01T00:00:00Z",
+        "day": 31
+    },
+    "february": {
+        "start": "2025-02-01T00:00:00Z",
+        "day": 28
+    },
+    "march": {
+        "start": "2025-03-01T00:00:00Z",
+        "day": 31
+    },
+    "april": {
+        "start": "2025-04-01T00:00:00Z",
+        "day": 30
+    },
+}
 
-
-
-"""
-Function for getting the constants based on the given timeframe.
-Args:
-    room: the room number as a string.
-    start_time: start time as a string.
-    days: number of days to train for.
-    retrain: boolean for retraining.
-    prediction_interval: interval for how far ahead the temperature is predicted.
-Returns:
-    Dictionary of constants.
-"""
-def get_constants(room: dict, start_time: str, days: int, retrain: bool, prediction_interval: int) -> dict:
-    path = "data/" + room["name"] + "/constants_cache.csv"
-
-    if is_retrain_needed(path, start_time, days, retrain):
-        constants, error = train_for_time_frame(room, start_time, days, prediction_interval)
-        print(constants, flush=True)
-        print(error, flush = True)
-    df = pd.read_csv(path)
-
-    #Return the constants as a dictionary
-    return {'alpha_a': df['alpha_a'][0], 'alpha_s': df['alpha_s'][0], 'alpha_r': df['alpha_r'][0],
-            'alpha_v': df['alpha_v'][0], 'alpha_o': df['alpha_o'][0]}
-
-"""
-A function that evaluates if retraining is necessary, based on whether there is cached data or if 
-the retrain parameter is set to true.
-Args:
-    path: the path of the cache.csv file.
-    start_time: start time as a string.
-    days: number of days to train for.
-    retrain: boolean for retraining.
-Returns:
-    A boolean indicating if retraining is necessary.
-"""
-def is_retrain_needed(path: str, start_time: str, days: int, retrain: bool) -> bool:
-    df = pd.read_csv(path)
-
-    # Check if the cache file is empty or if retrain is true
-    # Check if valid data is loaded from the cache file to the dataframe and if the start time and days are the same as in the csv file
-    if (os.path.getsize(path) == 0 or
-            retrain or
-            len(df) == 0 or
-            start_time != df['start_time'][0] or
-            days != df['days'][0]):
-        return True
-    return False
+prediction_intervals = [1, 4, 12, 24]
