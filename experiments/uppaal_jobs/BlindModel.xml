@@ -16,41 +16,48 @@ const int init_time = __INIT_TIME__;
 const int control_interval = 30;
 const double init_temp = __INIT_TEMP__;
 
+const double alpha_a = current_room[3];
+const double alpha_s = current_room[4];
+const double alpha_h = current_room[5];
+const double alpha_v = current_room[6];
+const double alpha_o = current_room[7];
+
 int counter = init_time;
 
 
 broadcast chan tik;
 
-hybrid clock room_temp;
+hybrid clock T_r;
 hybrid clock cost = 0;
 
 double blinds = 0;
+double sun_block = 1;
 bool blocked = false;
 
-double solar;
-double ambient_temp;
-double heating_setpoint;
-double cooling_setpoint;
-double wind;
+double E_s;
+double T_a;
+double H;
+double C;
+double w;
 
-double ventilation_effect;
-double solar_effect;
-double occupancy_effect;
-double heater_effect;
+double T_v;
+double S;
+double O;
+double T_h;
 
 void initialize() {
     if(init_temp == 0.0){
-        room_temp = data[init_time][1];
+        T_r = data[init_time][1];
     }
     else{
-        room_temp = init_temp;
+        T_r = init_temp;
     }
 
-    solar = data[init_time][0];
-    ambient_temp = data[init_time][2];
-    heating_setpoint = data[init_time][3];
-    cooling_setpoint = data[init_time][4];
-    wind = data[init_time][6];
+    E_s = data[init_time][0];
+    T_a = data[init_time][2];
+    H = data[init_time][3];
+    C = data[init_time][4];
+    w = data[init_time][6];
 }
 
 
@@ -59,14 +66,11 @@ void initialize() {
 </declaration>
 	<template>
 		<name>room</name>
-		<location id="id0" x="603" y="0">
-			<name x="586" y="-34">Room</name>
-			<label kind="invariant" x="425" y="0">room_temp' == 
-(ambient_temp - room_temp) * current_room[3]
-+ solar_effect * current_room[4] 
-+ heater_effect * current_room[5]
-+ ventilation_effect * current_room[6] 
-+ occupancy_effect * current_room[7]</label>
+		<location id="id0" x="1020" y="51">
+			<label kind="invariant" x="977" y="8">T_r' == (T_a - T_r) * alpha_a 
+         + S * sun_block * alpha_s
+         + T_h * alpha_h + T_v * alpha_v
+         + O * alpha_o</label>
 		</location>
 		<init ref="id0"/>
 	</template>
@@ -76,20 +80,20 @@ void initialize() {
 int period = 1;
 
 void blinds_blocked(){
-    if (wind &gt;= 10) {
+    if (w &gt;= 10) {
         blocked = true;
     }
-    if (wind &lt;= 8) {
+    if (w &lt;= 8) {
         blocked = false;
     }
 }
 
-void fetch_data(){
-    solar = data[counter][0];
-    ambient_temp = data[counter][2];
-    heating_setpoint = data[counter][3];
-    cooling_setpoint = data[counter][4];
-    wind = data[counter][6];
+void set_values(){
+    E_s = data[counter][0];
+    T_a = data[counter][2];
+    H = data[counter][3];
+    C = data[counter][4];
+    w = data[counter][6];
 
     blinds_blocked();
 }
@@ -105,7 +109,7 @@ void fetch_data(){
 			<target ref="id1"/>
 			<label kind="guard" x="-255" y="-102">x &gt;= period</label>
 			<label kind="synchronisation" x="-221" y="-59">tik!</label>
-			<label kind="assignment" x="-331" y="-136">counter++, fetch_data(), x = 0</label>
+			<label kind="assignment" x="-331" y="-136">counter++, set_values(), x = 0</label>
 			<nail x="-119" y="-110"/>
 			<nail x="-280" y="-110"/>
 		</transition>
@@ -115,84 +119,81 @@ void fetch_data(){
 		<declaration>// Place local declarations here.
 </declaration>
 		<location id="id3" x="68" y="-34">
-			<name x="76" y="-93">Below_Heating</name>
-			<label kind="invariant" x="281" y="-42">cost' == 1 + ((heating_setpoint - room_temp) * 
-	         (heating_setpoint - room_temp))</label>
+			<name x="85" y="-85">Below_Heating</name>
+			<label kind="invariant" x="85" y="-59">cost' == 1 + ((H - T_r) * (H - T_r))</label>
 		</location>
 		<location id="id4" x="68" y="68">
-			<name x="93" y="59">Between</name>
-			<label kind="invariant" x="281" y="59">cost' == 0</label>
+			<name x="59" y="76">Between</name>
+			<label kind="invariant" x="110" y="51">cost' == 0</label>
 		</location>
 		<location id="id5" x="68" y="170">
-			<name x="85" y="187">Above_Cooling</name>
-			<label kind="invariant" x="280" y="161">cost' == 1 + ((room_temp - cooling_setpoint) * 
-	         (room_temp - cooling_setpoint))</label>
+			<name x="85" y="204">Above_Cooling</name>
+			<label kind="invariant" x="85" y="178">cost' == 1 + ((T_r - C) * (T_r - C))</label>
 		</location>
-		<location id="id6" x="-408" y="68">
+		<location id="id6" x="-289" y="68">
 			<urgent/>
 		</location>
 		<init ref="id6"/>
 		<transition id="id7">
 			<source ref="id6"/>
 			<target ref="id5"/>
-			<label kind="guard" x="-374" y="246">room_temp &gt; cooling_setpoint</label>
-			<nail x="-408" y="238"/>
+			<label kind="guard" x="-255" y="246">T_r &gt; C</label>
+			<nail x="-289" y="238"/>
 			<nail x="68" y="238"/>
 		</transition>
 		<transition id="id8">
 			<source ref="id6"/>
 			<target ref="id4"/>
-			<label kind="guard" x="-374" y="17">room_temp &gt;= heating_setpoint &amp;&amp;
-room_temp &lt;= cooling_setpoint</label>
+			<label kind="guard" x="-255" y="34">T_r &gt;= H &amp;&amp; T_r &lt;= C</label>
 		</transition>
 		<transition id="id9">
 			<source ref="id6"/>
 			<target ref="id3"/>
-			<label kind="guard" x="-374" y="-136">room_temp &lt; heating_setpoint</label>
-			<nail x="-408" y="-102"/>
+			<label kind="guard" x="-255" y="-136">T_r &lt; H</label>
+			<nail x="-289" y="-102"/>
 			<nail x="68" y="-102"/>
 		</transition>
 		<transition id="id10">
 			<source ref="id3"/>
 			<target ref="id5"/>
-			<label kind="guard" x="136" y="-68">room_temp &gt; cooling_setpoint</label>
+			<label kind="guard" x="221" y="-25">T_r &gt; C</label>
 			<nail x="204" y="-34"/>
 			<nail x="204" y="170"/>
 		</transition>
 		<transition id="id11">
 			<source ref="id5"/>
 			<target ref="id3"/>
-			<label kind="guard" x="-238" y="-59">room_temp &lt; heating_setpoint</label>
+			<label kind="guard" x="-144" y="-25">T_r &lt; H</label>
 			<nail x="-68" y="170"/>
 			<nail x="-68" y="-34"/>
 		</transition>
 		<transition id="id12">
 			<source ref="id4"/>
 			<target ref="id3"/>
-			<label kind="guard" x="-238" y="-59">room_temp &lt; heating_setpoint</label>
+			<label kind="guard" x="-144" y="-25">T_r &lt; H</label>
 			<nail x="-68" y="34"/>
 			<nail x="-68" y="-34"/>
 		</transition>
 		<transition id="id13">
 			<source ref="id5"/>
 			<target ref="id4"/>
-			<label kind="guard" x="17" y="102">room_temp &gt;= heating_setpoint &amp;&amp;
-room_temp &lt;= cooling_setpoint</label>
+			<label kind="guard" x="25" y="102">T_r &gt;= H &amp;&amp;
+T_r &lt;= C</label>
 			<nail x="0" y="136"/>
 			<nail x="0" y="102"/>
 		</transition>
 		<transition id="id14">
 			<source ref="id4"/>
 			<target ref="id5"/>
-			<label kind="guard" x="136" y="-68">room_temp &gt; cooling_setpoint</label>
-			<nail x="204" y="68"/>
+			<label kind="guard" x="221" y="-25">T_r &gt; C</label>
+			<nail x="204" y="102"/>
 			<nail x="204" y="170"/>
 		</transition>
 		<transition id="id15">
 			<source ref="id3"/>
 			<target ref="id4"/>
-			<label kind="guard" x="144" y="0">room_temp &gt;= heating_setpoint &amp;&amp;
-room_temp &lt;= cooling_setpoint</label>
+			<label kind="guard" x="25" y="-8">T_r &gt;= H &amp;&amp;
+T_r &lt;= C</label>
 			<nail x="136" y="0"/>
 			<nail x="136" y="34"/>
 		</transition>
@@ -204,7 +205,7 @@ room_temp &lt;= cooling_setpoint</label>
 			<name x="-400" y="102">Blocked</name>
 		</location>
 		<location id="id17" x="-170" y="34">
-			<name x="-153" y="17">Wait</name>
+			<name x="-221" y="8">Wait</name>
 			<label kind="invariant" x="-357" y="42">y &lt;= control_interval</label>
 		</location>
 		<location id="id18" x="-578" y="34">
@@ -212,7 +213,7 @@ room_temp &lt;= cooling_setpoint</label>
 			<urgent/>
 		</location>
 		<location id="id19" x="-739" y="34">
-			<name x="-815" y="26">Initial</name>
+			<name x="-765" y="51">Initial</name>
 			<urgent/>
 		</location>
 		<init ref="id19"/>
@@ -261,7 +262,7 @@ room_temp &lt;= cooling_setpoint</label>
 		<transition id="id26">
 			<source ref="id17"/>
 			<target ref="id18"/>
-			<label kind="guard" x="-382" y="8">y &gt;= control_interval</label>
+			<label kind="guard" x="-408" y="8">y &gt;= control_interval</label>
 			<label kind="assignment" x="-551" y="34">y = 0</label>
 		</transition>
 		<transition id="id27">
@@ -290,7 +291,7 @@ room_temp &lt;= cooling_setpoint</label>
 const int energy_people_office = 250;
 const int energy_people_group = 150;
 
-int energy_people = 0;
+int E_p = 0;
 int occupancy = 0;
 int group = 1;
 int P = 5;
@@ -300,11 +301,11 @@ clock y;
 
 void update_energy_effect() {
     if (group == 1) {
-        energy_people = energy_people_group;
+        E_p = energy_people_group;
     } else {
-        energy_people = energy_people_office;
+        E_p = energy_people_office;
     }
-    occupancy_effect = occupancy * energy_people;
+    O = occupancy * E_p;
 }
 
 
@@ -359,7 +360,8 @@ void choose_occupancy(int time_frame) {
 		<transition id="id35" controllable="false">
 			<source ref="id29"/>
 			<target ref="id33"/>
-			<label kind="assignment" x="85" y="-297">choose_occupancy(3), y = 0</label>
+			<label kind="assignment" x="51" y="-314">choose_occupancy(3), 
+y = 0</label>
 			<nail x="238" y="-272"/>
 			<nail x="34" y="-272"/>
 		</transition>
@@ -373,7 +375,8 @@ void choose_occupancy(int time_frame) {
 		<transition id="id37" controllable="false">
 			<source ref="id30"/>
 			<target ref="id33"/>
-			<label kind="assignment" x="51" y="-238">choose_occupancy(2), y = 0</label>
+			<label kind="assignment" x="51" y="-255">choose_occupancy(2), 
+y = 0</label>
 			<nail x="34" y="-204"/>
 		</transition>
 		<transition id="id38" controllable="false">
@@ -387,7 +390,8 @@ counter &lt; 960
 		<transition id="id39" controllable="false">
 			<source ref="id31"/>
 			<target ref="id33"/>
-			<label kind="assignment" x="-153" y="-238">choose_occupancy(1), y = 0</label>
+			<label kind="assignment" x="-153" y="-255">choose_occupancy(1), 
+y = 0</label>
 			<nail x="34" y="-204"/>
 		</transition>
 		<transition id="id40" controllable="false">
@@ -401,16 +405,16 @@ counter &lt; 720
 		<transition id="id41" controllable="false">
 			<source ref="id33"/>
 			<target ref="id34"/>
-			<label kind="guard" x="-195" y="8">cooling_setpoint
--heating_setpoint != 1</label>
-			<label kind="assignment" x="-195" y="51">occupancy_effect = 0, 
+			<label kind="guard" x="-102" y="17">C - H != 1</label>
+			<label kind="assignment" x="-102" y="42">O = 0, 
 occupancy = 0</label>
 			<nail x="0" y="34"/>
 		</transition>
 		<transition id="id42" controllable="false">
 			<source ref="id32"/>
 			<target ref="id33"/>
-			<label kind="assignment" x="-170" y="-297">choose_occupancy(0), y = 0</label>
+			<label kind="assignment" x="-153" y="-314">choose_occupancy(0), 
+y = 0</label>
 			<nail x="-170" y="-221"/>
 			<nail x="-170" y="-272"/>
 			<nail x="34" y="-272"/>
@@ -425,29 +429,26 @@ occupancy = 0</label>
 		<transition id="id44" controllable="false">
 			<source ref="id34"/>
 			<target ref="id33"/>
-			<label kind="guard" x="76" y="17">cooling_setpoint
--heating_setpoint == 1</label>
+			<label kind="guard" x="76" y="17">C - H == 1</label>
 			<nail x="68" y="34"/>
 		</transition>
 	</template>
 	<template>
 		<name>solar_model</name>
 		<declaration>double window_size = current_room[1];
-double sun_block = 1;
 
 void update_solar() {
-    solar_effect = solar * sun_block * g_value * window_size;
+    S = E_s * g_value * window_size;
 }</declaration>
 		<location id="id45" x="0" y="0">
-			<name x="17" y="-8">Sun</name>
 		</location>
 		<init ref="id45"/>
 		<transition id="id46" controllable="false">
 			<source ref="id45"/>
 			<target ref="id45"/>
-			<label kind="guard" x="-280" y="34">blinds != 0 &amp;&amp; blinds != 1</label>
+			<label kind="guard" x="-331" y="-34">blinds != 0 &amp;&amp; blinds != 1</label>
 			<label kind="synchronisation" x="-93" y="-8">tik?</label>
-			<label kind="assignment" x="-272" y="-68">sun_block = 0.2/blinds,
+			<label kind="assignment" x="-331" y="-8">sun_block = 0.2/blinds,
 update_solar()</label>
 			<nail x="-102" y="34"/>
 			<nail x="-102" y="-34"/>
@@ -455,9 +456,9 @@ update_solar()</label>
 		<transition id="id47" controllable="false">
 			<source ref="id45"/>
 			<target ref="id45"/>
-			<label kind="guard" x="25" y="68">blinds == 0</label>
+			<label kind="guard" x="-68" y="76">blinds == 0</label>
 			<label kind="synchronisation" x="-17" y="42">tik?</label>
-			<label kind="assignment" x="-102" y="76">sun_block = 1,
+			<label kind="assignment" x="-68" y="102">sun_block = 1,
 update_solar()</label>
 			<nail x="34" y="68"/>
 			<nail x="-34" y="68"/>
@@ -465,9 +466,9 @@ update_solar()</label>
 		<transition id="id48" controllable="false">
 			<source ref="id45"/>
 			<target ref="id45"/>
-			<label kind="guard" x="-76" y="-110">blinds == 1</label>
+			<label kind="guard" x="-68" y="-144">blinds == 1</label>
 			<label kind="synchronisation" x="-17" y="-59">tik?</label>
-			<label kind="assignment" x="25" y="-119">sun_block = 0.2,
+			<label kind="assignment" x="-68" y="-119">sun_block = 0.2,
 update_solar()</label>
 			<nail x="-34" y="-68"/>
 			<nail x="34" y="-68"/>
@@ -478,16 +479,16 @@ update_solar()</label>
 		<declaration>double heater_temp;
 
 void update_heat() {
-    if (ambient_temp &lt; 12) {
+    if (T_a &lt; 12) {
         heater_temp = 77;
-    } else if (-12 &lt; ambient_temp &amp;&amp; ambient_temp &lt;= 5) {
-        heater_temp = -ambient_temp + 65;
-    } else if (5 &lt; ambient_temp &amp;&amp; ambient_temp &lt;= 20) {
-        heater_temp = -1.33 * ambient_temp + 66.67;
-    } else if (20 &lt; ambient_temp) {
+    } else if (-12 &lt; T_a &amp;&amp; T_a &lt;= 5) {
+        heater_temp = -T_a + 65;
+    } else if (5 &lt; T_a &amp;&amp; T_a &lt;= 20) {
+        heater_temp = -1.33 * T_a + 66.67;
+    } else if (20 &lt; T_a) {
         heater_temp = 40;
     }
-    heater_effect = heater_temp - room_temp;
+    T_h = heater_temp - T_r;
 }</declaration>
 		<location id="id49" x="170" y="0">
 			<name x="195" y="8">On</name>
@@ -499,7 +500,7 @@ void update_heat() {
 		<transition id="id51" controllable="false">
 			<source ref="id49"/>
 			<target ref="id49"/>
-			<label kind="guard" x="85" y="-161">room_temp &lt;= heating_setpoint</label>
+			<label kind="guard" x="85" y="-161">T_r &lt;= H</label>
 			<label kind="synchronisation" x="161" y="-93">tik?</label>
 			<label kind="assignment" x="136" y="-127">update_heat()</label>
 			<nail x="136" y="-102"/>
@@ -508,15 +509,15 @@ void update_heat() {
 		<transition id="id52" controllable="false">
 			<source ref="id49"/>
 			<target ref="id50"/>
-			<label kind="guard" x="-17" y="59">room_temp &gt; heating_setpoint</label>
+			<label kind="guard" x="-17" y="59">T_r &gt; H</label>
 			<label kind="synchronisation" x="85" y="76">tik?</label>
-			<label kind="assignment" x="34" y="42">heater_effect = 0</label>
+			<label kind="assignment" x="34" y="42">T_h = 0</label>
 			<nail x="102" y="34"/>
 		</transition>
 		<transition id="id53" controllable="false">
 			<source ref="id50"/>
 			<target ref="id49"/>
-			<label kind="guard" x="-102" y="-59">room_temp &lt;= heating_setpoint</label>
+			<label kind="guard" x="-102" y="-59">T_r &lt;= H</label>
 			<label kind="synchronisation" x="0" y="-76">tik?</label>
 			<nail x="102" y="-34"/>
 		</transition>
@@ -526,15 +527,15 @@ void update_heat() {
 		<declaration>double ventilation_valve = 0.3;
 
 void update_vent() {
-    double ventilation_temp = ambient_temp;
-    if (ambient_temp &lt;= 5){
+    double ventilation_temp = T_a;
+    if (T_a &lt;= 5){
         ventilation_temp = 21;
     } 
-    else if (5 &lt; ambient_temp &lt;= 17.8){
-        ventilation_temp = -0.25 * ambient_temp + 22.25;
+    else if (5 &lt; T_a &lt;= 17.8){
+        ventilation_temp = -0.25 * T_a + 22.25;
     }
 
-    ventilation_effect = ventilation_valve * (ventilation_temp - room_temp);
+    T_v = ventilation_valve * (ventilation_temp - T_r);
 }
 </declaration>
 		<location id="id54" x="238" y="0">
@@ -563,14 +564,14 @@ void update_vent() {
 		<transition id="id58" controllable="false">
 			<source ref="id54"/>
 			<target ref="id55"/>
-			<label kind="guard" x="76" y="59">room_temp &lt; cooling_setpoint</label>
+			<label kind="guard" x="76" y="59">T_r &lt; C</label>
 			<label kind="assignment" x="-212" y="59">ventilation_valve = 0.3</label>
 			<nail x="34" y="68"/>
 		</transition>
 		<transition id="id59" controllable="false">
 			<source ref="id55"/>
 			<target ref="id54"/>
-			<label kind="guard" x="-86" y="-50">room_temp &gt; cooling_setpoint</label>
+			<label kind="guard" x="-86" y="-50">T_r &gt; C</label>
 			<label kind="assignment" x="33" y="-25">ventilation_valve = 1</label>
 		</transition>
 	</template>
