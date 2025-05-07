@@ -12,4 +12,4 @@
 
 cd /nfs/home/student.aau.dk/tb30jn/BlindControl || exit 1
 
-python3 -u -m main_args --room='1.213' --training-start-date='2024-12-01T00:00:00Z' --training-days=31 --interval=1440 --prediction-date='2024-12-16T00:00:00Z'
+python3 -u -m main_train --room='1.213' --training-start-date='2024-12-01T00:00:00Z' --training-days=31 --interval=1440 --prediction-date='2024-12-16T00:00:00Z'

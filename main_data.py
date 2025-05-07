@@ -8,9 +8,9 @@ def main():
     chosen_room = rooms["1.213"]
 
     query_start_date = "2024-11-20T00:00:00Z"
-    query_end_date = "2025-04-01T00:00:00Z"
+    query_end_date = "2025-05-05T00:00:00Z"
 
-    query_data_period(query_start_date, query_end_date, chosen_room)
+    #query_data_period(query_start_date, query_end_date, chosen_room)
     preprocess_data_for_all_dates(query_start_date, query_end_date, chosen_room)
 
 
