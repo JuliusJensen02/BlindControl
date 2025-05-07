@@ -2,7 +2,7 @@ import re
 from pathlib import Path
 
 root_path = Path('experiments/')
-pattern_folder = re.compile(r'^logs_\d{4}$')
+pattern_folder = re.compile(r'^logs_1213$')
 pattern_logs = re.compile(r'^output_\d_\d{3}_\d{4}_\d{2}_\d{2}_\d{2}d_\d{1,5}min$')
 with open("experiment_data.csv", 'w') as f:
     f.write("Period,Hours,Room,Error,Constants\n")
@@ -27,10 +27,14 @@ for folder in root_path.iterdir():
                         period = "January"
                     elif file_name_atoms[3] == "2025" and file_name_atoms[4] == "02" and file_name_atoms[5] == "01":
                         period = "February"
-                    elif file_name_atoms[3] == "2025" and file_name_atoms[4] == "03" and file_name_atoms[5] == "01":
+                    elif file_name_atoms[3] == "2025" and file_name_atoms[4] == "03" and file_name_atoms[5] == "01" and file_name_atoms[6] == "31d":
                         period = "March"
+                    elif file_name_atoms[3] == "2025" and file_name_atoms[4] == "04" and file_name_atoms[5] == "01":
+                        period = "April"
                     elif file_name_atoms[3] == "2024" and file_name_atoms[4] == "12" and file_name_atoms[5] == "01" and file_name_atoms[6] == "90d":
                         period = "Winter"
+                    elif file_name_atoms[3] == "2025" and file_name_atoms[4] == "03" and file_name_atoms[5] == "01" and file_name_atoms[6] == "61d":
+                        period = "Spring"
 
                     if file_name_atoms[7] == "60min":
                         hours = "1"

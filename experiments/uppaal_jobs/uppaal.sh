@@ -22,9 +22,7 @@ for ((i=0; i<=22; i++)); do
     data_path="data_arrays.c"
     data_content=$(< "$data_path")
     escaped_data_content=$(echo "$data_content" | sed 's/[\/&\[\]\\]/\\&/g')
-    new_name="strategy_$i.json"
 
-    sed -i -E "s|saveStrategy[[:space:]]*\\(\"([^\"]*/)(strategy(_[0-9])*\.json)\"|saveStrategy (\"\1$new_name\"|" query.q
     sed -i -E "s|const double data\[\]\[\] = \{\};|$escaped_data_content|g" "BlindModel.xml"
     sed -i "s|$init_time_placeholder|$init_time|g" "BlindModel.xml"
     sed -i "s|$init_temp_placeholder|0.0|g" "BlindModel.xml"

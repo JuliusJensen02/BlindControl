@@ -1,2 +1,2 @@
-strategy GoFast = minE (cost) [<=1 + control_interval * 2] : <> counter == init_time + (control_interval * 2)
-saveStrategy ("/nfs/home/student.aau.dk/tb30jn/BlindControl/experiments/uppaal_jobs/strategy_22.json", GoFast)
+strategy OptimizeTemperature = minE (cost) [<=1 + control_interval * 2] : <> counter == init_time + (control_interval * 2)
+saveStrategy ("/nfs/home/student.aau.dk/tb30jn/BlindControl/experiments/uppaal_jobs/strategy.json", optimizeTemperature)
