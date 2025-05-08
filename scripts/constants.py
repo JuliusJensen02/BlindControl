@@ -126,31 +126,38 @@ rooms = {
 periods = {
     "winter": {
         "start": "2024-12-01",
-        "days": 90
+        "days": 90,
+        "simulation_day": "2025-01-17",
     },
     "spring": {
         "start": "2025-03-01",
-        "days": 61
+        "days": 61,
+        "simulation_day": "2025-04-17",
     },
     "december": {
         "start": "2024-12-01",
-        "days": 31
+        "days": 31,
+        "simulation_day": "2024-12-17",
     },
     "january": {
         "start": "2025-01-01",
-        "days": 31
+        "days": 31,
+        "simulation_day": "2025-01-17",
     },
     "february": {
         "start": "2025-02-01",
-        "days": 28
+        "days": 28,
+        "simulation_day": "2025-02-17",
     },
     "march": {
         "start": "2025-03-01",
-        "days": 31
+        "days": 31,
+        "simulation_day": "2025-03-17",
     },
     "april": {
         "start": "2025-04-01",
-        "days": 30
+        "days": 30,
+        "simulation_day": "2025-04-17",
     },
 }
 

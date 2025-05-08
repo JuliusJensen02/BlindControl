@@ -159,6 +159,7 @@ def query_data(room: dict, from_date: str, day: int) -> None:
     # The result is stored in the variable 'result'.
     query_api = client.query_api()
     result = query_api.query(org=os.getenv("org"), query=query)
+    print(result)
     ventilation_supply_damper_result = query_api.query(org=os.getenv("org"), query=query2)
     dmi_results = get_temp(date_string_from, date_string_to)
 
