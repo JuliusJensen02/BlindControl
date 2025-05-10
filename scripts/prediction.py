@@ -4,7 +4,7 @@ import pandas as pd
 import torch
 import torchdiffeq
 
-from experiments.uppaal_jobs.plot_simulation_data import convert_uppaal_to_df
+from get_simulation_data import convert_uppaal_to_df
 from scripts.ODE import TemperatureODE
 from scripts.data_processing import get_raw_data_as_df, get_processed_data_as_tensor
 from scripts.plot import plot_df
@@ -70,7 +70,7 @@ def predict_for_date(room: dict, start_time: str, constants: list, plot: bool, p
 
     df = get_raw_data_as_df(start_time, room)
     df['temp_predictions'] = T_pred
-    #uppaal_df = convert_uppaal_to_df(start_time.strftime("%Y_%m_%d"))
+    uppaal_df = convert_uppaal_to_df(start_time.strftime("%Y_%m_%d"))
     #df = pd.merge(df, uppaal_df, how='left', left_index=True, right_index=True)
 
     #uppaal_temp = torch.tensor(df['temp_predictions_uppaal'])

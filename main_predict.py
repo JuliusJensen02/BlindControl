@@ -21,8 +21,13 @@ def main():
 
     sum_minutes_out_setpoint = 0
     sum_mean_dist_opt_temp = 0
-    total_dist_setpoints = 0
+    total_daily_dist_setpoints = 0
     sum_mean_dist_setpoints = 0
+
+    uppaal_sum_minutes_out_setpoint = 0
+    uppaal_sum_mean_dist_opt_temp = 0
+    uppaal_total_daily_dist_setpoints = 0
+    uppaal_sum_mean_dist_setpoints = 0
 
     start_date = datetime.strptime(periods[args.period]["start"], "%Y-%m-%d")
 
@@ -32,30 +37,53 @@ def main():
 
         sum_mean_dist_setpoints_temp = 0
         sum_mean_dist_opt_temp_temp = 0
+
+        uppaal_sum_mean_dist_setpoints_temp = 0
+        uppaal_sum_mean_dist_opt_temp_temp = 0
         for row in df.itertuples():
             if row.temp_predictions > row.cooling_setpoint or row.temp_predictions < row.heating_setpoint:
                 sum_minutes_out_setpoint += 1
                 if row.temp_predictions > row.cooling_setpoint:
-                    total_dist_setpoints += np.abs(row.temp_predictions - row.cooling_setpoint)
+                    total_daily_dist_setpoints += np.abs(row.temp_predictions - row.cooling_setpoint)
                     sum_mean_dist_setpoints_temp += np.abs(row.temp_predictions - row.cooling_setpoint)
                 else:
-                    total_dist_setpoints += np.abs(row.temp_predictions - row.heating_setpoint)
+                    total_daily_dist_setpoints += np.abs(row.temp_predictions - row.heating_setpoint)
                     sum_mean_dist_setpoints_temp += np.abs(row.temp_predictions - row.heating_setpoint)
+
+            if row.uppaal_temp_predictions > row.cooling_setpoint or row.uppaal_temp_predictions < row.heating_setpoint:
+                uppaal_sum_minutes_out_setpoint += 1
+                if row.uppaal_temp_predictions > row.cooling_setpoint:
+                    uppaal_total_daily_dist_setpoints += np.abs(row.uppaal_temp_predictions - row.cooling_setpoint)
+                    uppaal_sum_mean_dist_setpoints_temp += np.abs(row.uppaal_temp_predictions - row.cooling_setpoint)
+                else:
+                    uppaal_total_daily_dist_setpoints += np.abs(row.uppaal_temp_predictions - row.heating_setpoint)
+                    uppaal_sum_mean_dist_setpoints_temp += np.abs(row.uppaal_temp_predictions - row.heating_setpoint)
 
             opt_setpoint = (row.cooling_setpoint - row.heating_setpoint) / 2 + row.heating_setpoint
             sum_mean_dist_opt_temp_temp += np.abs(row.temp_predictions - opt_setpoint)
+            uppaal_sum_mean_dist_opt_temp_temp += np.abs(row.uppaal_temp_predictions - opt_setpoint)
 
         sum_mean_dist_setpoints += sum_mean_dist_setpoints_temp / len(df)
         sum_mean_dist_opt_temp += sum_mean_dist_opt_temp_temp / len(df)
+
+        uppaal_sum_mean_dist_setpoints += uppaal_sum_mean_dist_setpoints_temp / len(df)
+        uppaal_sum_mean_dist_opt_temp += uppaal_sum_mean_dist_opt_temp_temp / len(df)
     sum_mean_dist_setpoints /= periods[args.period]["days"]
     sum_mean_dist_opt_temp /= periods[args.period]["days"]
-    total_dist_setpoints /= periods[args.period]["days"]
+    total_daily_dist_setpoints /= periods[args.period]["days"]
+
+    uppaal_sum_mean_dist_setpoints /= periods[args.period]["days"]
+    uppaal_sum_mean_dist_opt_temp /= periods[args.period]["days"]
+    uppaal_total_daily_dist_setpoints /= periods[args.period]["days"]
 
     with open("comparison_data.csv", "a", newline='') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(["BB", args.period, args.interval,
+        writer.writerow(["Bang-Bang", args.period, args.interval,
                          sum_minutes_out_setpoint, sum_mean_dist_opt_temp,
-                         total_dist_setpoints, sum_mean_dist_setpoints])
+                         total_daily_dist_setpoints, sum_mean_dist_setpoints])
+        writer.writerow(["UPPAAL", args.period, args.interval,
+                        uppaal_sum_minutes_out_setpoint, uppaal_sum_mean_dist_opt_temp,
+                        uppaal_total_daily_dist_setpoints, uppaal_sum_mean_dist_setpoints])
     print(f"Period: {args.period}, Interval: {args.interval}")
 
 
