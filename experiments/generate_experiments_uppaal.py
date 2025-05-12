@@ -10,6 +10,12 @@ The experiments are defined as a date, how many days the ODE should be solved fo
 """
 room = "1.213"
 room_short = "1213"
+method_nice_names = {
+    "0": "Co-variance",
+    "1": "Splitting",
+    "2": "Regression",
+    "3": "Naive",
+}
 
 for method in ["0", "1", "2", "3"]:
     for period_key, period in periods.items():
@@ -18,9 +24,8 @@ for method in ["0", "1", "2", "3"]:
                 simulation_day_date = datetime.strptime(period['start'], "%Y-%m-%d") + timedelta(days=day)
                 simulation_day_date_str = simulation_day_date.strftime("%Y-%m-%d")
 
-
                 slurm_template = """#!/bin/bash
-#SBATCH --job-name="""+str(interval)+"""/"""+str(period_key)+"""_"""+str(day+1)+"""
+#SBATCH --job-name="""+str(interval)+"""/"""+str(period_key)+"""_"""+str(day+1)+"""_+"""+str(method_nice_names[method])+"""
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=jabj22@student.aau.dk
 #SBATCH --partition=naples,dhabi
@@ -31,7 +36,7 @@ for method in ["0", "1", "2", "3"]:
 #SBATCH --error=uppaal_error.log
 #SBATCH --exclude=naples01,naples02,dhabi01,dhabi02
 
-cd /nfs/home/student.aau.dk/tb30jn/BlindControl/experiments/uppaal_jobs/job_"""+str(period_key)+"""_"""+str(interval)+"""_"""+str(day+1)+""" || exit 1
+cd /nfs/home/student.aau.dk/tb30jn/BlindControl/experiments/uppaal_jobs/job_"""+str(period_key)+"""_"""+str(interval)+"""_"""+str(day+1)+"""_"""+str(method_nice_names[method])+""" || exit 1
 init_temp_placeholder="__INIT_TEMP__"
 init_time_placeholder="__INIT_TIME__"
 period_placeholder="__PERIOD__"
@@ -103,14 +108,14 @@ for ((i=0; i<=46; i++)); do
     sed -i "s|__BLOCKED__|${init_blocked}|g" "BlindModel.xml"
     sed -i "s|__BLINDS__|${init_blinds}|g" "BlindModel.xml"
 
-    verifyta "BlindModel.xml" "uppaal.q" | tee "output_"""+str(period_key)+"""_"""+str(interval)+"""_"""+str(day+1)+"""_${i}.csv"
+    verifyta "BlindModel.xml" "uppaal.q" --generate-strategy=1 --learning-method="""+method+""" --exploration=1 | tee "output_"""+str(period_key)+"""_"""+str(interval)+"""_"""+str(day+1)+"""_${i}.csv"
 done"""
-                os.mkdir("uppaal_jobs/job_"""+str(period_key)+"""_"""+str(interval)+"""_"""+str(day+1)+"")
-                shutil.copyfile("uppaal_jobs/template/BlindModelClean.xml", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}/BlindModel.xml")
-                shutil.copyfile("uppaal_jobs/template/BlindModelClean.xml",f"uppaal_jobs/job_{period_key}_{interval}_{day+1}/BlindModelClean.xml")
-                shutil.copyfile("uppaal_jobs/template/uppaal.q", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}/uppaal.q")
-                shutil.copyfile("uppaal_jobs/template/data_arrays.c", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}/data_arrays.c")
-                shutil.copyfile("uppaal_jobs/template/data_uppaal_format.py", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}/data_uppaal_format.py")
-                filename = f"uppaal_jobs/job_{period_key}_{interval}_{day+1}/job_{period_key}_{interval}_{day+1}.sh"
+                os.mkdir("uppaal_jobs/job_"""+str(period_key)+"""_"""+str(interval)+"""_"""+str(day+1)+""+"""_"""+method_nice_names[method]+"")
+                shutil.copyfile("uppaal_jobs/template/BlindModelClean.xml", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/BlindModel.xml")
+                shutil.copyfile("uppaal_jobs/template/BlindModelClean.xml",f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/BlindModelClean.xml")
+                shutil.copyfile("uppaal_jobs/template/uppaal.q", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/uppaal.q")
+                shutil.copyfile("uppaal_jobs/template/data_arrays.c", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/data_arrays.c")
+                shutil.copyfile("uppaal_jobs/template/data_uppaal_format.py", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/data_uppaal_format.py")
+                filename = f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}.sh"
                 with open(filename, "w", newline="\n") as f:
                     f.write(slurm_template)
