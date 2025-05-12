@@ -11,21 +11,22 @@ The experiments are defined as a date, how many days the ODE should be solved fo
 room = "1.213"
 room_short = "1213"
 
-for period_key, period in periods.items():
-    for day in range(period['days']):
-        for interval in prediction_intervals:
-            simulation_day_date = datetime.strptime(period['start'], "%Y-%m-%d") + timedelta(days=day)
-            simulation_day_date_str = simulation_day_date.strftime("%Y-%m-%d")
+for method in ["0", "1", "2", "3"]:
+    for period_key, period in periods.items():
+        for day in range(period['days']):
+            for interval in prediction_intervals:
+                simulation_day_date = datetime.strptime(period['start'], "%Y-%m-%d") + timedelta(days=day)
+                simulation_day_date_str = simulation_day_date.strftime("%Y-%m-%d")
 
 
-            slurm_template = """#!/bin/bash
+                slurm_template = """#!/bin/bash
 #SBATCH --job-name="""+str(interval)+"""/"""+str(period_key)+"""_"""+str(day+1)+"""
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=jabj22@student.aau.dk
 #SBATCH --partition=naples,dhabi
 #SBATCH --time=192:00:00
-#SBATCH --mem=50G
-#SBATCH --cpus-per-task=6
+#SBATCH --mem=25G
+#SBATCH --cpus-per-task=1
 #SBATCH --output=uppaal_output.log
 #SBATCH --error=uppaal_error.log
 #SBATCH --exclude=naples01,naples02,dhabi01,dhabi02
@@ -104,12 +105,12 @@ for ((i=0; i<=46; i++)); do
 
     verifyta "BlindModel.xml" "uppaal.q" | tee "output_"""+str(period_key)+"""_"""+str(interval)+"""_"""+str(day+1)+"""_${i}.csv"
 done"""
-            os.mkdir("uppaal_jobs/job_"""+str(period_key)+"""_"""+str(interval)+"""_"""+str(day+1)+"")
-            shutil.copyfile("uppaal_jobs/template/BlindModelClean.xml", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}/BlindModel.xml")
-            shutil.copyfile("uppaal_jobs/template/BlindModelClean.xml",f"uppaal_jobs/job_{period_key}_{interval}_{day+1}/BlindModelClean.xml")
-            shutil.copyfile("uppaal_jobs/template/uppaal.q", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}/uppaal.q")
-            shutil.copyfile("uppaal_jobs/template/data_arrays.c", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}/data_arrays.c")
-            shutil.copyfile("uppaal_jobs/template/data_uppaal_format.py", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}/data_uppaal_format.py")
-            filename = f"uppaal_jobs/job_{period_key}_{interval}_{day+1}/job_{period_key}_{interval}_{day+1}.sh"
-            with open(filename, "w", newline="\n") as f:
-                f.write(slurm_template)
+                os.mkdir("uppaal_jobs/job_"""+str(period_key)+"""_"""+str(interval)+"""_"""+str(day+1)+"")
+                shutil.copyfile("uppaal_jobs/template/BlindModelClean.xml", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}/BlindModel.xml")
+                shutil.copyfile("uppaal_jobs/template/BlindModelClean.xml",f"uppaal_jobs/job_{period_key}_{interval}_{day+1}/BlindModelClean.xml")
+                shutil.copyfile("uppaal_jobs/template/uppaal.q", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}/uppaal.q")
+                shutil.copyfile("uppaal_jobs/template/data_arrays.c", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}/data_arrays.c")
+                shutil.copyfile("uppaal_jobs/template/data_uppaal_format.py", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}/data_uppaal_format.py")
+                filename = f"uppaal_jobs/job_{period_key}_{interval}_{day+1}/job_{period_key}_{interval}_{day+1}.sh"
+                with open(filename, "w", newline="\n") as f:
+                    f.write(slurm_template)

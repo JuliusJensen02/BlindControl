@@ -1,0 +1,26 @@
+Options for the verification:
+  Generating no trace
+  Search order is breadth first
+  Using conservative space optimisation
+  Seed is 1746716492
+  State space representation uses minimal constraint systems with future testing
+  Using HashMap + Compress integers for discrete state storage
+[2K
+Verifying formula 1 at uppaal.q:1
+ -- Throughput: 255841 runs/sec, Load: 49 runs[K -- Throughput: 256868 runs/sec, Load: 101 runs[K -- Throughput: 256987 runs/sec, Load: 152 runs[K -- Throughput: 257171 runs/sec, Load: 199 runs[K -- Throughput: 257752 runs/sec, Load: 199 runs[K -- Throughput: 257997 runs/sec, Load: 9 runs[K -- Throughput: 256877 runs/sec, Load: 61 runs[K -- Throughput: 253827 runs/sec, Load: 113 runs[K -- Throughput: 255269 runs/sec, Load: 162 runs[K -- Throughput: 254049 runs/sec, Load: 199 runs[K -- Throughput: 256853 runs/sec, Load: 199 runs[K -- Throughput: 256974 runs/sec, Load: 13 runs[K -- Throughput: 256607 runs/sec, Load: 64 runs[K -- Throughput: 256705 runs/sec, Load: 115 runs[K -- Throughput: 256781 runs/sec, Load: 166 runs[K -- Throughput: 256732 runs/sec, Load: 199 runs[K -- Throughput: 256926 runs/sec, Load: 199 runs[K -- Throughput: 256901 runs/sec, Load: 20 runs[K -- Throughput: 256019 runs/sec, Load: 71 runs[K -- Throughput: 256823 runs/sec, Load: 122 runs[K -- Throughput: 256621 runs/sec, Load: 173 runs[K -- Throughput: 257238 runs/sec, Load: 199 runs[K -- Throughput: 257713 runs/sec, Load: 199 runs[K -- Throughput: 257054 runs/sec, Load: 30 runs[K -- Throughput: 256802 runs/sec, Load: 81 runs[K[2K -- Formula is satisfied.
+(9000 runs)
+Learning statistics for best strategy: 
+	Number of resets: 0
+	Number of iterations in last reset: 1
+	Number of iterations in total: 1
+
+
+[2K
+Verifying formula 2 at uppaal.q:2
+[2K -- Formula is satisfied.
+blocked:
+[0]: (0,0) (30.000002,0)
+blinds:
+[0]: (0,21.80143430783303) (0,0.25) (30,0.25) (30.000002,0.75)
+T_r:
+[0]: (0,0) (0,21.80143430783303) (1,21.80120153560274) (2,21.80071129042463) (3,21.80022133126271) (4,21.79973165794813) (5,21.79921443819908) (6,21.79866275186329) (7,21.79808333110222) (8,21.79747746293572) (9,21.79687194823902) (10,21.79623722899053) (11,21.79557473816689) (12,21.79488568944496) (13,21.7941667080554) (14,21.79341888340078) (15,21.79267149503483) (16,21.791924542703) (17,21.79117802615092) (18,21.79043194512434) (19,21.78968629936917) (20,21.78894108863148) (21,21.78822675737029) (22,21.78751284285737) (23,21.78679934484959) (24,21.78608626310396) (25,21.78537359737762) (26,21.78466134742787) (27,21.78394951301213) (28,21.78323809388797) (29,21.78252708981312) (30.000002,21.78181649912505)

@@ -35,7 +35,7 @@ def convert_uppaal_to_df(day: str, period: str, interval: int) -> pd.DataFrame:
         raw_data = re.findall(r'\(([\d.]+),([\d.]+)\)', file_contents)
         buckets = defaultdict(list)
         for time, temp_predictions in raw_data:
-            if time == "0" and temp_predictions == "0":
+            if time == "0" and temp_predictions == "0" and i < 0:
                 continue
             int_time = int(float(time))
             buckets[int_time].append(float(temp_predictions))

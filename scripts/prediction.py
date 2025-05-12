@@ -4,10 +4,9 @@ import pandas as pd
 import torch
 import torchdiffeq
 
-from get_simulation_data import convert_uppaal_to_df
+from scripts.get_simulation_data import convert_uppaal_to_df
 from scripts.ODE import TemperatureODE
 from scripts.data_processing import get_raw_data_as_df, get_processed_data_as_tensor
-from scripts.plot import plot_df
 
 """
 Function that simulates the room temperature.
@@ -51,7 +50,7 @@ Args:
 Returns:
     Either plots the prediction or returns a dataframe with the predicted temperatures.
 """
-def predict_for_date(room: dict, start_time: str, constants: list, plot: bool, prediction_interval: int) -> pd.DataFrame | None:
+def predict_for_date(room: dict, start_time: str, prediction_interval: int, period: str) -> pd.DataFrame | None:
     start_time = datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%SZ")
     data = get_processed_data_as_tensor(start_time, room)
     T_r = data[:, 0]  # Room temperature
@@ -60,7 +59,7 @@ def predict_for_date(room: dict, start_time: str, constants: list, plot: bool, p
     h_s = data[:, 3]  # Heating setpoint
     c_s = data[:, 4]  # Cooling setpoint
     O = data[:, 5]    # Occupancy effect
-    constants = torch.tensor(constants)  # Convert constants to tensor
+    constants = torch.tensor(room["constants"][period][prediction_interval])  # Convert constants to tensor
 
     ode_func = TemperatureODE(T_a, S_t, h_s, c_s, O, constants, room["heater_effect"])
     y0 = T_r[0]  # Initial temperature
@@ -70,8 +69,8 @@ def predict_for_date(room: dict, start_time: str, constants: list, plot: bool, p
 
     df = get_raw_data_as_df(start_time, room)
     df['temp_predictions'] = T_pred
-    uppaal_df = convert_uppaal_to_df(start_time.strftime("%Y_%m_%d"))
-    #df = pd.merge(df, uppaal_df, how='left', left_index=True, right_index=True)
+    uppaal_df = convert_uppaal_to_df(start_time.strftime("%Y-%m-%d"), period, prediction_interval)
+    df = pd.merge(df, uppaal_df, how='left', left_index=True, right_index=True)
 
     #uppaal_temp = torch.tensor(df['temp_predictions_uppaal'])
     #real_temp = torch.tensor(df['temp_predictions'])
@@ -80,8 +79,4 @@ def predict_for_date(room: dict, start_time: str, constants: list, plot: bool, p
     #df['temp_predictions_uppaal_deviation_from_setpoints'] = torch.where(uppaal_temp > C, uppaal_temp - C, torch.where(uppaal_temp < H, uppaal_temp - H, torch.zeros_like(uppaal_temp)))
     #df['temp_predictions_deviation_from_setpoints'] = torch.where(real_temp > C, real_temp - C, torch.where(real_temp < H, real_temp - H, torch.zeros_like(real_temp)))
 
-    #Plot the data if plot is true
-    if plot:
-        plot_df(df)
-        return
     return df
