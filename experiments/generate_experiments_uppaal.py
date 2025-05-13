@@ -1,8 +1,10 @@
 import os
+import re
 import shutil
 from datetime import datetime, timedelta
 
 from scripts.constants import rooms, periods, prediction_intervals
+from experiments.uppaal_jobs.template.data_uppaal_format import create_c_array
 
 """
 File used to generate the different experiments carried out on the DEIS cluster. 
@@ -21,11 +23,17 @@ for method in ["0", "1", "2", "3"]:
     for period_key, period in periods.items():
         for day in range(period['days']):
             for interval in prediction_intervals:
+                init_alpha_a = str(rooms[room]['constants'][period_key][interval][0])
+                init_alpha_s = str(rooms[room]['constants'][period_key][interval][1])
+                init_alpha_h = str(rooms[room]['constants'][period_key][interval][2])
+                init_alpha_v = str(rooms[room]['constants'][period_key][interval][3])
+                init_alpha_o = str(rooms[room]['constants'][period_key][interval][4])
                 simulation_day_date = datetime.strptime(period['start'], "%Y-%m-%d") + timedelta(days=day)
                 simulation_day_date_str = simulation_day_date.strftime("%Y-%m-%d")
+                c_array = create_c_array(simulation_day_date_str)
 
                 slurm_template = """#!/bin/bash
-#SBATCH --job-name="""+str(interval)+"""/"""+str(period_key)+"""_"""+str(day+1)+"""_+"""+str(method_nice_names[method])+"""
+#SBATCH --job-name="""+str(interval)+"""/"""+str(period_key)+"""_"""+str(day+1)+"""_"""+str(method_nice_names[method])+"""
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=jabj22@student.aau.dk
 #SBATCH --partition=naples,dhabi
@@ -37,14 +45,6 @@ for method in ["0", "1", "2", "3"]:
 #SBATCH --exclude=naples01,naples02,dhabi01,dhabi02
 
 cd /nfs/home/student.aau.dk/tb30jn/BlindControl/experiments/uppaal_jobs/job_"""+str(period_key)+"""_"""+str(interval)+"""_"""+str(day+1)+"""_"""+str(method_nice_names[method])+""" || exit 1
-init_temp_placeholder="__INIT_TEMP__"
-init_time_placeholder="__INIT_TIME__"
-period_placeholder="__PERIOD__"
-init_alpha_a="""+str(rooms[room]['constants'][period_key][interval][0])+"""
-init_alpha_s="""+str(rooms[room]['constants'][period_key][interval][1])+"""
-init_alpha_h="""+str(rooms[room]['constants'][period_key][interval][2])+"""
-init_alpha_v="""+str(rooms[room]['constants'][period_key][interval][3])+"""
-init_alpha_o="""+str(rooms[room]['constants'][period_key][interval][4])+"""
 
 for ((i=0; i<=46; i++)); do
     cp BlindModelClean.xml BlindModel.xml
@@ -52,70 +52,45 @@ for ((i=0; i<=46; i++)); do
 
     init_time=$((i*30))
 
-    python3 -u -m data_uppaal_format --date='"""+str(simulation_day_date_str)+"""'
-
-    data_path="data_arrays_"""+str(simulation_day_date_str)+""".c"
-    data_content=$(< "$data_path")
-    escaped_data_content=$(echo "$data_content" | sed 's/[\/&\[\]\\]/\\&/g')
-    printf '%s\n' "$escaped_data_content" > data_content_"""+str(simulation_day_date_str)+""".txt
-    sed -i -E '
-      /const double data\[\]\[\] = \{\};/ {
-        r data_content_"""+str(simulation_day_date_str)+""".txt
-        d
-      }
-    ' BlindModel.xml
-    
     if(( i == 0 )); then
       init_temp=0.0
       init_blinds=0
       init_blocked=false
     else
-      temp_timestamp=$(grep -oE '\([0-9]+\.[0-9]+,[0-9]+\.[0-9]+\)' "output_"""+str(period_key)+"""_"""+str(interval)+"""_"""+str(day+1)+"""_$((i-1)).csv" | tail -n 1)
-      init_temp=$(echo "$temp_timestamp" | grep -oE '[0-9]+\.[0-9]+' | tail -n 1)
-      
-      blocked_timestamp=$(
-          grep -A1 '^blocked:' "output_"""+str(period_key)+"""_"""+str(interval)+"""_"""+str(day+1)+"""_$((i-1)).csv" \
-            | tail -n1 \
-            | sed -E 's/.*\[([0-9]+)\]:.*\(([0-9]+\.[0-9]+,[0-9]+\.[0-9]+)\).*/\1 in (\2)/'
-        )
-        init_blocked=$(echo "$blocked_timestamp" | grep -oE '[0-9]' | tail -n 1)
-        
-        if (( init_blocked == 1 )); then
-            init_blocked=true
-        else
-            init_blocked=false
-        fi
-        
-        blinds_timestamp=$(
-          grep -A1 '^blinds:' "output_"""+str(period_key)+"""_"""+str(interval)+"""_"""+str(day+1)+"""_$((i-1)).csv" \
-            | tail -n1 \
-            | sed -E 's/.*\[([0-9]+)\]:.*\(([0-9]+\.[0-9]+,[0-9]+\.[0-9]+)\).*/\1 in (\2)/'
-        )
-        init_blinds=$(echo "$temp_timestamp" | grep -oE '[0-9]+(\.[0-9]+)?' | tail -n 1)
+        python3 -u -m get_init_data --iteration=${i}
+        source init_data.sh
     fi
 
-    sed -i "s|${period_placeholder}|"""+str(interval)+"""|g" "uppaal.q"
+    sed -i "s|__PERIOD__|"""+str(interval)+"""|g" "uppaal.q"
     sed -i "s|__PERIOD1__|"""+str(interval)+"""|g" "uppaal.q"
-    sed -i "s|${init_time_placeholder}|${init_time}|g" "BlindModel.xml"
-    sed -i "s|${init_temp_placeholder}|${init_temp}|g" "BlindModel.xml"
-    
-    sed -i "s|__ALPHA_A__|${init_alpha_a}|g" "BlindModel.xml"
-    sed -i "s|__ALPHA_S__|${init_alpha_s}|g" "BlindModel.xml"
-    sed -i "s|__ALPHA_H__|${init_alpha_h}|g" "BlindModel.xml"
-    sed -i "s|__ALPHA_V__|${init_alpha_v}|g" "BlindModel.xml"
-    sed -i "s|__ALPHA_O__|${init_alpha_o}|g" "BlindModel.xml"
+    sed -i "s|__INIT_TIME__|${init_time}|g" "BlindModel.xml"
+    sed -i "s|__INIT_TEMP__|${init_temp}|g" "BlindModel.xml"
     
     sed -i "s|__BLOCKED__|${init_blocked}|g" "BlindModel.xml"
     sed -i "s|__BLINDS__|${init_blinds}|g" "BlindModel.xml"
 
-    verifyta "BlindModel.xml" "uppaal.q" --generate-strategy=1 --learning-method="""+method+""" --exploration=1 | tee "output_"""+str(period_key)+"""_"""+str(interval)+"""_"""+str(day+1)+"""_${i}.csv"
+    verifyta "BlindModel.xml" "uppaal.q" --generate-strategy=1 --learning-method="""+method+""" -u | tee "output_${i}.csv"
 done"""
                 os.mkdir("uppaal_jobs/job_"""+str(period_key)+"""_"""+str(interval)+"""_"""+str(day+1)+""+"""_"""+method_nice_names[method]+"")
-                shutil.copyfile("uppaal_jobs/template/BlindModelClean.xml", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/BlindModel.xml")
                 shutil.copyfile("uppaal_jobs/template/BlindModelClean.xml",f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/BlindModelClean.xml")
-                shutil.copyfile("uppaal_jobs/template/uppaal.q", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/uppaal.q")
-                shutil.copyfile("uppaal_jobs/template/data_arrays.c", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/data_arrays.c")
-                shutil.copyfile("uppaal_jobs/template/data_uppaal_format.py", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/data_uppaal_format.py")
-                filename = f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}.sh"
+                shutil.copyfile("uppaal_jobs/template/uppaalClean.q", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/uppaalClean.q")
+                shutil.copyfile("uppaal_jobs/template/get_init_data.py", f"uppaal_jobs/job_{period_key}_{interval}_{day + 1}_{method_nice_names[method]}/get_init_data.py")
+                shutil.copyfile("uppaal_jobs/template/init_data.sh", f"uppaal_jobs/job_{period_key}_{interval}_{day + 1}_{method_nice_names[method]}/init_data.sh")
+                shutil.copyfile("uppaal_jobs/template/accumulated_data.csv", f"uppaal_jobs/job_{period_key}_{interval}_{day + 1}_{method_nice_names[method]}/accumulated_data.csv")
+
+                model_filename = f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/BlindModelClean.xml"
+                with open(model_filename, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                updated = re.sub("__DATA__", c_array, content, flags=0)
+                updated = re.sub("__ALPHA_A__", init_alpha_a, updated, flags=0)
+                updated = re.sub("__ALPHA_S__", init_alpha_s, updated, flags=0)
+                updated = re.sub("__ALPHA_H__", init_alpha_h, updated, flags=0)
+                updated = re.sub("__ALPHA_V__", init_alpha_v, updated, flags=0)
+                updated = re.sub("__ALPHA_O__", init_alpha_o, updated, flags=0)
+
+                with open(model_filename, 'w', encoding='utf-8') as f:
+                    f.write(updated)
+
+                filename = f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/run_job.sh"
                 with open(filename, "w", newline="\n") as f:
                     f.write(slurm_template)

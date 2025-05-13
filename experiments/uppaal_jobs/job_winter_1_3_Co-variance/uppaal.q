@@ -1,2 +1,2 @@
-strategy OptimizeTemperature = minE (cost) [<=(control_interval * 2) * __PERIOD__] : <> counter == init_time + (control_interval * 2) * __PERIOD1__
-simulate [<=30;1]{blocked, blinds, T_r} under OptimizeTemperature
+strategy OptimizeTemperature = minE (cost) [<=(control_interval * 2) * 1] : <> counter == init_time + (control_interval * 2) * 1
+simulate [<=30;1]{blocked, blinds, cost, T_r} under OptimizeTemperature

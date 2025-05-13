@@ -1,0 +1,75 @@
+Options for the verification:
+  Generating no trace
+  Search order is breadth first
+  Using conservative space optimisation
+  Seed is 1747071238
+  State space representation uses minimal constraint systems with future testing
+  Using HashMap + Compress integers for discrete state storage
+[2K
+Verifying formula 1 at uppaal.q:1
+ -- Throughput: 249170 runs/sec, Load: 40 runs[K -- Throughput: 249784 runs/sec, Load: 82 runs[K -- Throughput: 249460 runs/sec, Load: 123 runs[K -- Throughput: 249498 runs/sec, Load: 164 runs[K -- Throughput: 249819 runs/sec, Load: 199 runs[K -- Throughput: 247782 runs/sec, Load: 199 runs[K -- Throughput: 249063 runs/sec, Load: 199 runs[K -- Throughput: 250587 runs/sec, Load: 30 runs[K -- Throughput: 250428 runs/sec, Load: 73 runs[K -- Throughput: 250397 runs/sec, Load: 115 runs[K -- Throughput: 250744 runs/sec, Load: 158 runs[K -- Throughput: 250726 runs/sec, Load: 199 runs[K -- Throughput: 251280 runs/sec, Load: 199 runs[K -- Throughput: 250561 runs/sec, Load: 199 runs[K -- Throughput: 250399 runs/sec, Load: 30 runs[K -- Throughput: 250170 runs/sec, Load: 73 runs[K -- Throughput: 250526 runs/sec, Load: 115 runs[K -- Throughput: 250417 runs/sec, Load: 158 runs[K -- Throughput: 250397 runs/sec, Load: 199 runs[K -- Throughput: 250597 runs/sec, Load: 199 runs[K -- Throughput: 249797 runs/sec, Load: 199 runs[K -- Throughput: 250570 runs/sec, Load: 28 runs[K -- Throughput: 250684 runs/sec, Load: 70 runs[K -- Throughput: 250365 runs/sec, Load: 113 runs[K -- Throughput: 249975 runs/sec, Load: 155 runs[K -- Throughput: 250502 runs/sec, Load: 198 runs[K[2K -- Formula is satisfied.
+(9000 runs)
+Learning statistics for best strategy: 
+	Number of resets: 0
+	Number of iterations in last reset: 1
+	Number of iterations in total: 1
+
+
+ -- States explored : 6583391 states
+ -- CPU user time used : 26276 ms
+ -- Virtual memory used : 65660 KiB
+ -- Resident memory used : 25316 KiB
+[2K
+Verifying formula 2 at uppaal.q:2
+[2K -- Formula is satisfied.
+blocked:
+[0]: (0,0) (30.000002,0)
+blinds:
+[0]: (0,0.5) (0,0) (30,0) (30.000002,0.25)
+cost:
+[0]: (0,0) (30.000002,0)
+T_r:
+[0]: (0,0) (0,20.73389490322583) (0.8483753984184392,20.73353666792591) (1,20.73347264536196) (1.754020768956886,20.73381138347825) (2,20.73392188352946) (2.851764842837081,20.73425147888095) (3,20.73430883711472) (4,20.73463640635806) (5,20.7349386786703) (6,20.735240819954) (7,20.73554283026597) (8,20.73584470966298) (9,20.73614645820176) (10,20.736422477822) (11,20.73663187325351) (12,20.73681271548738) (13,20.73696512025993) (14,20.73708598648306) (15,20.73718237632629) (16,20.73725255742249) (17,20.73732270809669) (18,20.73739282836209) (19,20.73746291823186) (20,20.73755998196664) (21,20.73768300774409) (22,20.7378354115207) (23,20.73801919123156) (24,20.73830173086873) (25,20.73864459602325) (25.85190539156373,20.73900685179236) (26,20.73906982363119) (26.75724923694554,20.73946767749869) (27,20.73959521227456) (27.66259308232735,20.74004552098052) (28,20.74027481923591) (28.56793692770916,20.74081098690044) (29,20.74121886558142) (29.47328077309096,20.74189433297521) (30.000002,20.74264604301305)
+ -- States explored : 373 states
+ -- CPU user time used : 0 ms
+ -- Virtual memory used : 65660 KiB
+ -- Resident memory used : 25440 KiB
+0,20.73389490322583
+0.8483753984184392,20.73353666792591
+1,20.73347264536196
+1.754020768956886,20.73381138347825
+2,20.73392188352946
+2.851764842837081,20.73425147888095
+3,20.73430883711472
+4,20.73463640635806
+5,20.7349386786703
+6,20.735240819954
+7,20.73554283026597
+8,20.73584470966298
+9,20.73614645820176
+10,20.736422477822
+11,20.73663187325351
+12,20.73681271548738
+13,20.73696512025993
+14,20.73708598648306
+15,20.73718237632629
+16,20.73725255742249
+17,20.73732270809669
+18,20.73739282836209
+19,20.73746291823186
+20,20.73755998196664
+21,20.73768300774409
+22,20.7378354115207
+23,20.73801919123156
+24,20.73830173086873
+25,20.73864459602325
+25.85190539156373,20.73900685179236
+26,20.73906982363119
+26.75724923694554,20.73946767749869
+27,20.73959521227456
+27.66259308232735,20.74004552098052
+28,20.74027481923591
+28.56793692770916,20.74081098690044
+29,20.74121886558142
+29.47328077309096,20.74189433297521
+30.000002,20.74264604301305

@@ -1,0 +1,67 @@
+Options for the verification:
+  Generating no trace
+  Search order is breadth first
+  Using conservative space optimisation
+  Seed is 1747072723
+  State space representation uses minimal constraint systems with future testing
+  Using HashMap + Compress integers for discrete state storage
+[2K
+Verifying formula 1 at uppaal.q:1
+ -- Throughput: 204684 runs/sec, Load: 199 runs[K -- Throughput: 91555 runs/sec, Load: 199 runs[K -- Throughput: 43620 runs/sec, Load: 97 runs[K -- Throughput: 221281 runs/sec, Load: 100 runs[K -- Throughput: 203903 runs/sec, Load: 102 runs[K -- Throughput: 241459 runs/sec, Load: 132 runs[K -- Throughput: 189962 runs/sec, Load: 163 runs[K -- Throughput: 213937 runs/sec, Load: 157 runs[K -- Throughput: 185725 runs/sec, Load: 150 runs[K -- Throughput: 211246 runs/sec, Load: 139 runs[K -- Throughput: 227844 runs/sec, Load: 150 runs[K -- Throughput: 152530 runs/sec, Load: 162 runs[K -- Throughput: 51053 runs/sec, Load: 70 runs[K -- Throughput: 51697 runs/sec, Load: 141 runs[K -- Throughput: 41282 runs/sec, Load: 199 runs[K -- Throughput: 50415 runs/sec, Load: 199 runs[K -- Throughput: 105334 runs/sec, Load: 126 runs[K -- Throughput: 238425 runs/sec, Load: 165 runs[K -- Throughput: 207341 runs/sec, Load: 191 runs[K -- Throughput: 239348 runs/sec, Load: 199 runs[K -- Throughput: 199921 runs/sec, Load: 199 runs[K -- Throughput: 215771 runs/sec, Load: 199 runs[K -- Throughput: 165548 runs/sec, Load: 199 runs[K -- Throughput: 232326 runs/sec, Load: 199 runs[K -- Throughput: 229606 runs/sec, Load: 199 runs[K -- Throughput: 231105 runs/sec, Load: 199 runs[K -- Throughput: 219944 runs/sec, Load: 3 runs[K -- Throughput: 209549 runs/sec, Load: 3 runs[K -- Throughput: 211119 runs/sec, Load: 199 runs[K -- Throughput: 205617 runs/sec, Load: 199 runs[K -- Throughput: 213618 runs/sec, Load: 199 runs[K -- Throughput: 199363 runs/sec, Load: 199 runs[K -- Throughput: 218458 runs/sec, Load: 199 runs[K[2K -- Formula is satisfied.
+(9000 runs)
+Learning statistics for best strategy: 
+	Number of resets: 0
+	Number of iterations in last reset: 1
+	Number of iterations in total: 1
+
+
+ -- States explored : 6583415 states
+ -- CPU user time used : 39656 ms
+ -- Virtual memory used : 65660 KiB
+ -- Resident memory used : 25540 KiB
+[2K
+Verifying formula 2 at uppaal.q:2
+[2K -- Formula is satisfied.
+blocked:
+[0]: (0,0) (30.000002,0)
+blinds:
+[0]: (0,1) (0,0.75) (30,0.75) (30.000002,0.5)
+cost:
+[0]: (0,0) (30.000002,0)
+T_r:
+[0]: (0,0) (0,22.1607967872668) (1,22.16040364708514) (2,22.15936077960624) (3,22.15831852055138) (4,22.15727686956146) (5,22.15623582628155) (6,22.15519539035709) (7,22.15415556143375) (8,22.1531163391574) (9,22.15207772317412) (10,22.15103971313017) (11,22.15000230867206) (12,22.14896550944649) (13,22.14792931510034) (14,22.14689372528074) (15,22.14585873963498) (16,22.14482435781058) (17,22.14379057945529) (18,22.14275740421701) (19,22.14172483174389) (20,22.14069286168427) (21,22.13966149368669) (22,22.13863072739991) (23,22.13760056247289) (24,22.13657099855477) (25,22.13554203529493) (26,22.13451367234293) (27,22.13348590934856) (28,22.13245874596179) (29,22.1314321818328) (30.000002,22.13040621457575)
+ -- States explored : 373 states
+ -- CPU user time used : 2 ms
+ -- Virtual memory used : 65660 KiB
+ -- Resident memory used : 25672 KiB
+0,22.1607967872668
+1,22.16040364708514
+2,22.15936077960624
+3,22.15831852055138
+4,22.15727686956146
+5,22.15623582628155
+6,22.15519539035709
+7,22.15415556143375
+8,22.1531163391574
+9,22.15207772317412
+10,22.15103971313017
+11,22.15000230867206
+12,22.14896550944649
+13,22.14792931510034
+14,22.14689372528074
+15,22.14585873963498
+16,22.14482435781058
+17,22.14379057945529
+18,22.14275740421701
+19,22.14172483174389
+20,22.14069286168427
+21,22.13966149368669
+22,22.13863072739991
+23,22.13760056247289
+24,22.13657099855477
+25,22.13554203529493
+26,22.13451367234293
+27,22.13348590934856
+28,22.13245874596179
+29,22.1314321818328
+30.000002,22.13040621457575

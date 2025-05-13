@@ -1,0 +1,73 @@
+Options for the verification:
+  Generating no trace
+  Search order is breadth first
+  Using conservative space optimisation
+  Seed is 1747072783
+  State space representation uses minimal constraint systems with future testing
+  Using HashMap + Compress integers for discrete state storage
+[2K
+Verifying formula 1 at uppaal.q:1
+ -- Throughput: 258890 runs/sec, Load: 54 runs[K -- Throughput: 259501 runs/sec, Load: 108 runs[K -- Throughput: 259318 runs/sec, Load: 163 runs[K -- Throughput: 258821 runs/sec, Load: 199 runs[K -- Throughput: 260127 runs/sec, Load: 199 runs[K -- Throughput: 259599 runs/sec, Load: 29 runs[K -- Throughput: 259355 runs/sec, Load: 84 runs[K -- Throughput: 259311 runs/sec, Load: 138 runs[K -- Throughput: 259200 runs/sec, Load: 193 runs[K -- Throughput: 259961 runs/sec, Load: 199 runs[K -- Throughput: 259598 runs/sec, Load: 4 runs[K -- Throughput: 259076 runs/sec, Load: 58 runs[K -- Throughput: 258970 runs/sec, Load: 113 runs[K -- Throughput: 259186 runs/sec, Load: 167 runs[K -- Throughput: 259347 runs/sec, Load: 199 runs[K -- Throughput: 259667 runs/sec, Load: 199 runs[K -- Throughput: 259357 runs/sec, Load: 31 runs[K -- Throughput: 259306 runs/sec, Load: 86 runs[K -- Throughput: 259618 runs/sec, Load: 141 runs[K -- Throughput: 259139 runs/sec, Load: 196 runs[K -- Throughput: 259737 runs/sec, Load: 199 runs[K -- Throughput: 259154 runs/sec, Load: 6 runs[K -- Throughput: 259075 runs/sec, Load: 60 runs[K -- Throughput: 259414 runs/sec, Load: 115 runs[K -- Throughput: 259444 runs/sec, Load: 170 runs[K[2K -- Formula is satisfied.
+(9000 runs)
+Learning statistics for best strategy: 
+	Number of resets: 0
+	Number of iterations in last reset: 1
+	Number of iterations in total: 1
+
+
+ -- States explored : 6583453 states
+ -- CPU user time used : 25371 ms
+ -- Virtual memory used : 65692 KiB
+ -- Resident memory used : 25432 KiB
+[2K
+Verifying formula 2 at uppaal.q:2
+[2K -- Formula is satisfied.
+blocked:
+[0]: (0,0) (30.000002,0)
+blinds:
+[0]: (0,0.25) (0,0.75) (30,0.75) (30.000002,0.5)
+cost:
+[0]: (0,0) (30.000002,0)
+T_r:
+[0]: (0,0) (0,20.70119389239306) (1,20.70103716919686) (1.84858690583211,20.69999933562825) (2,20.69981415747621) (2.851764842837081,20.69877304503926) (3,20.69859185927838) (3.851899454768192,20.69762098925431) (4,20.69745220795296) (4.85190514082115,20.69648189786826) (5,20.69631322151196) (5.851905380973594,20.69534347724287) (6,20.69517489956747) (6.851905391116475,20.69420572104571) (7,20.69403724173182) (8,20.69290024761756) (9,20.69176391683747) (10,20.69062824900455) (11,20.68949324373203) (12,20.68835890063337) (13,20.68722521932225) (14,20.68609219941258) (15,20.68495984051847) (16,20.6838281422543) (17,20.68269710423465) (18,20.6815667260743) (19,20.68043700738833) (20,20.67930794779195) (21,20.67817954690065) (22,20.67705180433016) (23,20.67592471969639) (24,20.67479829261549) (25,20.67367252270385) (26,20.67254740957805) (27,20.67142295285494) (28,20.67029915215154) (29,20.66917600708515) (30.000002,20.66805351504254)
+ -- States explored : 373 states
+ -- CPU user time used : 2 ms
+ -- Virtual memory used : 65692 KiB
+ -- Resident memory used : 25560 KiB
+0,20.70119389239306
+1,20.70103716919686
+1.84858690583211,20.69999933562825
+2,20.69981415747621
+2.851764842837081,20.69877304503926
+3,20.69859185927838
+3.851899454768192,20.69762098925431
+4,20.69745220795296
+4.85190514082115,20.69648189786826
+5,20.69631322151196
+5.851905380973594,20.69534347724287
+6,20.69517489956747
+6.851905391116475,20.69420572104571
+7,20.69403724173182
+8,20.69290024761756
+9,20.69176391683747
+10,20.69062824900455
+11,20.68949324373203
+12,20.68835890063337
+13,20.68722521932225
+14,20.68609219941258
+15,20.68495984051847
+16,20.6838281422543
+17,20.68269710423465
+18,20.6815667260743
+19,20.68043700738833
+20,20.67930794779195
+21,20.67817954690065
+22,20.67705180433016
+23,20.67592471969639
+24,20.67479829261549
+25,20.67367252270385
+26,20.67254740957805
+27,20.67142295285494
+28,20.67029915215154
+29,20.66917600708515
+30.000002,20.66805351504254
