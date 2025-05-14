@@ -35,5 +35,6 @@ for ((i=0; i<=46; i++)); do
     sed -i "s|__BLOCKED__|${init_blocked}|g" "BlindModel.xml"
     sed -i "s|__BLINDS__|${init_blinds}|g" "BlindModel.xml"
 
-    verifyta "BlindModel.xml" "uppaal.q" --generate-strategy=1 --learning-method=2 -u | tee "output_${i}.csv"
+    verifyta "BlindModel.xml" "uppaal.q" --generate-strategy=2 --learning-method=2 -u | tee "output_${i}.csv"
+    python3 -u -m collect_data --iteration=${i}
 done

@@ -69,14 +69,17 @@ for ((i=0; i<=46; i++)); do
     sed -i "s|__BLOCKED__|${init_blocked}|g" "BlindModel.xml"
     sed -i "s|__BLINDS__|${init_blinds}|g" "BlindModel.xml"
 
-    verifyta "BlindModel.xml" "uppaal.q" --generate-strategy=1 --learning-method="""+method+""" -u | tee "output_${i}.csv"
+    verifyta "BlindModel.xml" "uppaal.q" --generate-strategy=2 --learning-method="""+method+""" -u | tee "output_${i}.csv"
+    python3 -u -m collect_data --iteration=${i}
 done"""
                 os.mkdir("uppaal_jobs/job_"""+str(period_key)+"""_"""+str(interval)+"""_"""+str(day+1)+""+"""_"""+method_nice_names[method]+"")
                 shutil.copyfile("uppaal_jobs/template/BlindModelClean.xml",f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/BlindModelClean.xml")
                 shutil.copyfile("uppaal_jobs/template/uppaalClean.q", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/uppaalClean.q")
                 shutil.copyfile("uppaal_jobs/template/get_init_data.py", f"uppaal_jobs/job_{period_key}_{interval}_{day + 1}_{method_nice_names[method]}/get_init_data.py")
+                shutil.copyfile("uppaal_jobs/template/collect_data.py", f"uppaal_jobs/job_{period_key}_{interval}_{day + 1}_{method_nice_names[method]}/collect_data.py")
                 shutil.copyfile("uppaal_jobs/template/init_data.sh", f"uppaal_jobs/job_{period_key}_{interval}_{day + 1}_{method_nice_names[method]}/init_data.sh")
                 shutil.copyfile("uppaal_jobs/template/accumulated_data.csv", f"uppaal_jobs/job_{period_key}_{interval}_{day + 1}_{method_nice_names[method]}/accumulated_data.csv")
+                shutil.copyfile("uppaal_jobs/template/accumulated_cost.csv", f"uppaal_jobs/job_{period_key}_{interval}_{day + 1}_{method_nice_names[method]}/accumulated_cost.csv")
 
                 model_filename = f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/BlindModelClean.xml"
                 with open(model_filename, 'r', encoding='utf-8') as f:

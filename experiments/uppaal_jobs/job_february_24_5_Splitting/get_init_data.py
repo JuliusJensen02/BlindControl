@@ -31,11 +31,6 @@ with open(filename,'r') as csvfile:
         if "T_r:" in line:
             sanitized_line = sanitize_line(lines[i+1])
             temp_list = sanitized_line.split(' ')
-            for j, temp in enumerate(temp_list):
-                if j == 0 and i != 0:
-                    continue
-                with open(filename, 'a') as csvfile:
-                    csvfile.write(temp + '\n')
             last_record = temp_list[-1].split(',')[1]
             temp = str(last_record)
 
