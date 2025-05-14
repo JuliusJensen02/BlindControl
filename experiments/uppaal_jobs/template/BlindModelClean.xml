@@ -6,12 +6,12 @@ __DATA__
 
 
 const double g_value = 0.45; //Value gotten from Rasmus
-const double r213[8] = {1.213, 3.64, 372, 1.33743576e-04, 1.41231052e-05, 4.95835071e-04, 2.78526852e-03, 9.72844963e-06};
-const double r215[8] = {1.215, 5.46, 422, 0.00006654616536711289, 0.0002178432103546357, 0.001052809993242162, 0.009573171305359684, 0.0001001959631084448};
-const double r217[8] = {1.217, 3.64, 379, 0.00008403719002189947, 0.0001662483920148472, 0.0009650930757849907, 0.009980847043215571, 0.0001604311015424853};
-const double r229[8] = {1.229, 5.18, 758, 0.00004841750569834047,0.0004048344549600047, 0.0009720673114826017, 0.009243668292515059, 0.0003024374591161649};
-const double r231[8] = {1.231, 6.86, 758, 0.00006641455619518232, 0.00019325396554338846, 0.0009765717733458412, 0.009957940987549275, 0.00013935217612309091};
-const double r233[8] = {1.233, 7, 758, 0.0000482699692484434, 0.0003135142135749358, 0.0010239398245252662, 0.009508719194294865, 0.00033553867308414584};
+const double r213[8] = {1.213, 3.64, 372};
+const double r215[8] = {1.215, 5.46, 422};
+const double r217[8] = {1.217, 3.64, 379};
+const double r229[8] = {1.229, 5.18, 758};
+const double r231[8] = {1.231, 6.86, 758};
+const double r233[8] = {1.233, 7, 758};
 const double current_room[8] = r213;
 const int init_time = __INIT_TIME__;
 const int control_interval = 30;
@@ -46,6 +46,158 @@ double S;
 double O;
 double T_h;
 
+/*
+Blinds Blocked
+*/
+void blinds_blocked(){
+    if (w &gt;= 10) {
+        blocked = true;
+    }
+    if (w &lt;= 8) {
+        blocked = false;
+    }
+}
+
+
+/*
+Solar
+*/
+double window_size = current_room[1];
+void update_solar() {
+    if(blinds == 0){
+        sun_block = 1;
+    }
+    else if(blinds == 1){
+        sun_block = 0;
+    }
+    else{
+        sun_block = 0.2/blinds;
+    }
+    S = E_s * g_value * window_size;
+}
+
+
+/*
+Heater
+*/
+double heater_temp;
+void update_heat() {
+    if(T_r &lt;= H){
+        T_h = 0;
+    }
+    else{
+        if (T_a &lt; 12) {
+            heater_temp = 77;
+        } else if (-12 &lt; T_a &amp;&amp; T_a &lt;= 5) {
+            heater_temp = -T_a + 65;
+        } else if (5 &lt; T_a &amp;&amp; T_a &lt;= 20) {
+            heater_temp = -1.33 * T_a + 66.67;
+        } else if (20 &lt; T_a) {
+            heater_temp = 40;
+        }
+        T_h = heater_temp - T_r;
+    }
+}
+
+
+/*
+Ventilation
+*/
+double ventilation_valve = 0.3;
+void update_vent() {
+    if(T_r &gt; C){
+        ventilation_valve = 0.3;
+    }
+    else{
+        ventilation_valve = 1;
+    }
+
+    double ventilation_temp = T_a;
+    if (T_a &lt;= 5){
+        ventilation_temp = 21;
+    } 
+    else if (5 &lt; T_a &lt;= 17.8){
+        ventilation_temp = -0.25 * T_a + 22.25;
+    }
+
+    T_v = ventilation_valve * (ventilation_temp - T_r);
+}
+
+
+/*
+Occupancy
+*/
+const int probabilities[4][7] = {
+    {50, 75, 90, 95, 98, 99, 100},  // Probabilities for 0-8 AM
+    {10, 25, 45, 65, 80, 90, 100}, // Probabilities for 8 AM-12 PM
+    {5, 15, 30, 50, 70, 85, 100},  // Probabilities for 12-4 PM
+    {20, 45, 65, 80, 90, 96, 100}   // Probabilities for 4-12 AM
+};
+
+
+const int energy_people_office = 250;
+const int energy_people_group = 150;
+const bool is_group = true;
+const int P = 5;
+
+int E_p = 0;
+int occupancy = 0;
+double random_number = 0;
+clock y;
+
+void choose_occupancy(int time_frame) {
+    random_number = random(100);
+
+    if (random_number &lt;= probabilities[time_frame][0]) {  
+        occupancy = 1;
+    } else if (random_number &lt;= probabilities[time_frame][1]) {  
+        occupancy = 2;
+    } else if (random_number &lt;= probabilities[time_frame][2]) { 
+        occupancy = 3;
+    } else if (random_number &lt;= probabilities[time_frame][3]) {  
+        occupancy = 4;
+    } else if (random_number &lt;= probabilities[time_frame][4]) {
+        occupancy = 5;
+    } else if (random_number &lt;= probabilities[time_frame][5]) {
+        occupancy = 6;
+    } else if (random_number &lt;= probabilities[time_frame][6]) {
+        occupancy = 7;
+    }   
+}
+
+
+void update_occu() {
+    if(C - H == 1){
+        if(y &gt;= P){
+            if(counter &lt; 480){
+                choose_occupancy(0); //Before 08:00
+            } else if(counter &gt;= 480 &amp;&amp; counter &lt; 720){
+                choose_occupancy(1); //08:00 to 12:00
+            } else if(counter &gt;= 480 &amp;&amp; counter &lt; 720){
+                choose_occupancy(2); //12:00 to 16:00
+            } else{
+                choose_occupancy(3); //After 16:00
+            }
+            y = 0
+        }
+        if (is_group) {
+            E_p = energy_people_group;
+        } else {
+            E_p = energy_people_office;
+        }
+        O = occupancy * E_p;
+    }
+    else{
+        O = 0;
+        occupancy = 0;
+    }
+}
+
+
+
+/*
+Initializer
+*/
 void initialize() {
     if(init_temp == 0.0){
         T_r = data[init_time][1];
@@ -75,16 +227,7 @@ void initialize() {
 		<declaration>clock x;
 int period = 1;
 
-void blinds_blocked(){
-    if (w &gt;= 10) {
-        blocked = true;
-    }
-    if (w &lt;= 8) {
-        blocked = false;
-    }
-}
-
-void set_values(){
+void update_values(){
     E_s = data[counter][0];
     T_a = data[counter][2];
     H = data[counter][3];
@@ -92,6 +235,10 @@ void set_values(){
     w = data[counter][6];
 
     blinds_blocked();
+    update_solar();
+    update_heat();
+    update_vent();
+    update_occu();
 }
 
 </declaration>
@@ -105,7 +252,7 @@ void set_values(){
 			<target ref="id1"/>
 			<label kind="guard" x="-255" y="-102">x &gt;= period</label>
 			<label kind="synchronisation" x="-221" y="-59">tik!</label>
-			<label kind="assignment" x="-331" y="-136">counter++, set_values(), x = 0</label>
+			<label kind="assignment" x="-331" y="-136">counter++, update_values(), x = 0</label>
 			<nail x="-119" y="-110"/>
 			<nail x="-280" y="-110"/>
 		</transition>
@@ -274,304 +421,13 @@ T_r &lt;= C</label>
 			<label kind="assignment" x="-713" y="9">initialize()</label>
 		</transition>
 	</template>
-	<template>
-		<name>occupancy_model</name>
-		<declaration>const int probabilities[4][7] = {
-    {50, 75, 90, 95, 98, 99, 100},  // Probabilities for 0-8 AM
-    {10, 25, 45, 65, 80, 90, 100}, // Probabilities for 8 AM-12 PM
-    {5, 15, 30, 50, 70, 85, 100},  // Probabilities for 12-4 PM
-    {20, 45, 65, 80, 90, 96, 100}   // Probabilities for 4-12 AM
-};
-
-
-const int energy_people_office = 250;
-const int energy_people_group = 150;
-
-int E_p = 0;
-int occupancy = 0;
-int group = 1;
-int P = 5;
-double random_number = 0;
-clock y;
-
-
-void update_energy_effect() {
-    if (group == 1) {
-        E_p = energy_people_group;
-    } else {
-        E_p = energy_people_office;
-    }
-    O = occupancy * E_p;
-}
-
-
-void choose_occupancy(int time_frame) {
-    random_number = random(100);
-
-    if (random_number &lt;= probabilities[time_frame][0]) {  
-        occupancy = 1;
-    } else if (random_number &lt;= probabilities[time_frame][1]) {  
-        occupancy = 2;
-    } else if (random_number &lt;= probabilities[time_frame][2]) { 
-        occupancy = 3;
-    } else if (random_number &lt;= probabilities[time_frame][3]) {  
-        occupancy = 4;
-    } else if (random_number &lt;= probabilities[time_frame][4]) {
-        occupancy = 5;
-    } else if (random_number &lt;= probabilities[time_frame][5]) {
-        occupancy = 6;
-    } else if (random_number &lt;= probabilities[time_frame][6]) {
-        occupancy = 7;
-    }
-
-    update_energy_effect();
-
-    
-}
-</declaration>
-		<location id="id29" x="238" y="-204">
-			<name x="263" y="-212">After_16</name>
-			<urgent/>
-		</location>
-		<location id="id30" x="136" y="-204">
-			<name x="51" y="-195">_12_to_16</name>
-			<urgent/>
-		</location>
-		<location id="id31" x="-68" y="-204">
-			<name x="-153" y="-195">_8_to_12</name>
-			<urgent/>
-		</location>
-		<location id="id32" x="-170" y="-204">
-			<name x="-255" y="-204">Before_8</name>
-			<urgent/>
-		</location>
-		<location id="id33" x="34" y="-68">
-			<name x="59" y="-59">Activity</name>
-			<label kind="invariant" x="-42" y="-59">y &lt;= P</label>
-		</location>
-		<location id="id34" x="34" y="136">
-			<name x="59" y="136">Wait</name>
-		</location>
-		<init ref="id34"/>
-		<transition id="id35" controllable="false">
-			<source ref="id29"/>
-			<target ref="id33"/>
-			<label kind="assignment" x="51" y="-314">choose_occupancy(3), 
-y = 0</label>
-			<nail x="238" y="-272"/>
-			<nail x="34" y="-272"/>
-		</transition>
-		<transition id="id36" controllable="false">
-			<source ref="id33"/>
-			<target ref="id29"/>
-			<label kind="guard" x="144" y="-68">counter &gt;= 960
-&amp;&amp; y &gt;= P</label>
-			<nail x="238" y="-68"/>
-		</transition>
-		<transition id="id37" controllable="false">
-			<source ref="id30"/>
-			<target ref="id33"/>
-			<label kind="assignment" x="51" y="-255">choose_occupancy(2), 
-y = 0</label>
-			<nail x="34" y="-204"/>
-		</transition>
-		<transition id="id38" controllable="false">
-			<source ref="id33"/>
-			<target ref="id30"/>
-			<label kind="guard" x="76" y="-161">counter &gt;= 720 &amp;&amp; 
-counter &lt; 960
-&amp;&amp; y &gt;= P</label>
-			<nail x="136" y="-68"/>
-		</transition>
-		<transition id="id39" controllable="false">
-			<source ref="id31"/>
-			<target ref="id33"/>
-			<label kind="assignment" x="-153" y="-255">choose_occupancy(1), 
-y = 0</label>
-			<nail x="34" y="-204"/>
-		</transition>
-		<transition id="id40" controllable="false">
-			<source ref="id33"/>
-			<target ref="id31"/>
-			<label kind="guard" x="-127" y="-161">counter &gt;= 480 &amp;&amp; 
-counter &lt; 720 
-&amp;&amp; y &gt;= P</label>
-			<nail x="-68" y="-68"/>
-		</transition>
-		<transition id="id41" controllable="false">
-			<source ref="id33"/>
-			<target ref="id34"/>
-			<label kind="guard" x="-102" y="17">C - H != 1</label>
-			<label kind="assignment" x="-102" y="42">O = 0, 
-occupancy = 0</label>
-			<nail x="0" y="34"/>
-		</transition>
-		<transition id="id42" controllable="false">
-			<source ref="id32"/>
-			<target ref="id33"/>
-			<label kind="assignment" x="-153" y="-314">choose_occupancy(0), 
-y = 0</label>
-			<nail x="-170" y="-221"/>
-			<nail x="-170" y="-272"/>
-			<nail x="34" y="-272"/>
-		</transition>
-		<transition id="id43" controllable="false">
-			<source ref="id33"/>
-			<target ref="id32"/>
-			<label kind="guard" x="-187" y="-68">counter &lt; 480
-&amp;&amp; y &gt;= P</label>
-			<nail x="-170" y="-68"/>
-		</transition>
-		<transition id="id44" controllable="false">
-			<source ref="id34"/>
-			<target ref="id33"/>
-			<label kind="guard" x="76" y="17">C - H == 1</label>
-			<nail x="68" y="34"/>
-		</transition>
-	</template>
-	<template>
-		<name>solar_model</name>
-		<declaration>double window_size = current_room[1];
-
-void update_solar() {
-    S = E_s * g_value * window_size;
-}</declaration>
-		<location id="id45" x="0" y="0">
-		</location>
-		<init ref="id45"/>
-		<transition id="id46" controllable="false">
-			<source ref="id45"/>
-			<target ref="id45"/>
-			<label kind="guard" x="-331" y="-34">blinds != 0 &amp;&amp; blinds != 1</label>
-			<label kind="synchronisation" x="-93" y="-8">tik?</label>
-			<label kind="assignment" x="-331" y="-8">sun_block = 0.2/blinds,
-update_solar()</label>
-			<nail x="-102" y="34"/>
-			<nail x="-102" y="-34"/>
-		</transition>
-		<transition id="id47" controllable="false">
-			<source ref="id45"/>
-			<target ref="id45"/>
-			<label kind="guard" x="-68" y="76">blinds == 0</label>
-			<label kind="synchronisation" x="-17" y="42">tik?</label>
-			<label kind="assignment" x="-68" y="102">sun_block = 1,
-update_solar()</label>
-			<nail x="34" y="68"/>
-			<nail x="-34" y="68"/>
-		</transition>
-		<transition id="id48" controllable="false">
-			<source ref="id45"/>
-			<target ref="id45"/>
-			<label kind="guard" x="-68" y="-144">blinds == 1</label>
-			<label kind="synchronisation" x="-17" y="-59">tik?</label>
-			<label kind="assignment" x="-68" y="-119">sun_block = 0.2,
-update_solar()</label>
-			<nail x="-34" y="-68"/>
-			<nail x="34" y="-68"/>
-		</transition>
-	</template>
-	<template>
-		<name>heater_model</name>
-		<declaration>double heater_temp;
-
-void update_heat() {
-    if (T_a &lt; 12) {
-        heater_temp = 77;
-    } else if (-12 &lt; T_a &amp;&amp; T_a &lt;= 5) {
-        heater_temp = -T_a + 65;
-    } else if (5 &lt; T_a &amp;&amp; T_a &lt;= 20) {
-        heater_temp = -1.33 * T_a + 66.67;
-    } else if (20 &lt; T_a) {
-        heater_temp = 40;
-    }
-    T_h = heater_temp - T_r;
-}</declaration>
-		<location id="id49" x="170" y="0">
-			<name x="195" y="8">On</name>
-		</location>
-		<location id="id50" x="34" y="0">
-			<name x="17" y="17">Off</name>
-		</location>
-		<init ref="id50"/>
-		<transition id="id51" controllable="false">
-			<source ref="id49"/>
-			<target ref="id49"/>
-			<label kind="guard" x="85" y="-161">T_r &lt;= H</label>
-			<label kind="synchronisation" x="161" y="-93">tik?</label>
-			<label kind="assignment" x="136" y="-127">update_heat()</label>
-			<nail x="136" y="-102"/>
-			<nail x="238" y="-102"/>
-		</transition>
-		<transition id="id52" controllable="false">
-			<source ref="id49"/>
-			<target ref="id50"/>
-			<label kind="guard" x="-17" y="59">T_r &gt; H</label>
-			<label kind="synchronisation" x="85" y="76">tik?</label>
-			<label kind="assignment" x="34" y="42">T_h = 0</label>
-			<nail x="102" y="34"/>
-		</transition>
-		<transition id="id53" controllable="false">
-			<source ref="id50"/>
-			<target ref="id49"/>
-			<label kind="guard" x="-102" y="-59">T_r &lt;= H</label>
-			<label kind="synchronisation" x="0" y="-76">tik?</label>
-			<nail x="102" y="-34"/>
-		</transition>
-	</template>
-	<template>
-		<name>ventilation_model</name>
-		<declaration>double ventilation_valve = 0.3;
-
-void update_vent() {
-    double ventilation_temp = T_a;
-    if (T_a &lt;= 5){
-        ventilation_temp = 21;
-    } 
-    else if (5 &lt; T_a &lt;= 17.8){
-        ventilation_temp = -0.25 * T_a + 22.25;
-    }
-
-    T_v = ventilation_valve * (ventilation_temp - T_r);
-}
-</declaration>
-		<location id="id54" x="238" y="0">
-			<name x="255" y="8">Power</name>
-		</location>
-		<location id="id55" x="-136" y="0">
-			<name x="-204" y="8">Passive</name>
-		</location>
-		<init ref="id55"/>
-		<transition id="id56" controllable="false">
-			<source ref="id54"/>
-			<target ref="id54"/>
-			<label kind="synchronisation" x="238" y="-102">tik?</label>
-			<label kind="assignment" x="212" y="-127">update_vent()</label>
-			<nail x="204" y="-102"/>
-			<nail x="306" y="-102"/>
-		</transition>
-		<transition id="id57" controllable="false">
-			<source ref="id55"/>
-			<target ref="id55"/>
-			<label kind="synchronisation" x="-170" y="-102">tik?</label>
-			<label kind="assignment" x="-204" y="-127">update_vent()</label>
-			<nail x="-204" y="-102"/>
-			<nail x="-102" y="-102"/>
-		</transition>
-		<transition id="id58" controllable="false">
-			<source ref="id54"/>
-			<target ref="id55"/>
-			<label kind="guard" x="76" y="59">T_r &lt; C</label>
-			<label kind="assignment" x="-212" y="59">ventilation_valve = 0.3</label>
-			<nail x="34" y="68"/>
-		</transition>
-		<transition id="id59" controllable="false">
-			<source ref="id55"/>
-			<target ref="id54"/>
-			<label kind="guard" x="-86" y="-50">T_r &gt; C</label>
-			<label kind="assignment" x="33" y="-25">ventilation_valve = 1</label>
-		</transition>
-	</template>
 	<system>// List one or more processes to be composed into a system.
 system clock_time, controller_blinds, room, optimization, occupancy_model, solar_model, heater_model, ventilation_model;
 </system>
+	<queries>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+	</queries>
 </nta>
