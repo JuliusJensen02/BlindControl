@@ -13,13 +13,11 @@ The experiments are defined as a date, how many days the ODE should be solved fo
 room = "1.213"
 room_short = "1213"
 method_nice_names = {
-    "0": "Co-variance",
-    "1": "Splitting",
-    "2": "Regression",
-    "3": "Naive",
+    "4": "Q-Learning",
+    "5": "M-Learning",
 }
 
-for method in ["0", "1", "2", "3"]:
+for method in ["4", "5"]:
     for period_key, period in periods.items():
         for day in range(period['days']):
             for interval in prediction_intervals:
@@ -48,7 +46,6 @@ cd /nfs/home/student.aau.dk/tb30jn/BlindControl/experiments/uppaal_jobs/job_"""+
 
 for ((i=0; i<=46; i++)); do
     cp BlindModelClean.xml BlindModel.xml
-    cp uppaalClean.q uppaal.q
 
     init_time=$((i*30))
 
@@ -61,11 +58,8 @@ for ((i=0; i<=46; i++)); do
         source init_data.sh
     fi
 
-    sed -i "s|__PERIOD__|"""+str(interval)+"""|g" "uppaal.q"
-    sed -i "s|__PERIOD1__|"""+str(interval)+"""|g" "uppaal.q"
     sed -i "s|__INIT_TIME__|${init_time}|g" "BlindModel.xml"
     sed -i "s|__INIT_TEMP__|${init_temp}|g" "BlindModel.xml"
-    
     sed -i "s|__BLOCKED__|${init_blocked}|g" "BlindModel.xml"
     sed -i "s|__BLINDS__|${init_blinds}|g" "BlindModel.xml"
 
@@ -74,13 +68,14 @@ for ((i=0; i<=46; i++)); do
 done"""
                 os.mkdir("uppaal_jobs/job_"""+str(period_key)+"""_"""+str(interval)+"""_"""+str(day+1)+""+"""_"""+method_nice_names[method]+"")
                 shutil.copyfile("uppaal_jobs/template/BlindModelClean.xml",f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/BlindModelClean.xml")
-                shutil.copyfile("uppaal_jobs/template/uppaalClean.q", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/uppaalClean.q")
+                shutil.copyfile("uppaal_jobs/template/uppaalClean.q", f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/uppaal.q")
                 shutil.copyfile("uppaal_jobs/template/get_init_data.py", f"uppaal_jobs/job_{period_key}_{interval}_{day + 1}_{method_nice_names[method]}/get_init_data.py")
                 shutil.copyfile("uppaal_jobs/template/collect_data.py", f"uppaal_jobs/job_{period_key}_{interval}_{day + 1}_{method_nice_names[method]}/collect_data.py")
                 shutil.copyfile("uppaal_jobs/template/init_data.sh", f"uppaal_jobs/job_{period_key}_{interval}_{day + 1}_{method_nice_names[method]}/init_data.sh")
                 shutil.copyfile("uppaal_jobs/template/accumulated_data.csv", f"uppaal_jobs/job_{period_key}_{interval}_{day + 1}_{method_nice_names[method]}/accumulated_data.csv")
                 shutil.copyfile("uppaal_jobs/template/accumulated_cost.csv", f"uppaal_jobs/job_{period_key}_{interval}_{day + 1}_{method_nice_names[method]}/accumulated_cost.csv")
 
+                query_filename = f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/uppaal.q"
                 model_filename = f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/BlindModelClean.xml"
                 with open(model_filename, 'r', encoding='utf-8') as f:
                     content = f.read()
@@ -92,6 +87,15 @@ done"""
                 updated = re.sub("__ALPHA_O__", init_alpha_o, updated, flags=0)
 
                 with open(model_filename, 'w', encoding='utf-8') as f:
+                    f.write(updated)
+
+                #Query
+                with open(query_filename, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                updated = re.sub("__PERIOD__", str(interval), content, flags=0)
+                updated = re.sub("__PERIOD1__", str(interval), updated, flags=0)
+
+                with open(query_filename, 'w', encoding='utf-8') as f:
                     f.write(updated)
 
                 filename = f"uppaal_jobs/job_{period_key}_{interval}_{day+1}_{method_nice_names[method]}/run_job.sh"
