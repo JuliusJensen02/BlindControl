@@ -13,9 +13,9 @@ const double r229[3] = {1.229, 5.18, 758};
 const double r231[3] = {1.231, 6.86, 758};
 const double r233[3] = {1.233, 7, 758};
 const double current_room[3] = r213;
-const int init_time = 0;
+const int init_time = __INIT_TIME__;
 const int control_interval = 30;
-const double init_temp = 0.0;
+const double init_temp = __INIT_TEMP__;
 
 const double alpha_a = 7.63070876e-05;
 const double alpha_s = 7.43803621e-06;
@@ -31,9 +31,9 @@ broadcast chan tik;
 hybrid clock T_r;
 double cost = 0;
 
-double blinds = 0;
+double blinds = __BLINDS__;
 double sun_block = 1;
-bool blocked = false;
+bool blocked = __BLOCKED__;
 
 double E_s;
 double T_a;
@@ -200,9 +200,9 @@ Cost
 */
 void update_cost(){
     if(T_r &lt; H){
-        cost = cost + 1 + ((H - T_r) * (H - T_r));
+        cost = cost + (1 + H - T_r) * (1 + H - T_r);
     } else if(T_r &gt; C){
-        cost = cost + 1 + ((T_r - C) * (T_r - C));
+        cost = cost + (1 + T_r - C) * (1 + T_r - C);
     }
 }
 
@@ -354,10 +354,8 @@ void update_values(){
 system clock_time, controller_blinds, room;
 </system>
 	<queries>
-		<option key="--learning-method" value="0"/>
 		<query>
-			<formula>strategy OptimizeTemperature = minE (cost) [&lt;=(control_interval * 2) * 1] : &lt;&gt; counter == init_time + (control_interval * 2) * 1
-</formula>
+			<formula/>
 			<comment/>
 		</query>
 	</queries>

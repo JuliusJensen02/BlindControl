@@ -200,9 +200,9 @@ Cost
 */
 void update_cost(){
     if(T_r &lt; H){
-        cost = cost + 1 + ((H - T_r) * (H - T_r));
+        cost = cost + (1 + H - T_r) * (1 + H - T_r);
     } else if(T_r &gt; C){
-        cost = cost + 1 + ((T_r - C) * (T_r - C));
+        cost = cost + (1 + T_r - C) * (1 + T_r - C);
     }
 }
 

@@ -1,6 +1,5 @@
 cd ../ || exit 1
 
-
 py -u -m main_predict --room='1.213' --period="winter" --interval=1
 py -u -m main_predict --room='1.213' --period="winter" --interval=4
 py -u -m main_predict --room='1.213' --period="winter" --interval=12

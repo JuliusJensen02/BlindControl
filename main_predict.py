@@ -82,9 +82,21 @@ for day in range(periods[args.period]["days"]):
 with open("comparison_data.csv", "a", newline='') as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(["Bang-Bang", args.period, args.interval,
-                     sum_minutes_out_setpoint, sum_mean_dist_opt_temp,
-                     total_daily_dist_setpoints, sum_mean_dist_setpoints])
-    writer.writerow(["UPPAAL", args.period, args.interval,
-                    uppaal_sum_minutes_out_setpoint, uppaal_sum_mean_dist_opt_temp,
-                    uppaal_total_daily_dist_setpoints, uppaal_sum_mean_dist_setpoints])
+                     results["Bang-Bang"]["sum_minutes_out_setpoint"],
+                     results["Bang-Bang"]["sum_mean_dist_opt_temp"],
+                     results["Bang-Bang"]["total_daily_dist_setpoints"],
+                     results["Bang-Bang"]["sum_mean_dist_setpoints"]
+                     ])
+    writer.writerow(["UPPAAL M-Learning", args.period, args.interval,
+                    results["UPPAAL_q"]["uppaal_sum_minutes_out_setpoint"],
+                    results["UPPAAL_q"]["uppaal_sum_mean_dist_opt_temp"],
+                    results["UPPAAL_q"]["uppaal_total_daily_dist_setpoints"],
+                    results["UPPAAL_q"]["uppaal_sum_mean_dist_setpoints"]
+                     ])
+    writer.writerow(["UPPAAL Q-Learning", args.period, args.interval,
+                     results["UPPAAL_m"]["uppaal_sum_minutes_out_setpoint"],
+                     results["UPPAAL_m"]["uppaal_sum_mean_dist_opt_temp"],
+                     results["UPPAAL_m"]["uppaal_total_daily_dist_setpoints"],
+                     results["UPPAAL_m"]["uppaal_sum_mean_dist_setpoints"]
+                     ])
 print(f"Period: {args.period}, Interval: {args.interval}")
