@@ -29,7 +29,7 @@ int counter = init_time;
 broadcast chan tik;
 
 hybrid clock T_r;
-hybrid clock cost = 0;
+double cost = 0;
 
 double blinds = __BLINDS__;
 double sun_block = 1;
@@ -68,7 +68,7 @@ void update_solar() {
         sun_block = 1;
     }
     else if(blinds == 1){
-        sun_block = 0;
+        sun_block = 0.2;
     }
     else{
         sun_block = 0.2/blinds;
@@ -82,7 +82,7 @@ Heater
 */
 double heater_temp;
 void update_heat() {
-    if(T_r &lt;= H){
+    if(T_r &gt; H){
         T_h = 0;
     }
     else{
@@ -106,7 +106,7 @@ Ventilation
 double ventilation_valve = 0.3;
 double ventilation_temp = 0;
 void update_vent() {
-    if(T_r &gt; C){
+    if(T_r &lt; C){
         ventilation_valve = 0.3;
     }
     else{
@@ -195,6 +195,17 @@ void update_occu() {
 }
 
 
+/*
+Cost
+*/
+void update_cost(){
+    if(T_r &lt; H){
+        cost = cost + 1 + ((H - T_r) * (H - T_r));
+    } else if(T_r &gt; C){
+        cost = cost + 1 + ((T_r - C) * (T_r - C));
+    }
+}
+
 
 /*
 Initializer
@@ -240,6 +251,7 @@ void update_values(){
     update_heat();
     update_vent();
     update_occu();
+    update_cost();
 }
 
 </declaration>
@@ -259,171 +271,87 @@ void update_values(){
 		</transition>
 	</template>
 	<template>
-		<name x="5" y="5">optimization</name>
-		<declaration>// Place local declarations here.
-</declaration>
-		<location id="id3" x="68" y="-34">
-			<name x="85" y="-85">Below_Heating</name>
-			<label kind="invariant" x="85" y="-59">cost' == 1 + ((H - T_r) * (H - T_r))</label>
-		</location>
-		<location id="id4" x="68" y="68">
-			<name x="59" y="76">Between</name>
-			<label kind="invariant" x="110" y="51">cost' == 0</label>
-		</location>
-		<location id="id5" x="68" y="170">
-			<name x="85" y="204">Above_Cooling</name>
-			<label kind="invariant" x="85" y="178">cost' == 1 + ((T_r - C) * (T_r - C))</label>
-		</location>
-		<location id="id6" x="-289" y="68">
-			<urgent/>
-		</location>
-		<init ref="id6"/>
-		<transition id="id7">
-			<source ref="id6"/>
-			<target ref="id5"/>
-			<label kind="guard" x="-255" y="246">T_r &gt; C</label>
-			<nail x="-289" y="238"/>
-			<nail x="68" y="238"/>
-		</transition>
-		<transition id="id8">
-			<source ref="id6"/>
-			<target ref="id4"/>
-			<label kind="guard" x="-255" y="34">T_r &gt;= H &amp;&amp; T_r &lt;= C</label>
-		</transition>
-		<transition id="id9">
-			<source ref="id6"/>
-			<target ref="id3"/>
-			<label kind="guard" x="-255" y="-136">T_r &lt; H</label>
-			<nail x="-289" y="-102"/>
-			<nail x="68" y="-102"/>
-		</transition>
-		<transition id="id10">
-			<source ref="id3"/>
-			<target ref="id5"/>
-			<label kind="guard" x="221" y="-25">T_r &gt; C</label>
-			<nail x="204" y="-34"/>
-			<nail x="204" y="170"/>
-		</transition>
-		<transition id="id11">
-			<source ref="id5"/>
-			<target ref="id3"/>
-			<label kind="guard" x="-144" y="-25">T_r &lt; H</label>
-			<nail x="-68" y="170"/>
-			<nail x="-68" y="-34"/>
-		</transition>
-		<transition id="id12">
-			<source ref="id4"/>
-			<target ref="id3"/>
-			<label kind="guard" x="-144" y="-25">T_r &lt; H</label>
-			<nail x="-68" y="34"/>
-			<nail x="-68" y="-34"/>
-		</transition>
-		<transition id="id13">
-			<source ref="id5"/>
-			<target ref="id4"/>
-			<label kind="guard" x="25" y="102">T_r &gt;= H &amp;&amp;
-T_r &lt;= C</label>
-			<nail x="0" y="136"/>
-			<nail x="0" y="102"/>
-		</transition>
-		<transition id="id14">
-			<source ref="id4"/>
-			<target ref="id5"/>
-			<label kind="guard" x="221" y="-25">T_r &gt; C</label>
-			<nail x="204" y="102"/>
-			<nail x="204" y="170"/>
-		</transition>
-		<transition id="id15">
-			<source ref="id3"/>
-			<target ref="id4"/>
-			<label kind="guard" x="25" y="-8">T_r &gt;= H &amp;&amp;
-T_r &lt;= C</label>
-			<nail x="136" y="0"/>
-			<nail x="136" y="34"/>
-		</transition>
-	</template>
-	<template>
 		<name>controller_blinds</name>
 		<declaration>clock y;</declaration>
-		<location id="id16" x="-374" y="136">
+		<location id="id3" x="-374" y="136">
 			<name x="-400" y="102">Blocked</name>
 		</location>
-		<location id="id17" x="-170" y="34">
+		<location id="id4" x="-170" y="34">
 			<name x="-221" y="8">Wait</name>
 			<label kind="invariant" x="-357" y="42">y &lt;= control_interval</label>
 		</location>
-		<location id="id18" x="-578" y="34">
+		<location id="id5" x="-578" y="34">
 			<name x="-561" y="0">Choice</name>
 			<urgent/>
 		</location>
-		<location id="id19" x="-739" y="34">
+		<location id="id6" x="-739" y="34">
 			<name x="-765" y="51">Initial</name>
 			<urgent/>
 		</location>
-		<init ref="id19"/>
-		<transition id="id20" controllable="false">
-			<source ref="id16"/>
-			<target ref="id18"/>
+		<init ref="id6"/>
+		<transition id="id7" controllable="false">
+			<source ref="id3"/>
+			<target ref="id5"/>
 			<label kind="guard" x="-484" y="110">!blocked</label>
 			<label kind="assignment" x="-578" y="136">y = 0</label>
 			<nail x="-578" y="136"/>
 		</transition>
-		<transition id="id21" controllable="false">
-			<source ref="id17"/>
-			<target ref="id16"/>
+		<transition id="id8" controllable="false">
+			<source ref="id4"/>
+			<target ref="id3"/>
 			<label kind="guard" x="-237" y="110">blocked</label>
 			<label kind="assignment" x="-348" y="144">blinds = 0</label>
 			<nail x="-170" y="136"/>
 		</transition>
-		<transition id="id22">
-			<source ref="id18"/>
-			<target ref="id17"/>
+		<transition id="id9">
+			<source ref="id5"/>
+			<target ref="id4"/>
 			<label kind="assignment" x="-551" y="-170">blinds = 0</label>
 			<nail x="-578" y="-170"/>
 			<nail x="-170" y="-169"/>
 		</transition>
-		<transition id="id23">
-			<source ref="id18"/>
-			<target ref="id17"/>
+		<transition id="id10">
+			<source ref="id5"/>
+			<target ref="id4"/>
 			<label kind="assignment" x="-551" y="-136">blinds = 0.25</label>
 			<nail x="-578" y="-136"/>
 			<nail x="-170" y="-135"/>
 		</transition>
-		<transition id="id24">
-			<source ref="id18"/>
-			<target ref="id17"/>
+		<transition id="id11">
+			<source ref="id5"/>
+			<target ref="id4"/>
 			<label kind="assignment" x="-551" y="-102">blinds = 0.5</label>
 			<nail x="-578" y="-102"/>
 			<nail x="-170" y="-101"/>
 		</transition>
-		<transition id="id25">
-			<source ref="id18"/>
-			<target ref="id17"/>
+		<transition id="id12">
+			<source ref="id5"/>
+			<target ref="id4"/>
 			<label kind="assignment" x="-551" y="-68">blinds = 0.75</label>
 			<nail x="-578" y="-68"/>
 			<nail x="-170" y="-67"/>
 		</transition>
-		<transition id="id26">
-			<source ref="id17"/>
-			<target ref="id18"/>
+		<transition id="id13">
+			<source ref="id4"/>
+			<target ref="id5"/>
 			<label kind="guard" x="-408" y="8">y &gt;= control_interval</label>
 			<label kind="assignment" x="-551" y="34">y = 0</label>
 		</transition>
-		<transition id="id27">
-			<source ref="id18"/>
-			<target ref="id17"/>
+		<transition id="id14">
+			<source ref="id5"/>
+			<target ref="id4"/>
 			<label kind="assignment" x="-551" y="-34">blinds = 1</label>
 			<nail x="-578" y="-34"/>
 			<nail x="-170" y="-33"/>
 		</transition>
-		<transition id="id28">
-			<source ref="id19"/>
-			<target ref="id18"/>
+		<transition id="id15">
+			<source ref="id6"/>
+			<target ref="id5"/>
 			<label kind="assignment" x="-713" y="9">initialize()</label>
 		</transition>
 	</template>
 	<system>// List one or more processes to be composed into a system.
-system clock_time, controller_blinds, room, optimization;
+system clock_time, controller_blinds, room;
 </system>
 	<queries>
 		<query>

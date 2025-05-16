@@ -3,7 +3,9 @@ import csv
 from datetime import datetime, timedelta
 
 import numpy as np
+import pandas as pd
 
+from get_simulation_data import convert_uppaal_to_df
 from scripts.prediction import predict_for_date
 from scripts.constants import rooms, periods
 
@@ -16,65 +18,66 @@ args = parser.parse_args()
 chosen_room = rooms["1.213"]
 prediction_interval = args.interval
 
-sum_minutes_out_setpoint = 0
-sum_mean_dist_opt_temp = 0
-total_daily_dist_setpoints = 0
-sum_mean_dist_setpoints = 0
-
-uppaal_sum_minutes_out_setpoint = 0
-uppaal_sum_mean_dist_opt_temp = 0
-uppaal_total_daily_dist_setpoints = 0
-uppaal_sum_mean_dist_setpoints = 0
+results = {
+    "Bang-Bang": {
+        "sum_minutes_out_setpoint": 0,
+        "sum_mean_dist_opt_temp": 0,
+        "total_daily_dist_setpoints": 0,
+        "sum_mean_dist_setpoints": 0,
+        "df": pd.DataFrame()
+    },
+    "UPPAAL_q": {
+        "sum_minutes_out_setpoint": 0,
+        "sum_mean_dist_opt_temp": 0,
+        "total_daily_dist_setpoints": 0,
+        "sum_mean_dist_setpoints": 0,
+        "df": pd.DataFrame()
+    },
+    "UPPAAL_m": {
+        "sum_minutes_out_setpoint": 0,
+        "sum_mean_dist_opt_temp": 0,
+        "total_daily_dist_setpoints": 0,
+        "sum_mean_dist_setpoints": 0,
+        "df": pd.DataFrame()
+    }
+}
 
 start_date = datetime.strptime(periods[args.period]["start"], "%Y-%m-%d")
 
 for day in range(periods[args.period]["days"]):
     current_date = datetime.strftime(start_date + timedelta(days=day), "%Y-%m-%dT%H:%M:%SZ")
-    df = predict_for_date(chosen_room,
+    results["Bang-Bang"]["df"] = predict_for_date(chosen_room,
                           current_date,
                           prediction_interval,
                           args.period)
 
-    sum_mean_dist_setpoints_temp = 0
-    sum_mean_dist_opt_temp_temp = 0
+    results["UPPAAL_q"]["df"] = convert_uppaal_to_df(day+1, args.period, prediction_interval, "Q-Learning")
+    results["UPPAAL_m"]["df"] = convert_uppaal_to_df(day+1, args.period, prediction_interval, "M-Learning")
 
-    uppaal_sum_mean_dist_setpoints_temp = 0
-    uppaal_sum_mean_dist_opt_temp_temp = 0
-    for row in df.itertuples():
-        if row.temp_predictions > row.cooling_setpoint or row.temp_predictions < row.heating_setpoint:
-            sum_minutes_out_setpoint += 1
-            if row.temp_predictions > row.cooling_setpoint:
-                total_daily_dist_setpoints += np.abs(row.temp_predictions - row.cooling_setpoint)
-                sum_mean_dist_setpoints_temp += np.abs(row.temp_predictions - row.cooling_setpoint)
-            else:
-                total_daily_dist_setpoints += np.abs(row.temp_predictions - row.heating_setpoint)
-                sum_mean_dist_setpoints_temp += np.abs(row.temp_predictions - row.heating_setpoint)
+    for method in ["Bang-Bang", "Q-Learning", "M-Learning"]:
+        sum_mean_dist_setpoints_temp = 0
+        sum_mean_dist_opt_temp_temp = 0
 
-        if row.uppaal_temp_predictions > row.cooling_setpoint or row.uppaal_temp_predictions < row.heating_setpoint:
-            uppaal_sum_minutes_out_setpoint += 1
-            if row.uppaal_temp_predictions > row.cooling_setpoint:
-                uppaal_total_daily_dist_setpoints += np.abs(row.uppaal_temp_predictions - row.cooling_setpoint)
-                uppaal_sum_mean_dist_setpoints_temp += np.abs(row.uppaal_temp_predictions - row.cooling_setpoint)
-            else:
-                uppaal_total_daily_dist_setpoints += np.abs(row.uppaal_temp_predictions - row.heating_setpoint)
-                uppaal_sum_mean_dist_setpoints_temp += np.abs(row.uppaal_temp_predictions - row.heating_setpoint)
+        for row in results[method]["df"].itertuples():
+            if row.temp_predictions > row.cooling_setpoint or row.temp_predictions < row.heating_setpoint:
+                results[method]["sum_minutes_out_setpoint"] += 1
+                if row.temp_predictions > row.cooling_setpoint:
+                    results[method]["total_daily_dist_setpoints"] += np.abs(row.temp_predictions - row.cooling_setpoint)
+                    sum_mean_dist_setpoints_temp += np.abs(row.temp_predictions - row.cooling_setpoint)
+                else:
+                    results[method]["total_daily_dist_setpoints"] += np.abs(row.temp_predictions - row.heating_setpoint)
+                    sum_mean_dist_setpoints_temp += np.abs(row.temp_predictions - row.heating_setpoint)
 
-        opt_setpoint = (row.cooling_setpoint - row.heating_setpoint) / 2 + row.heating_setpoint
-        sum_mean_dist_opt_temp_temp += np.abs(row.temp_predictions - opt_setpoint)
-        uppaal_sum_mean_dist_opt_temp_temp += np.abs(row.uppaal_temp_predictions - opt_setpoint)
+            results[method]["opt_setpoint"] = (row.cooling_setpoint - row.heating_setpoint) / 2 + row.heating_setpoint
+            sum_mean_dist_opt_temp_temp += np.abs(row.temp_predictions - results[method]["opt_setpoint"])
 
-    sum_mean_dist_setpoints += sum_mean_dist_setpoints_temp / len(df)
-    sum_mean_dist_opt_temp += sum_mean_dist_opt_temp_temp / len(df)
+        results[method]["sum_mean_dist_setpoints"] += sum_mean_dist_setpoints_temp / len(results[method]["df"])
+        results[method]["sum_mean_dist_opt_temp"] += sum_mean_dist_opt_temp_temp / len(results[method]["df"])
 
-    uppaal_sum_mean_dist_setpoints += uppaal_sum_mean_dist_setpoints_temp / len(df)
-    uppaal_sum_mean_dist_opt_temp += uppaal_sum_mean_dist_opt_temp_temp / len(df)
-sum_mean_dist_setpoints /= periods[args.period]["days"]
-sum_mean_dist_opt_temp /= periods[args.period]["days"]
-total_daily_dist_setpoints /= periods[args.period]["days"]
+    results[method]["sum_mean_dist_setpoints"] /= periods[args.period]["days"]
+    results[method]["sum_mean_dist_opt_temp"] /= periods[args.period]["days"]
+    results[method]["total_daily_dist_setpoints"] /= periods[args.period]["days"]
 
-uppaal_sum_mean_dist_setpoints /= periods[args.period]["days"]
-uppaal_sum_mean_dist_opt_temp /= periods[args.period]["days"]
-uppaal_total_daily_dist_setpoints /= periods[args.period]["days"]
 
 with open("comparison_data.csv", "a", newline='') as csvfile:
     writer = csv.writer(csvfile)

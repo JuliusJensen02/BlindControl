@@ -69,14 +69,5 @@ def predict_for_date(room: dict, start_time: str, prediction_interval: int, peri
 
     df = get_raw_data_as_df(start_time, room)
     df['temp_predictions'] = T_pred
-    uppaal_df = convert_uppaal_to_df(start_time.strftime("%Y-%m-%d"), period, prediction_interval)
-    df = pd.merge(df, uppaal_df, how='left', left_index=True, right_index=True)
-
-    #uppaal_temp = torch.tensor(df['temp_predictions_uppaal'])
-    #real_temp = torch.tensor(df['temp_predictions'])
-    #H = torch.tensor(df['heating_setpoint'])
-    #C = torch.tensor(df['cooling_setpoint'])
-    #df['temp_predictions_uppaal_deviation_from_setpoints'] = torch.where(uppaal_temp > C, uppaal_temp - C, torch.where(uppaal_temp < H, uppaal_temp - H, torch.zeros_like(uppaal_temp)))
-    #df['temp_predictions_deviation_from_setpoints'] = torch.where(real_temp > C, real_temp - C, torch.where(real_temp < H, real_temp - H, torch.zeros_like(real_temp)))
 
     return df
