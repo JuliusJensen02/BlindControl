@@ -9,7 +9,7 @@
 
 * Python 3.8+
 * pip (Python package installer)
-* *(Optional)* UPPAAL tool (for formal verification)
+* UPPAAL tool
 
 ### Steps
 
