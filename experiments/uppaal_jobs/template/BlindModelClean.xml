@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>
+__DATA__
+
+
+const double g_value = 0.45; //Value gotten from Rasmus
+const double r213[3] = {1.213, 3.64, 372};
+const double r215[3] = {1.215, 5.46, 422};
+const double r217[3] = {1.217, 3.64, 379};
+const double r229[3] = {1.229, 5.18, 758};
+const double r231[3] = {1.231, 6.86, 758};
+const double r233[3] = {1.233, 7, 758};
+const double current_room[3] = r213;
+const int init_time = __INIT_TIME__;
+const int control_interval = 30;
+const double init_temp = __INIT_TEMP__;
+const int prediction_interval = __PERIOD__;
+
+const double alpha_a = __ALPHA_A__;
+const double alpha_s = __ALPHA_S__;
+const double alpha_h = __ALPHA_H__;
+const double alpha_v = __ALPHA_V__;
+const double alpha_o = __ALPHA_O__;
+
+int counter = init_time;
+
+
+broadcast chan tik;
+
+hybrid clock T_r;
+double cost = 0;
+
+double blinds = __BLINDS__;
+double sun_block = 1;
+bool blocked = __BLOCKED__;
+
+double E_s;
+double T_a;
+double H;
+double C;
+double w;
+
+double T_v;
+double S;
+double O;
+double T_h;
+
+/*
+Blinds Blocked
+*/
+void blinds_blocked(){
+    if (w &gt;= 10) {
+        blocked = true;
+    }
+    if (w &lt;= 8) {
+        blocked = false;
+    }
+}
+
+
+/*
+Solar
+*/
+double window_size = current_room[1];
+void update_solar() {
+    if(blinds == 0){
+        sun_block = 1;
+    }
+    else if(blinds == 1){
+        sun_block = 0.2;
+    }
+    else{
+        sun_block = 0.2/blinds;
+    }
+    S = E_s * g_value * window_size;
+}
+
+
+/*
+Heater
+*/
+double heater_temp;
+void update_heat() {
+    if(T_r &gt; H){
+        T_h = 0;
+    }
+    else{
+        if (T_a &lt; 12) {
+            heater_temp = 77;
+        } else if (-12 &lt; T_a &amp;&amp; T_a &lt;= 5) {
+            heater_temp = -T_a + 65;
+        } else if (5 &lt; T_a &amp;&amp; T_a &lt;= 20) {
+            heater_temp = -1.33 * T_a + 66.67;
+        } else if (20 &lt; T_a) {
+            heater_temp = 40;
+        }
+        T_h = heater_temp - T_r;
+    }
+}
+
+
+/*
+Ventilation
+*/
+double ventilation_valve = 0.3;
+double ventilation_temp = 0;
+void update_vent() {
+    if(T_r &lt; C){
+        ventilation_valve = 0.3;
+    }
+    else{
+        ventilation_valve = 1;
+    }
+
+    ventilation_temp = T_a;
+    if (T_a &lt;= 5){
+        ventilation_temp = 21;
+    } 
+    else if (5 &lt; T_a &lt;= 17.8){
+        ventilation_temp = -0.25 * T_a + 22.25;
+    }
+
+    T_v = ventilation_valve * (ventilation_temp - T_r);
+}
+
+
+/*
+Occupancy
+*/
+const int probabilities[4][7] = {
+    {50, 75, 90, 95, 98, 99, 100},  // Probabilities for 0-8 AM
+    {10, 25, 45, 65, 80, 90, 100}, // Probabilities for 8 AM-12 PM
+    {5, 15, 30, 50, 70, 85, 100},  // Probabilities for 12-4 PM
+    {20, 45, 65, 80, 90, 96, 100}   // Probabilities for 4-12 AM
+};
+
+
+const int energy_people_office = 250;
+const int energy_people_group = 150;
+const bool is_group = true;
+const int P = 5;
+
+int E_p = 0;
+int occupancy = 0;
+double random_number = 0;
+clock y;
+
+void choose_occupancy(int time_frame) {
+    random_number = random(100);
+
+    if (random_number &lt;= probabilities[time_frame][0]) {  
+        occupancy = 1;
+    } else if (random_number &lt;= probabilities[time_frame][1]) {  
+        occupancy = 2;
+    } else if (random_number &lt;= probabilities[time_frame][2]) { 
+        occupancy = 3;
+    } else if (random_number &lt;= probabilities[time_frame][3]) {  
+        occupancy = 4;
+    } else if (random_number &lt;= probabilities[time_frame][4]) {
+        occupancy = 5;
+    } else if (random_number &lt;= probabilities[time_frame][5]) {
+        occupancy = 6;
+    } else if (random_number &lt;= probabilities[time_frame][6]) {
+        occupancy = 7;
+    }   
+}
+
+
+void update_occu() {
+    if(C - H == 1){
+        if(y &gt;= P){
+            if(counter &lt; 480){
+                choose_occupancy(0); //Before 08:00
+            } else if(counter &gt;= 480 &amp;&amp; counter &lt; 720){
+                choose_occupancy(1); //08:00 to 12:00
+            } else if(counter &gt;= 480 &amp;&amp; counter &lt; 720){
+                choose_occupancy(2); //12:00 to 16:00
+            } else{
+                choose_occupancy(3); //After 16:00
+            }
+            y = 0;
+        }
+        if (is_group) {
+            E_p = energy_people_group;
+        } else {
+            E_p = energy_people_office;
+        }
+        O = occupancy * E_p;
+    }
+    else{
+        O = 0;
+        occupancy = 0;
+    }
+}
+
+
+/*
+Cost
+*/
+void update_cost(){
+    if(T_r &lt; H){
+        cost = cost + (1 + H - T_r) * (1 + H - T_r);
+    } else if(T_r &gt; C){
+        cost = cost + (1 + T_r - C) * (1 + T_r - C);
+    }
+}
+
+
+/*
+Initializer
+*/
+void initialize() {
+    if(init_temp == 0.0){
+        T_r = data[init_time][1];
+    }
+    else{
+        T_r = init_temp;
+    }
+
+    E_s = data[init_time][0];
+    T_a = data[init_time][2];
+    H = data[init_time][3];
+    C = data[init_time][4];
+    w = data[init_time][6];
+}</declaration>
+	<template>
+		<name>room</name>
+		<location id="id0" x="1020" y="51">
+			<label kind="invariant" x="977" y="8">T_r' == (T_a - T_r) * alpha_a 
+         + S * sun_block * alpha_s
+         + T_h * alpha_h + T_v * alpha_v
+         + O * alpha_o</label>
+		</location>
+		<init ref="id0"/>
+	</template>
+	<template>
+		<name>clock_time</name>
+		<declaration>clock x;
+
+void update_values(){
+    E_s = data[counter][0];
+    T_a = data[counter][2];
+    H = data[counter][3];
+    C = data[counter][4];
+    w = data[counter][6];
+
+    blinds_blocked();
+    update_solar();
+    update_heat();
+    update_vent();
+    update_occu();
+    update_cost();
+}
+
+</declaration>
+		<location id="id1" x="-204" y="0">
+			<name x="-255" y="-8">Tik</name>
+			<label kind="invariant" x="-178" y="-8">x &lt;= 1</label>
+		</location>
+		<location id="id2" x="-204" y="136">
+			<name x="-187" y="127">Done</name>
+		</location>
+		<init ref="id1"/>
+		<transition id="id3" controllable="false">
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="guard" x="-187" y="51">counter &gt;= init_time + control_interval * 2 * prediction_interval</label>
+		</transition>
+		<transition id="id4" controllable="false">
+			<source ref="id1"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-459" y="-161">x &gt;= 1 &amp;&amp; counter &lt; init_time + control_interval * 2 * prediction_interval</label>
+			<label kind="synchronisation" x="-221" y="-59">tik!</label>
+			<label kind="assignment" x="-331" y="-136">counter++, update_values(), x = 0</label>
+			<nail x="-119" y="-110"/>
+			<nail x="-280" y="-110"/>
+		</transition>
+	</template>
+	<template>
+		<name>controller_blinds</name>
+		<declaration>clock y;</declaration>
+		<location id="id5" x="-374" y="136">
+			<name x="-400" y="102">Blocked</name>
+			<label kind="invariant" x="-348" y="161">y &lt;= control_interval</label>
+		</location>
+		<location id="id6" x="-170" y="34">
+			<name x="-221" y="8">Wait</name>
+			<label kind="invariant" x="-144" y="25">y &lt;= control_interval</label>
+		</location>
+		<location id="id7" x="-578" y="34">
+			<name x="-561" y="0">Choice</name>
+			<urgent/>
+		</location>
+		<location id="id8" x="-739" y="34">
+			<name x="-765" y="51">Initial</name>
+			<urgent/>
+		</location>
+		<init ref="id8"/>
+		<transition id="id9" controllable="false">
+			<source ref="id5"/>
+			<target ref="id7"/>
+			<label kind="guard" x="-578" y="153">y &gt;= control_interval</label>
+			<label kind="assignment" x="-578" y="136">y = 0</label>
+			<nail x="-578" y="136"/>
+		</transition>
+		<transition id="id10" controllable="false">
+			<source ref="id6"/>
+			<target ref="id5"/>
+			<label kind="guard" x="-237" y="110">blocked</label>
+			<label kind="synchronisation" x="-229" y="93">tik?</label>
+			<label kind="assignment" x="-348" y="144">blinds = 0</label>
+			<nail x="-170" y="136"/>
+		</transition>
+		<transition id="id11">
+			<source ref="id7"/>
+			<target ref="id6"/>
+			<label kind="assignment" x="-551" y="-170">blinds = 0</label>
+			<nail x="-578" y="-170"/>
+			<nail x="-170" y="-169"/>
+		</transition>
+		<transition id="id12">
+			<source ref="id7"/>
+			<target ref="id6"/>
+			<label kind="assignment" x="-551" y="-136">blinds = 0.25</label>
+			<nail x="-578" y="-136"/>
+			<nail x="-170" y="-135"/>
+		</transition>
+		<transition id="id13">
+			<source ref="id7"/>
+			<target ref="id6"/>
+			<label kind="assignment" x="-551" y="-102">blinds = 0.5</label>
+			<nail x="-578" y="-102"/>
+			<nail x="-170" y="-101"/>
+		</transition>
+		<transition id="id14">
+			<source ref="id7"/>
+			<target ref="id6"/>
+			<label kind="assignment" x="-551" y="-68">blinds = 0.75</label>
+			<nail x="-578" y="-68"/>
+			<nail x="-170" y="-67"/>
+		</transition>
+		<transition id="id15">
+			<source ref="id6"/>
+			<target ref="id7"/>
+			<label kind="guard" x="-416" y="8">y &gt;= control_interval</label>
+			<label kind="assignment" x="-551" y="34">y = 0</label>
+		</transition>
+		<transition id="id16">
+			<source ref="id7"/>
+			<target ref="id6"/>
+			<label kind="assignment" x="-551" y="-34">blinds = 1</label>
+			<nail x="-578" y="-34"/>
+			<nail x="-170" y="-33"/>
+		</transition>
+		<transition id="id17">
+			<source ref="id8"/>
+			<target ref="id7"/>
+			<label kind="assignment" x="-713" y="9">initialize()</label>
+		</transition>
+	</template>
+	<system>// List one or more processes to be composed into a system.
+system clock_time, controller_blinds, room;
+</system>
+	<queries>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+	</queries>
+</nta>

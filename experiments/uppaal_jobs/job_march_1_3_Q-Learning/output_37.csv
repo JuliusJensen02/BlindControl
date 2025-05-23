@@ -1,0 +1,40 @@
+Options for the verification:
+  Generating no trace
+  Search order is breadth first
+  Using conservative space optimisation
+  Seed is 1747649828
+  State space representation uses minimal constraint systems with future testing
+  Using HashMap + Compress integers for discrete state storage
+[2K
+Verifying formula 1 at uppaal.q:1
+ -- Throughput: 95439 runs/sec, Load: 128 runs[K -- Throughput: 96326 runs/sec, Load: 199 runs[K -- Throughput: 97548 runs/sec, Load: 90 runs[K -- Throughput: 97610 runs/sec, Load: 199 runs[K -- Throughput: 97102 runs/sec, Load: 53 runs[K -- Throughput: 96350 runs/sec, Load: 185 runs[K -- Throughput: 94563 runs/sec, Load: 15 runs[K -- Throughput: 98091 runs/sec, Load: 147 runs[K -- Throughput: 98578 runs/sec, Load: 199 runs[K -- Throughput: 98015 runs/sec, Load: 113 runs[K -- Throughput: 95921 runs/sec, Load: 199 runs[K -- Throughput: 95561 runs/sec, Load: 75 runs[K -- Throughput: 94547 runs/sec, Load: 199 runs[K -- Throughput: 96542 runs/sec, Load: 35 runs[K -- Throughput: 97184 runs/sec, Load: 166 runs[K -- Throughput: 96028 runs/sec, Load: 199 runs[K -- Throughput: 95100 runs/sec, Load: 127 runs[K -- Throughput: 96510 runs/sec, Load: 199 runs[K -- Throughput: 94716 runs/sec, Load: 87 runs[K -- Throughput: 97155 runs/sec, Load: 199 runs[K -- Throughput: 94775 runs/sec, Load: 49 runs[K -- Throughput: 93690 runs/sec, Load: 177 runs[K -- Throughput: 97711 runs/sec, Load: 9 runs[K -- Throughput: 94828 runs/sec, Load: 141 runs[K -- Throughput: 94226 runs/sec, Load: 199 runs[K -- Throughput: 97993 runs/sec, Load: 101 runs[K -- Throughput: 97259 runs/sec, Load: 199 runs[K -- Throughput: 96666 runs/sec, Load: 65 runs[K -- Throughput: 95198 runs/sec, Load: 195 runs[K -- Throughput: 95895 runs/sec, Load: 25 runs[K -- Throughput: 96625 runs/sec, Load: 155 runs[K -- Throughput: 96644 runs/sec, Load: 199 runs[K -- Throughput: 96051 runs/sec, Load: 116 runs[K -- Throughput: 97813 runs/sec, Load: 199 runs[K -- Throughput: 97961 runs/sec, Load: 80 runs[K -- Throughput: 95447 runs/sec, Load: 199 runs[K -- Throughput: 92407 runs/sec, Load: 42 runs[K -- Throughput: 95998 runs/sec, Load: 171 runs[K -- Throughput: 95537 runs/sec, Load: 1 runs[K -- Throughput: 94963 runs/sec, Load: 130 runs[K -- Throughput: 94749 runs/sec, Load: 199 runs[K -- Throughput: 93557 runs/sec, Load: 86 runs[K -- Throughput: 97961 runs/sec, Load: 199 runs[K -- Throughput: 97961 runs/sec, Load: 50 runs[K -- Throughput: 94513 runs/sec, Load: 182 runs[K -- Throughput: 95089 runs/sec, Load: 11 runs[K -- Throughput: 95996 runs/sec, Load: 141 runs[K -- Throughput: 92190 runs/sec, Load: 199 runs[K -- Throughput: 92549 runs/sec, Load: 95 runs[K -- Throughput: 95875 runs/sec, Load: 199 runs[K -- Throughput: 94755 runs/sec, Load: 54 runs[K -- Throughput: 98015 runs/sec, Load: 186 runs[K -- Throughput: 97528 runs/sec, Load: 19 runs[K -- Throughput: 98092 runs/sec, Load: 151 runs[K -- Throughput: 97052 runs/sec, Load: 199 runs[K -- Throughput: 97913 runs/sec, Load: 116 runs[K -- Throughput: 94907 runs/sec, Load: 199 runs[K -- Throughput: 94218 runs/sec, Load: 76 runs[K -- Throughput: 97596 runs/sec, Load: 199 runs[K -- Throughput: 96741 runs/sec, Load: 39 runs[K -- Throughput: 95320 runs/sec, Load: 170 runs[K -- Throughput: 94048 runs/sec, Load: 199 runs[K -- Throughput: 96744 runs/sec, Load: 129 runs[K -- Throughput: 94679 runs/sec, Load: 199 runs[K -- Throughput: 94702 runs/sec, Load: 87 runs[K -- Throughput: 95486 runs/sec, Load: 199 runs[K -- Throughput: 93511 runs/sec, Load: 45 runs[K -- Throughput: 94894 runs/sec, Load: 173 runs[K[2K -- Formula is satisfied.
+(9000 runs)
+Learning statistics for best strategy: 
+	Number of resets: 0
+	Number of iterations in last reset: 1
+	Number of iterations in total: 1
+
+
+ -- States explored : 6667436 states
+ -- CPU user time used : 69540 ms
+ -- Virtual memory used : 65784 KiB
+ -- Resident memory used : 25308 KiB
+[2K
+Verifying formula 2 at uppaal.q:2
+[2K -- Formula is satisfied.
+blocked:
+[0]: (0,0) (30.000002,0)
+blinds:
+[0]: (0,0.5) (0,1) (30,1) (30.000002,0.25)
+cost:
+[0]: (0,0) (30.000002,0)
+T_r:
+[0]: (0,0) (0,23.45406522616499) (1,23.45346801582654) (1.564988436704141,23.45208868680814) (2,23.45102669077884) (2.567812016046565,23.44964155737573) (3,23.44858728338793) (3.567931651365488,23.4472029463886) (4,23.44614979213546) (4.567936704860871,23.44476653021529) (5,23.44371421551581) (5.56793691829714,23.44233203961905) (6,23.44128055202504) (6.567936927311652,23.43989946179612) (7,23.43884880016039) (7.567936927692375,23.43746879476753) (8,23.43641895842029) (8.56793692770842,23.43504003701224) (9,23.43399102530435) (9.567936927709145,23.4326131870297) (10,23.43156499931338) (10.56793692770916,23.43018824332131) (11,23.42914087894931) (11.56793692770916,23.42776520438972) (12,23.42671866271531) (12.56793692770916,23.42534406873872) (13,23.42429834911569) (13.56793692770916,23.42292483487332) (14,23.42187993665593) (14.56793692770916,23.42050750129967) (15,23.41946342384272) (15.56793692770916,23.4180920665251) (16,23.4170488091839) (16.56793692770916,23.41567852905812) (17,23.41463609118847) (17.56793692770916,23.41326688740841) (18,23.41222526836662) (18.56793692770916,23.41085714008682) (19,23.4098163392297) (19.56793692770916,23.40844928560536) (20,23.40740930229023) (20.56793692770916,23.40604332247722) (21,23.40500415606191) (21.56793692770916,23.40363924921675) (22,23.4026008990596) (22.56793692770916,23.40123706433949) (23,23.40019952979932) (23.56793692770916,23.39883676636211) (24,23.39780004679827) (24.56793692770916,23.39642216697377) (25,23.39537394764849) (25.56793692770916,23.39399715013923) (26,23.3929497541831) (26.56793692770916,23.39157403813891) (27,23.39052746490519) (27.56793692770916,23.3891528294766) (28,23.38810707831903) (28.56793692770916,23.38673352265723) (29,23.38568859293009) (29.56793692770916,23.38431611618692) (30.000002,23.38327200249428)
+H:
+[0]: (0,0) (0,21) (30.000002,21)
+C:
+[0]: (0,0) (0,25) (30.000002,25)
+ -- States explored : 371 states
+ -- CPU user time used : 8 ms
+ -- Virtual memory used : 65784 KiB
+ -- Resident memory used : 25524 KiB

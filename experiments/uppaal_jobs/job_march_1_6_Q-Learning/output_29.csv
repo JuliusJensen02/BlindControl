@@ -1,0 +1,40 @@
+Options for the verification:
+  Generating no trace
+  Search order is breadth first
+  Using conservative space optimisation
+  Seed is 1747649420
+  State space representation uses minimal constraint systems with future testing
+  Using HashMap + Compress integers for discrete state storage
+[2K
+Verifying formula 1 at uppaal.q:1
+ -- Throughput: 145427 runs/sec, Load: 196 runs[K -- Throughput: 146599 runs/sec, Load: 95 runs[K -- Throughput: 146784 runs/sec, Load: 199 runs[K -- Throughput: 145520 runs/sec, Load: 192 runs[K -- Throughput: 146626 runs/sec, Load: 91 runs[K -- Throughput: 146635 runs/sec, Load: 199 runs[K -- Throughput: 145493 runs/sec, Load: 188 runs[K -- Throughput: 146490 runs/sec, Load: 86 runs[K -- Throughput: 146210 runs/sec, Load: 199 runs[K -- Throughput: 145483 runs/sec, Load: 182 runs[K -- Throughput: 146335 runs/sec, Load: 80 runs[K -- Throughput: 146277 runs/sec, Load: 199 runs[K -- Throughput: 145754 runs/sec, Load: 176 runs[K -- Throughput: 146484 runs/sec, Load: 74 runs[K -- Throughput: 145865 runs/sec, Load: 199 runs[K -- Throughput: 145164 runs/sec, Load: 170 runs[K -- Throughput: 145362 runs/sec, Load: 67 runs[K -- Throughput: 145616 runs/sec, Load: 199 runs[K -- Throughput: 145310 runs/sec, Load: 161 runs[K -- Throughput: 146119 runs/sec, Load: 59 runs[K -- Throughput: 145665 runs/sec, Load: 199 runs[K -- Throughput: 145195 runs/sec, Load: 154 runs[K -- Throughput: 146107 runs/sec, Load: 52 runs[K -- Throughput: 145222 runs/sec, Load: 199 runs[K -- Throughput: 145463 runs/sec, Load: 146 runs[K -- Throughput: 146078 runs/sec, Load: 44 runs[K -- Throughput: 145479 runs/sec, Load: 199 runs[K -- Throughput: 145688 runs/sec, Load: 139 runs[K -- Throughput: 146141 runs/sec, Load: 37 runs[K -- Throughput: 145374 runs/sec, Load: 199 runs[K -- Throughput: 145702 runs/sec, Load: 132 runs[K -- Throughput: 146100 runs/sec, Load: 30 runs[K -- Throughput: 145143 runs/sec, Load: 199 runs[K -- Throughput: 145134 runs/sec, Load: 124 runs[K -- Throughput: 145938 runs/sec, Load: 21 runs[K -- Throughput: 145452 runs/sec, Load: 199 runs[K -- Throughput: 145274 runs/sec, Load: 116 runs[K -- Throughput: 147639 runs/sec, Load: 16 runs[K -- Throughput: 145444 runs/sec, Load: 199 runs[K -- Throughput: 146389 runs/sec, Load: 114 runs[K -- Throughput: 146528 runs/sec, Load: 12 runs[K -- Throughput: 145524 runs/sec, Load: 199 runs[K -- Throughput: 146708 runs/sec, Load: 109 runs[K -- Throughput: 146896 runs/sec, Load: 8 runs[K -- Throughput: 145559 runs/sec, Load: 199 runs[K[2K -- Formula is satisfied.
+(9000 runs)
+Learning statistics for best strategy: 
+	Number of resets: 0
+	Number of iterations in last reset: 1
+	Number of iterations in total: 1
+
+
+ -- States explored : 6649226 states
+ -- CPU user time used : 45537 ms
+ -- Virtual memory used : 65748 KiB
+ -- Resident memory used : 24488 KiB
+[2K
+Verifying formula 2 at uppaal.q:2
+[2K -- Formula is satisfied.
+blocked:
+[0]: (0,0) (30.000002,0)
+blinds:
+[0]: (0,1) (0,0.5) (30,0.5) (30.000002,1)
+cost:
+[0]: (0,0) (30.000002,0)
+T_r:
+[0]: (0,0) (0,24.8162516879862) (1,24.81582086076059) (2,24.81606653908656) (3,24.81627535324504) (4,24.81646579632854) (5,24.8166156282175) (6,24.81672853805856) (7,24.81680520270006) (8,24.81684562593251) (9,24.81684596251353) (10,24.81680771598175) (11,24.81674904605805) (12,24.81664103370523) (13,24.81649138900469) (14,24.8163227483255) (15,24.8161086219613) (16,24.81587522223188) (17,24.81559495779583) (18,24.81527698467347) (19,24.81494206459577) (20,24.8145671110393) (21,24.8141544434788) (22,24.81371967172857) (23,24.81321861871962) (24,24.81267264706072) (25,24.81210773673841) (26,24.8114960133583) (27,24.81086379568638) (28,24.81018952962282) (29,24.80949767354567) (30,24.8087625916985) (30.000002,24.80876258673949)
+H:
+[0]: (0,0) (0,21) (30.000002,21)
+C:
+[0]: (0,0) (0,25) (30.000002,25)
+ -- States explored : 371 states
+ -- CPU user time used : 6 ms
+ -- Virtual memory used : 65748 KiB
+ -- Resident memory used : 25460 KiB
